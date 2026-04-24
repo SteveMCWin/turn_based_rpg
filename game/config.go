@@ -1,6 +1,10 @@
 package game
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
+
 	"tbrpg/models"
 )
 
@@ -21,4 +25,44 @@ type GameConfig struct {
 	Moves            map[string]models.MoveDefinition
 	Settings         GameSettings
 	EventTemplates   []models.Event
+}
+
+func Load(configDir string) (*GameConfig, error) {
+	cfg := &GameConfig{}
+
+	if err := loadJSON(configDir+"/hero.json", &cfg.HeroTemplate); err != nil {
+		return nil, fmt.Errorf("hero config: %w", err)
+	}
+
+	if err := loadJSON(configDir+"/monsters.json", &cfg.MonsterTemplates); err != nil {
+		return nil, fmt.Errorf("monsters config: %w", err)
+	}
+
+	var moveList []models.MoveDefinition
+	if err := loadJSON(configDir+"/moves.json", &moveList); err != nil {
+		return nil, fmt.Errorf("moves config: %w", err)
+	}
+	cfg.Moves = make(map[string]models.MoveDefinition, len(moveList))
+	for _, m := range moveList {
+		cfg.Moves[m.ID] = m
+	}
+
+	if err := loadJSON(configDir+"/game.json", &cfg.Settings); err != nil {
+		return nil, fmt.Errorf("game settings: %w", err)
+	}
+
+	// events.json is optional
+	if err := loadJSON(configDir+"/events.json", &cfg.EventTemplates); err != nil {
+		fmt.Printf("warning: events config not loaded: %v\n", err)
+	}
+
+	return cfg, nil
+}
+
+func loadJSON(path string, v any) error {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, v)
 }

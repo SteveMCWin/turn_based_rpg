@@ -33,14 +33,14 @@ func (e *Entity) MaxMana() int {
 // Since e.Stats is just the base, meant for level 1 characters,
 // we need to calculate stats based on modifiers like character level
 // and debuffs or buffs
-func (e *Entity) AffectStats() Stats {
+func (e *Entity) EffectiveStats() Stats {
 	s := e.Stats.Add(e.LevelBonuses)
 	for _, se := range e.StatusEffects {
 		switch se.Type {
-		case Temporary:
-			s = s.ApplyEffect(se.Effect)
-		case Permanent:
-			e.Stats = e.Stats.ApplyEffect(se.Effect)
+		case StatModifier:
+			if se.TurnsToActivate <= 0 {
+				s = s.ApplyEffect(se.Effect)
+			}
 		}
 	}
 	return s
@@ -66,17 +66,26 @@ func (e *Entity) LevelUpStats() {
 func (e *Entity) TickStatusEffects() {
 	effects_to_remove := []int{}
 	for i, se := range e.StatusEffects {
-		if se.TurnsToActivate > 0 {
-			se.TurnsToActivate--
-		} else if se.TurnsRemaining > 0 {
-			se.TurnsRemaining--
-			if se.TurnsRemaining <= 0 {
+
+		if e.StatusEffects[i].TurnsToActivate > 0 {
+			e.StatusEffects[i].TurnsToActivate--
+		}
+
+		if e.StatusEffects[i].TurnsToActivate <= 0 && e.StatusEffects[i].TurnsRemaining > 0 {
+			switch se.Type {
+			case DamageOverTime:
+				e.CurrentHP = max(0, e.CurrentHP - se.Effect.Delta)
+			}
+
+			e.StatusEffects[i].TurnsRemaining--
+			if e.StatusEffects[i].TurnsRemaining <= 0 {
 				effects_to_remove = append(effects_to_remove, i)
 			}
 		}
 	}
 
-	for _, idx := range effects_to_remove {
+	for i := len(effects_to_remove)-1; i >= 0; i-- {
+		idx := effects_to_remove[i]
 		e.StatusEffects = slices.Delete(e.StatusEffects, idx, idx+1)
 	}
 }
@@ -85,17 +94,17 @@ func (e *Entity) ClearStatusEffects() {
 	e.StatusEffects = make([]StatusEffect, 0)
 }
 
-func (e *Entity) AddXP(amount int, thresholds []int, statPerLevel Stats) int {
+func (e *Entity) AddXP(amount int, thresholds []int) int {
 	e.CurrentXP += amount
-	gained := 0
+	levels_gained := 0
 	for e.Level < len(thresholds) && e.CurrentXP >= thresholds[e.Level] {
 		e.LevelUp()
-		e.LevelBonuses = e.LevelBonuses.Add(statPerLevel)
-		gained++
+		levels_gained++
 	}
-	return gained
+	return levels_gained
 }
 
 func (e *Entity) LevelUp() {
 	e.Level += 1
+	e.LevelUpStats()
 }

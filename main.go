@@ -11,7 +11,7 @@ func main() {
     db.InitDatabase()
 
 	handler := handlers.SetUpRouter(db)
-	http.ListenAndServe("5000", handler)
+	http.ListenAndServe(":5000", handler)
 }
 
 

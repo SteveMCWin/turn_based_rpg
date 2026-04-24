@@ -3,8 +3,8 @@ package models
 type EffectType string
 
 const (
-	Permanent EffectType = "permanent"
-	Temporary EffectType = "temporary"
+	StatModifier EffectType = "stat_mod"
+	DamageOverTime EffectType = "dot"
 )
 
 type EffectTarget string
@@ -24,7 +24,7 @@ type Effect struct {
 	Target          EffectTarget `json:"target"`
 	CostAmount      int          `json:"cost_amount,omitempty"`
 	CostType        StatType     `json:"cost_type,omitempty"`
-	ActivationTimer int          `json:"turns_to_activate"`
+	ActivationDelay int          `json:"activation_delay"`
 }
 
 // This is used to identify the status of a character
