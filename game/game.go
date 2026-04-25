@@ -1,27 +1,44 @@
 package game
 
 import (
+	"crypto/rand"
+	"fmt"
+	"slices"
+
 	"tbrpg/models"
-	"time"
 )
 
 type Game struct {
-	ID     string
-	Config GameConfig
-	Player models.Hero
-	Floors []models.Floor
+	ID     string `json:"id"`
+	Settings GameSettings `json:"settings"`
+	Player models.Hero `json:"player"`
+	Floors []models.Floor `json:"floors"`
 }
 
-func NewGame(conf GameConfig) Game {
+func NewGame(config *GameConfig) *Game {
+
+	monsters := slices.Clone(config.MonsterTemplates)
+	for i := range monsters {
+		monsters[i].Init()
+	}
 
 	g := Game{}
 
-	g.ID = time.Now().Format("2006-01-02 15:04:05")
-	g.Config = conf
-	g.Player = models.Hero{}
+	g.ID = newUUID()
+	g.Settings = config.Settings
+	g.Player = config.HeroTemplate
 	g.Player.Init()
-	g.Floors = models.GenerateFloors(len(conf.MonsterTemplates), conf.Settings.MaxRoomsPerLevel)
-	models.FillFloorEncounters(g.Floors, conf.MonsterTemplates, conf.EventTemplates)
+	g.Floors = models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel)
+	models.FillFloorEncounters(g.Floors, monsters, config.EventTemplates)
 
-	return g
+	return &g
+}
+
+func newUUID() string {
+	var b [16]byte
+	rand.Read(b[:])
+	b[6] = (b[6] & 0x0f) | 0x40
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+		b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }

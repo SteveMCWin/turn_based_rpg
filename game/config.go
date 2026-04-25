@@ -27,7 +27,7 @@ type GameConfig struct {
 	EventTemplates   []models.Event
 }
 
-func Load(configDir string) (*GameConfig, error) {
+func LoadConfig(configDir string) (*GameConfig, error) {
 	cfg := &GameConfig{}
 
 	if err := loadJSON(configDir+"/hero.json", &cfg.HeroTemplate); err != nil {

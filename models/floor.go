@@ -40,8 +40,7 @@ func GenerateFloors(numFloors, maxRoomsPerFloor int) []Floor {
 	return floors
 }
 
-func FillFloorEncounters(floors []Floor, monsterTemplates []Monster, eventTemplates []Event) {
-	monsters := slices.Clone(monsterTemplates)
+func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Event) {
 	events := slices.Clone(eventTemplates)
 	rand_monster_indexes := rand.Perm(len(monsters))
 	rand_event_indexes := rand.Perm(len(events))
