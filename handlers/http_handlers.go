@@ -162,11 +162,38 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 }
 
 func (s *Server) handlePostEnterRoom(c *gin.Context) {
-
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		return
+	}
+	var req struct { RoomID string `json:"room_id" binding:"required"` }
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "room_id is required"})
+		return
+	}
+	if err := g.EnterRoom(req.RoomID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, g)
 }
 
 func (s *Server) handlePostBattleMove(c *gin.Context) {
-
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		return
+	}
+	var req struct { MoveID string `json:"move_id" binding:"required"` }
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
+		return
+	}
+	result, err := g.SubmitPlayerMove(req.MoveID, s.config)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, result)
 }
 
 func (s *Server) handlePostEquipMove(c *gin.Context) {

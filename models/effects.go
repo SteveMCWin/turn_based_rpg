@@ -22,8 +22,6 @@ type Effect struct {
 	Delta           int          `json:"delta"`
 	Duration        int          `json:"duration"`
 	Target          EffectTarget `json:"target"`
-	CostAmount      int          `json:"cost_amount,omitempty"`
-	CostType        StatType     `json:"cost_type,omitempty"`
 	ActivationDelay int          `json:"activation_delay"`
 }
 

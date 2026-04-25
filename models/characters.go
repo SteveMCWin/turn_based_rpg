@@ -37,6 +37,15 @@ func (h *Hero) LearnMove(moveID string, level int) LearnedMove {
 	return lm
 }
 
+func (h *Hero) GetMoveLevel(moveID string) int {
+	for _, lm := range h.LearnedMoves {
+		if lm.MoveID == moveID {
+			return lm.Level
+		}
+	}
+	return 0
+}
+
 // Monster represents an enemy in the gauntlet.
 type Monster struct {
 	Entity

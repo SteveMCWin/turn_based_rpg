@@ -26,6 +26,7 @@ type MoveDefinition struct {
 	Effects     []*Effect   `json:"effect,omitempty"`
 	BaseValue   int         `json:"base_value"`
 	ScalingStat StatType    `json:"scaling_stat"`
+	CostAmount  int         `json:"cost_amount,omitempty"`
 }
 
 type LearnedMove struct {

@@ -1,22 +1,26 @@
 package models
 
 import (
+	"fmt"
 	"math/rand"
 	"slices"
 	"strconv"
+	"strings"
 )
+
+const ROOM_ID_SEPARATOR string = ","
 
 // id of room is floor_num,room_num
 type Room struct {
 	ID          string
 	Encounter   Encounter
-	Next        []string
+	NextRoomIDs []string
 	IsCompleted bool
 	CanEnter    bool
 }
 
 type Floor struct {
-	Rooms []Room
+	Rooms       []Room
 	IsCompleted bool
 }
 
@@ -24,12 +28,12 @@ func GenerateFloors(numFloors, maxRoomsPerFloor int) []Floor {
 	floors := make([]Floor, numFloors)
 
 	floors[0] = Floor{
-		Rooms: []Room{Room{ CanEnter: true }},
+		Rooms:       []Room{Room{CanEnter: true}},
 		IsCompleted: false,
 	}
 
 	floors[numFloors-1] = Floor{
-		Rooms: []Room{Room{}},
+		Rooms:       []Room{Room{}},
 		IsCompleted: false,
 	}
 
@@ -38,6 +42,25 @@ func GenerateFloors(numFloors, maxRoomsPerFloor int) []Floor {
 	}
 
 	return floors
+}
+
+func GetFloorIdx(room_id string) (int, int, error) {
+	idxs := strings.Split(room_id, ROOM_ID_SEPARATOR)
+	if len(idxs) != 2 {
+		return -1, -1, fmt.Errorf("Error getting floor and room idx from room id %s\n", room_id)
+	}
+
+	f_idx, err := strconv.Atoi(idxs[0])
+	if err != nil {
+		return -1, -1, fmt.Errorf("Error converting string to floor idx: %s", err)
+	}
+
+	r_idx, err := strconv.Atoi(idxs[1])
+	if err != nil {
+		return -1, -1, fmt.Errorf("Error converting string to room idx: %s", err)
+	}
+
+	return f_idx, r_idx, nil
 }
 
 func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Event) {
@@ -50,7 +73,7 @@ func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Ev
 		max_room_connect_idx := 0
 
 		for j := range floors[i].Rooms {
-			floors[i].Rooms[j].ID = strconv.Itoa(i) + "," + strconv.Itoa(j)
+			floors[i].Rooms[j].ID = strconv.Itoa(i) + ROOM_ID_SEPARATOR + strconv.Itoa(j)
 
 			if j == monster_room_idx {
 				floors[i].Rooms[j].Encounter.Kind = EncounterKindMonster
