@@ -98,7 +98,7 @@ func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Ev
 				}
 
 				for room_idx := max_room_connect_idx; room_idx <= room_indexes_to_connect; room_idx++ {
-					floors[i].Rooms[j].Next = append(floors[i].Rooms[j].Next, strconv.Itoa(i+1)+","+strconv.Itoa(room_idx))
+					floors[i].Rooms[j].NextRoomIDs = append(floors[i].Rooms[j].NextRoomIDs, strconv.Itoa(i+1)+","+strconv.Itoa(room_idx))
 				}
 				max_room_connect_idx = room_indexes_to_connect + 1
 			}

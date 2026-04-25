@@ -188,7 +188,7 @@ func (s *Server) handlePostBattleMove(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
 	}
-	result, err := g.SubmitPlayerMove(req.MoveID, s.config)
+	result, err := g.SubmitPlayerMove(req.MoveID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

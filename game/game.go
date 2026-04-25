@@ -2,22 +2,23 @@ package game
 
 import (
 	crand "crypto/rand"
-	mrand "math/rand"
 	"fmt"
 	"log"
+	mrand "math/rand"
 	"slices"
 
 	"tbrpg/models"
 )
 
 type Game struct {
-	ID            string         `json:"id"`
-	Settings      GameSettings   `json:"settings"`
-	Player        models.Hero    `json:"player"`
-	Floors        []models.Floor `json:"floors"`
-	BattleLog     []string       `json:"battle_log,omitempty"`
-	IsInBattle    bool           `json:"in_battle"`
-	CurrentRoomID string         `json:"current_room_id,omitempty"`
+	ID               string             `json:"id"`
+	Settings         GameSettings       `json:"settings"`
+	Player           models.Hero        `json:"player"`
+	Floors           []models.Floor     `json:"floors"`
+	BattleLog        []string           `json:"battle_log,omitempty"`
+	IsInBattle       bool               `json:"in_battle"`
+	CurrentRoomID    string             `json:"current_room_id,omitempty"`
+	LastBattleResult *BattleResult      `json:"last_battle_result"`
 
 	AllMoves map[string]models.MoveDefinition `json:"moves,omitempty"`
 }
@@ -37,6 +38,7 @@ func NewGame(config *GameConfig) *Game {
 	g.Player = config.HeroTemplate
 	g.Player.Init()
 	g.Floors = models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel)
+	g.AllMoves = config.Moves
 	models.FillFloorEncounters(g.Floors, monsters, events)
 
 	return &g
@@ -63,7 +65,6 @@ func (g *Game) RoomByID(id string) *models.Room {
 	return nil
 }
 
-
 func (g *Game) CurrentRoom() *models.Room {
 	if g.CurrentRoomID == "" {
 		return nil
@@ -79,9 +80,6 @@ func (g *Game) EnterRoom(roomID string) error {
 	}
 	if !room.CanEnter {
 		return fmt.Errorf("room %s is not accessible", roomID)
-	}
-	if room.IsCompleted {
-		return fmt.Errorf("room %s is already completed", roomID)
 	}
 
 	switch room.Encounter.Kind {
@@ -164,4 +162,25 @@ func (g *Game) applyEvent(e *models.Event) {
 		h.CurrentMana = min(max(h.CurrentMana, 0), newMax)
 	}
 	e.Applied = true
+}
+
+func (g *Game) learnRandomMove() *models.LearnedMove {
+	var pool []string
+	monster := g.CurrentRoom().Encounter.Monster
+	for _, m := range monster.Moves {
+		if _, ok := g.AllMoves[m.MoveID]; !ok {
+			continue
+		}
+		if g.Player.GetMoveLevel(m.MoveID) < g.Settings.MaxMoveLevel {
+			pool = append(pool, m.MoveID)
+		}
+	}
+
+	if len(pool) == 0 {
+		return nil
+	}
+
+	chosen := pool[mrand.Intn(len(pool))]
+	learned := g.Player.LearnMove(chosen, monster.Level)
+	return &learned
 }

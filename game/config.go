@@ -18,6 +18,8 @@ type GameSettings struct {
 	ManaRegenPerTurn             int     `json:"mana_regen_per_turn"`
 	ManaRestoreBetweenFightsPct  float32 `json:"mana_restore_between_fights_pct"`
 	PercentChanceMonsterLevelsUp int     `json:"pct_chance_monster_lvl_up"`
+	ManualPointsOnLevelUp        int     `json:"manual_points_on_level_up"`
+	RandomPointsOnLevelUp        int     `json:"random_points_on_level_up"`
 }
 
 type GameConfig struct {
