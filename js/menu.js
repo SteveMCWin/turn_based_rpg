@@ -9,7 +9,13 @@ let selectedHeroId = null;
 
 function renderHeroCards(heroes) {
   const grid = document.getElementById('hero-select-grid');
-  grid.innerHTML = heroes.map(h => `
+  grid.innerHTML = heroes.map(h => {
+    const startingItems = (h.equipment || []).map(item => {
+      const icon = item.item_type === 'weapon' ? '⚔' : item.item_type === 'armor' ? '🛡' : '💎';
+      return `<span class="hero-card-item" title="${escHtml(item.name)}">${icon} ${escHtml(item.name)}</span>`;
+    }).join('');
+
+    return `
     <div class="hero-card" data-id="${escHtml(h.id)}" onclick="selectHero(this)">
       <div class="hero-card-name">${escHtml(h.name)}</div>
       <div class="hero-card-desc">${escHtml(h.description || '')}</div>
@@ -20,8 +26,9 @@ function renderHeroCards(heroes) {
         <span title="Magic">✦ ${h.magic}</span>
         <span title="Mana">◈ ${h.mana}</span>
       </div>
-    </div>
-  `).join('');
+      ${startingItems ? `<div class="hero-card-items">${startingItems}</div>` : ''}
+    </div>`;
+  }).join('');
 
   const first = grid.firstElementChild;
   if (first) selectHero(first);

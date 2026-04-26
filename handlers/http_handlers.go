@@ -84,6 +84,7 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	r.GET("/event", s.handleGetEvent)
 	r.GET("/post-battle", s.handleGetAfterBattle)
 	r.GET("/moves", s.handleGetMoves)
+	r.GET("/items", s.handleGetItemsPage)
 
 	// Game state (read-only)
 	r.GET("/game/state", s.handleGetGameState)
@@ -96,6 +97,11 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	r.POST("/game/moves/equip", s.handlePostEquipMove)
 	r.POST("/game/moves/unequip", s.handlePostUnequipMove)
 	r.POST("/game/levelup", s.handlePostLevelUp)
+
+	// Items
+	r.POST("/game/items/equip", s.handlePostEquipItem)
+	r.POST("/game/items/unequip", s.handlePostUnequipItem)
+	r.POST("/game/items/use", s.handlePostUseItem)
 
 	// Saves
 	r.POST("/game/save", s.handlePostSave)
@@ -161,6 +167,10 @@ func (s *Server) handleGetEvent(c *gin.Context) {
 
 func (s *Server) handleGetMoves(c *gin.Context) {
 	c.HTML(http.StatusOK, "moves.html", gin.H{})
+}
+
+func (s *Server) handleGetItemsPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "items.html", gin.H{})
 }
 
 // ====================================================
@@ -313,6 +323,126 @@ func (s *Server) handlePostUnequipMove(c *gin.Context) {
 	}
 
 	hero.EquippedMoves = updated
+	c.JSON(http.StatusOK, g)
+}
+
+// ==========================================
+// ================= ITEMS ==================
+// ==========================================
+
+func (s *Server) handlePostEquipItem(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		return
+	}
+	if g.IsInBattle {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot equip items during battle"})
+		return
+	}
+	var req struct {
+		ItemID string `json:"item_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
+		return
+	}
+	item, exists := g.AllItems[req.ItemID]
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unknown item"})
+		return
+	}
+	// Verify item is in player inventory
+	found := false
+	for _, id := range g.Player.ItemPool {
+		if id == req.ItemID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item not in inventory"})
+		return
+	}
+	if err := g.Player.EquipItem(item); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// Remove one occurrence from inventory
+	for i, id := range g.Player.ItemPool {
+		if id == req.ItemID {
+			g.Player.ItemPool = append(g.Player.ItemPool[:i], g.Player.ItemPool[i+1:]...)
+			break
+		}
+	}
+	c.JSON(http.StatusOK, g)
+}
+
+func (s *Server) handlePostUnequipItem(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		return
+	}
+	if g.IsInBattle {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot unequip items during battle"})
+		return
+	}
+	var req struct {
+		ItemID string `json:"item_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
+		return
+	}
+	g.Player.UnequipItem(req.ItemID)
+	g.Player.ItemPool = append(g.Player.ItemPool, req.ItemID)
+	c.JSON(http.StatusOK, g)
+}
+
+func (s *Server) handlePostUseItem(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		return
+	}
+	if g.IsInBattle {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cannot use items during battle"})
+		return
+	}
+	var req struct {
+		ItemID string `json:"item_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
+		return
+	}
+	item, exists := g.AllItems[req.ItemID]
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "unknown item"})
+		return
+	}
+	found := false
+	for _, id := range g.Player.ItemPool {
+		if id == req.ItemID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item not in inventory"})
+		return
+	}
+	if err := g.Player.ApplyConsumableItem(item); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	for i, id := range g.Player.ItemPool {
+		if id == req.ItemID {
+			g.Player.ItemPool = append(g.Player.ItemPool[:i], g.Player.ItemPool[i+1:]...)
+			break
+		}
+	}
 	c.JSON(http.StatusOK, g)
 }
 

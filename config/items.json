@@ -1,0 +1,146 @@
+[
+  {
+    "id": "iron_sword",
+    "name": "Iron Sword",
+    "description": "A sturdy iron blade. Slightly increases Attack.",
+    "item_type": "weapon",
+    "drop_rate": 30,
+    "stat_affected": { "attack": 5 }
+  },
+  {
+    "id": "battle_axe",
+    "name": "Battle Axe",
+    "description": "A heavy two-handed axe. Considerably increases Attack.",
+    "item_type": "weapon",
+    "drop_rate": 18,
+    "stat_affected": { "attack": 9 }
+  },
+  {
+    "id": "magic_staff",
+    "name": "Magic Staff",
+    "description": "A staff imbued with arcane energy. Considerably increases Magic.",
+    "item_type": "weapon",
+    "drop_rate": 25,
+    "stat_affected": { "magic": 7 }
+  },
+  {
+    "id": "shadow_dagger",
+    "name": "Shadow Dagger",
+    "description": "A slim blade tipped with dark residue. Increases Attack and Magic.",
+    "item_type": "weapon",
+    "drop_rate": 22,
+    "stat_affected": { "attack": 4, "magic": 3 }
+  },
+  {
+    "id": "enchanted_wand",
+    "name": "Enchanted Wand",
+    "description": "A slender wand crackling with stored energy. Increases Magic.",
+    "item_type": "weapon",
+    "drop_rate": 30,
+    "stat_affected": { "magic": 5 }
+  },
+  {
+    "id": "leather_vest",
+    "name": "Leather Vest",
+    "description": "Light but dependable protection. Slightly increases Defense.",
+    "item_type": "armor",
+    "drop_rate": 35,
+    "stat_affected": { "defense": 3 }
+  },
+  {
+    "id": "chain_mail",
+    "name": "Chain Mail",
+    "description": "Interlocked iron rings that provide solid protection.",
+    "item_type": "armor",
+    "drop_rate": 18,
+    "stat_affected": { "defense": 7 }
+  },
+  {
+    "id": "arcane_robe",
+    "name": "Arcane Robe",
+    "description": "A flowing robe woven with mana threads. Increases Defense and Mana.",
+    "item_type": "armor",
+    "drop_rate": 25,
+    "stat_affected": { "defense": 2, "mana": 20 }
+  },
+  {
+    "id": "iron_shield",
+    "name": "Iron Shield",
+    "description": "A reinforced shield that can absorb heavy blows.",
+    "item_type": "armor",
+    "drop_rate": 18,
+    "stat_affected": { "defense": 6 }
+  },
+  {
+    "id": "dragon_scale_armor",
+    "name": "Dragon Scale Armor",
+    "description": "Forged from a dragon's shed scales. Greatly increases Defense and Health.",
+    "item_type": "armor",
+    "drop_rate": 10,
+    "stat_affected": { "defense": 10, "health": 15 }
+  },
+  {
+    "id": "amulet_of_vitality",
+    "name": "Amulet of Vitality",
+    "description": "A glowing amulet that bolsters the wearer's constitution.",
+    "item_type": "trinket",
+    "drop_rate": 28,
+    "stat_affected": { "health": 22 }
+  },
+  {
+    "id": "ring_of_power",
+    "name": "Ring of Power",
+    "description": "A ring pulsing with raw energy. Increases both Attack and Magic.",
+    "item_type": "trinket",
+    "drop_rate": 20,
+    "stat_affected": { "attack": 3, "magic": 3 }
+  },
+  {
+    "id": "mana_crystal",
+    "name": "Mana Crystal",
+    "description": "A shard of crystallized mana. Considerably increases maximum Mana.",
+    "item_type": "trinket",
+    "drop_rate": 28,
+    "stat_affected": { "mana": 28 }
+  },
+  {
+    "id": "iron_pendant",
+    "name": "Iron Pendant",
+    "description": "A simple iron pendant worn by veteran warriors. Increases Defense and Attack.",
+    "item_type": "trinket",
+    "drop_rate": 28,
+    "stat_affected": { "defense": 2, "attack": 3 }
+  },
+  {
+    "id": "health_potion",
+    "name": "Health Potion",
+    "description": "A vial of red liquid. Restores 30 HP when consumed.",
+    "item_type": "consumable",
+    "drop_rate": 45,
+    "stat_affected": { "health": 30 }
+  },
+  {
+    "id": "greater_health_potion",
+    "name": "Greater Health Potion",
+    "description": "A concentrated healing draught. Restores 65 HP when consumed.",
+    "item_type": "consumable",
+    "drop_rate": 20,
+    "stat_affected": { "health": 65 }
+  },
+  {
+    "id": "mana_potion",
+    "name": "Mana Potion",
+    "description": "A vial of blue liquid. Restores 30 MP when consumed.",
+    "item_type": "consumable",
+    "drop_rate": 35,
+    "stat_affected": { "mana": 30 }
+  },
+  {
+    "id": "elixir",
+    "name": "Elixir",
+    "description": "A shimmering blend of health and mana tonics. Restores 25 HP and 25 MP.",
+    "item_type": "consumable",
+    "drop_rate": 22,
+    "stat_affected": { "health": 25, "mana": 25 }
+  }
+]

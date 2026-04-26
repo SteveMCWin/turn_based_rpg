@@ -9,11 +9,12 @@ import (
 )
 
 type BattleResult struct {
-	GameState   *Game               `json:"game_state,omitempty"`
-	BattleOver  bool                `json:"battle_over"`
-	PlayerWon   bool                `json:"player_won"`
-	MonsterName string              `json:"monster_name,omitempty"`
-	LearnedMove *models.LearnedMove `json:"learned_move,omitempty"`
+	GameState    *Game               `json:"game_state,omitempty"`
+	BattleOver   bool                `json:"battle_over"`
+	PlayerWon    bool                `json:"player_won"`
+	MonsterName  string              `json:"monster_name,omitempty"`
+	LearnedMove  *models.LearnedMove `json:"learned_move,omitempty"`
+	ItemAcquired *models.Item         `json:"item_acquired,omitempty"`
 }
 
 func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
@@ -62,7 +63,6 @@ func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
 		monster.CurrentHP = 0
 		return g.endBattle(true), nil
 	}
-
 
 	// ============================
 	// ======= Monster turn =======
@@ -124,7 +124,7 @@ func (g *Game) pickMonsterMove() string {
 			} else {
 				weight = 0
 			}
-		// TODO: check if hero has negative stat effects and if this move applies a debuff, give it a weight
+			// TODO: check if hero has negative stat effects and if this move applies a debuff, give it a weight
 		}
 
 		if weight > 0 {
@@ -181,8 +181,8 @@ func applyMove(move models.MoveDefinition, attacker, defender *models.Entity) {
 
 func applyEffect(effect *models.Effect, target *models.Entity) {
 	target.StatusEffects = append(target.StatusEffects, models.StatusEffect{
-		Effect:         *effect,
-		TurnsRemaining: effect.Duration,
+		Effect:          *effect,
+		TurnsRemaining:  effect.Duration,
 		TurnsToActivate: effect.ActivationDelay,
 	})
 }
@@ -252,6 +252,13 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 			result.LearnedMove = learned
 		}
 
+		item_acquired := g.getRandomItem()
+		if item_acquired != nil {
+			item_name := item_acquired.Name
+			g.BattleLog = append(g.BattleLog, fmt.Sprintf("Got an item: %s", item_name))
+			result.ItemAcquired = item_acquired
+		}
+
 		// Restore a portion of hero mana between fights
 		if g.Player.MaxMana() > 0 {
 			restore := int(float32(g.Player.MaxMana()) * g.Settings.ManaRestoreBetweenFightsPct)
@@ -285,4 +292,3 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 	result.GameState = g
 	return result
 }
-
