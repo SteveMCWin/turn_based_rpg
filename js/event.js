@@ -16,12 +16,13 @@ let state = null;
   if (!ev) {
     content.innerHTML = '<p>Nothing of note happened.</p>';
   } else {
-    const sign   = ev.delta >= 0 ? '+' : '';
-    const colour = ev.delta >= 0 ? 'var(--green)' : 'var(--accent)';
+    const parts = Object.entries(ev.stat_affected || {}).map(([stat, val]) => {
+      const sign   = val >= 0 ? '+' : '';
+      const colour = val >= 0 ? 'var(--green)' : 'var(--accent)';
+      return `<span style="color:${colour}">${sign}${val} ${escHtml(stat)}</span>`;
+    });
     content.innerHTML = `
       <p class="event-description">${escHtml(ev.description)}</p>
-      <p class="event-delta" style="color:${colour}">
-        ${escHtml(ev.stat_affected)}: ${sign}${ev.delta}
-      </p>`;
+      <p class="event-delta">${parts.join(' &middot; ')}</p>`;
   }
 })();
