@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"tbrpg/game"
 	"tbrpg/handlers"
-	"tbrpg/models"
+	"tbrpg/database"
 )
 
 func main() {
@@ -14,11 +14,11 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	db := &models.DataBase{}
+	db := &database.DataBase{}
     db.InitDatabase()
 
 	log.Println("Starting server on :5000")
-	if err := http.ListenAndServe(":5000", handlers.NewServer(config, db.Data)); err != nil {
+	if err := http.ListenAndServe(":5000", handlers.NewServer(config, db)); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }

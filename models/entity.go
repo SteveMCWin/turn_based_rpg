@@ -47,21 +47,45 @@ func (e *Entity) EffectiveStats() Stats {
 }
 
 // Increases entites level bonuses based on the stat scaling of that entity
-func (e *Entity) LevelUpStats() {
+func (e *Entity) SetToLevel(new_level int) {
+	current_lvl := e.Level
+
 	prevMaxHP := e.MaxHP()
 	prevMaxMana := e.MaxMana()
 
-	e.LevelBonuses.Health += int(float32(e.Stats.Health) * e.StatScaling.HealthScaling)
-	e.LevelBonuses.Attack += int(float32(e.Stats.Attack) * e.StatScaling.AttackScaling)
-	e.LevelBonuses.Defense += int(float32(e.Stats.Defense) * e.StatScaling.DefenseScaling)
-	e.LevelBonuses.Magic += int(float32(e.Stats.Magic) * e.StatScaling.MagicScaling)
-	e.LevelBonuses.Mana += int(float32(e.Stats.Mana) * e.StatScaling.ManaScaling)
+	e.LevelBonuses.Health += int(float32(e.Stats.Health) * e.StatScaling.HealthScaling) * (new_level - current_lvl)
+	e.LevelBonuses.Mana += int(float32(e.Stats.Mana) * e.StatScaling.ManaScaling) * (new_level - current_lvl)
+	e.LevelBonuses.Attack += int(float32(e.Stats.Attack) * e.StatScaling.AttackScaling) * (new_level - current_lvl)
+	e.LevelBonuses.Defense += int(float32(e.Stats.Defense) * e.StatScaling.DefenseScaling) * (new_level - current_lvl)
+	e.LevelBonuses.Magic += int(float32(e.Stats.Magic) * e.StatScaling.MagicScaling) * (new_level - current_lvl)
 
 	// add health and mana on level up as a reward :^D
 	e.CurrentHP += e.MaxHP() - prevMaxHP
 	e.CurrentMana += e.MaxMana() - prevMaxMana
+
+	e.Level = new_level
 }
 
+func (e *Entity) LevelUpStat(stat StatType, amount int) {
+	prevMaxHP := e.MaxHP()
+	prevMaxMana := e.MaxMana()
+
+	switch stat {
+	case HealthStat:
+		e.LevelBonuses.Health += int(float32(e.Stats.Health)*e.StatScaling.HealthScaling) * amount
+	case ManaStat:
+		e.LevelBonuses.Mana += int(float32(e.Stats.Mana)*e.StatScaling.ManaScaling) * amount
+	case AttackStat:
+		e.LevelBonuses.Attack += int(float32(e.Stats.Attack)*e.StatScaling.AttackScaling) * amount
+	case DefenseStat:
+		e.LevelBonuses.Defense += int(float32(e.Stats.Defense)*e.StatScaling.DefenseScaling) * amount
+	default:
+		e.LevelBonuses.Magic += int(float32(e.Stats.Magic)*e.StatScaling.MagicScaling) * amount
+	}
+
+	e.CurrentHP += e.MaxHP() - prevMaxHP
+	e.CurrentMana += e.MaxMana() - prevMaxMana
+}
 
 func (e *Entity) TickStatusEffects() {
 	effects_to_remove := []int{}
@@ -74,7 +98,7 @@ func (e *Entity) TickStatusEffects() {
 		if e.StatusEffects[i].TurnsToActivate <= 0 && e.StatusEffects[i].TurnsRemaining > 0 {
 			switch se.Type {
 			case DamageOverTime:
-				e.CurrentHP = max(0, e.CurrentHP - se.Effect.Delta)
+				e.CurrentHP = max(0, e.CurrentHP-se.Effect.Delta)
 			}
 
 			e.StatusEffects[i].TurnsRemaining--
@@ -84,7 +108,7 @@ func (e *Entity) TickStatusEffects() {
 		}
 	}
 
-	for i := len(effects_to_remove)-1; i >= 0; i-- {
+	for i := len(effects_to_remove) - 1; i >= 0; i-- {
 		idx := effects_to_remove[i]
 		e.StatusEffects = slices.Delete(e.StatusEffects, idx, idx+1)
 	}
@@ -98,13 +122,8 @@ func (e *Entity) AddXP(amount int, thresholds []int) int {
 	e.CurrentXP += amount
 	levels_gained := 0
 	for e.Level < len(thresholds) && e.CurrentXP >= thresholds[e.Level] {
-		e.LevelUp()
+		e.SetToLevel(e.Level+1)
 		levels_gained++
 	}
 	return levels_gained
-}
-
-func (e *Entity) LevelUp() {
-	e.Level += 1
-	e.LevelUpStats()
 }

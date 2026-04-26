@@ -79,6 +79,9 @@ func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Ev
 				floors[i].Rooms[j].Encounter.Kind = EncounterKindMonster
 				floors[i].Rooms[j].Encounter.Monster = &monsters[rand_monster_indexes[len(rand_monster_indexes)-1]]
 				rand_monster_indexes = rand_monster_indexes[:len(rand_monster_indexes)-1]
+
+				floors[i].Rooms[j].Encounter.Monster.SetToLevel(i+1)
+
 			} else {
 				floors[i].Rooms[j].Encounter.Kind = EncounterKindEvent
 				floors[i].Rooms[j].Encounter.Event = &events[rand_event_indexes[len(rand_event_indexes)-1]]

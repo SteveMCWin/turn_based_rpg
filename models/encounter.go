@@ -17,5 +17,5 @@ type Event struct {
 	Description  string   `json:"description"`
 	StatAffected StatType `json:"stat_affected"`
 	Delta        int      `json:"delta"`
-	Applied      bool     `json:"applied"`
+	Applied      bool     `json:"applied,omitempty"`
 }

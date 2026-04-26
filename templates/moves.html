@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Moves — Knight's Gauntlet</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="moves-page">
+  <div class="moves-layout">
+    <div class="moves-header">
+      <a href="/map" class="btn btn-secondary">← Back to Map</a>
+      <h2>Move Management</h2>
+      <p id="slot-count"></p>
+    </div>
+    <div class="moves-columns">
+      <div class="moves-section">
+        <h3>Equipped <span id="equipped-count"></span></h3>
+        <div id="equipped-moves" class="move-list"></div>
+      </div>
+      <div class="moves-section">
+        <h3>All Learned Moves</h3>
+        <div id="all-moves" class="move-list"></div>
+      </div>
+    </div>
+    <p id="moves-error" class="error-text hidden"></p>
+  </div>
+
+  <script src="/js/game.js"></script>
+  <script src="/js/moves.js"></script>
+</body>
+</html>

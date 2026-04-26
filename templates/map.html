@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map — Knight's Gauntlet</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="map-page">
+<div id="tooltip" class="tooltip" style="display:none"></div>
+
+<div id="levelup-overlay" class="levelup-overlay hidden">
+  <div class="levelup-modal">
+    <h2>Level Up!</h2>
+    <p class="overlay-subtitle">Allocate <span id="points-remaining">0</span> point(s) — unspent are randomized</p>
+    <div id="overlay-stats" class="overlay-stat-list"></div>
+    <div class="overlay-actions">
+      <button class="btn btn-secondary btn-small" onclick="undoAllocation()">Undo</button>
+      <button class="btn btn-secondary btn-small" onclick="confirmAllocation({})">Randomize all</button>
+      <button class="btn btn-primary btn-small" onclick="confirmAllocation()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="map-layout">
+  <aside class="hero-panel">
+    <h2 id="hero-name"></h2>
+    <div class="hp-bar-wrapper"><div id="hero-hp-bar" class="hp-bar"></div></div>
+    <p id="hero-hp-text"></p>
+    <div class="hp-bar-wrapper"><div id="hero-mana-bar" class="mana-bar"></div></div>
+    <p id="hero-mana-text"></p>
+    <div class="stat-grid" id="hero-stats"></div>
+    <div class="equipped-moves">
+      <h3>Equipped</h3>
+      <ul id="equipped-list"></ul>
+    </div>
+    <a href="/moves" class="btn btn-secondary">Manage Moves</a>
+    <button class="btn btn-secondary" onclick="saveAndExit()">Save &amp; Exit</button>
+  </aside>
+
+  <main class="floor-list">
+    <h2>The Gauntlet</h2>
+    <div id="floors"></div>
+  </main>
+</div>
+
+<script src="/js/game.js"></script>
+<script src="/js/map.js"></script>
+</body>
+</html>

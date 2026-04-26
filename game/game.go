@@ -1,7 +1,6 @@
 package game
 
 import (
-	crand "crypto/rand"
 	"fmt"
 	"log"
 	mrand "math/rand"
@@ -11,7 +10,7 @@ import (
 )
 
 type Game struct {
-	ID               string             `json:"id"`
+	ID               int                              `json:"id"`
 	Settings         GameSettings       `json:"settings"`
 	Player           models.Hero        `json:"player"`
 	Floors           []models.Floor     `json:"floors"`
@@ -19,39 +18,36 @@ type Game struct {
 	IsInBattle       bool               `json:"in_battle"`
 	CurrentRoomID    string             `json:"current_room_id,omitempty"`
 	LastBattleResult *BattleResult      `json:"last_battle_result"`
+	PendingLevelUp   *PendingAllocation `json:"pending_level_up"`
 
 	AllMoves map[string]models.MoveDefinition `json:"moves,omitempty"`
+}
+
+type PendingAllocation struct {
+	ManualPoints int `json:"manual_points"`
+	RandomPoints int `json:"random_points"`
 }
 
 func NewGame(config *GameConfig) *Game {
 
 	events := slices.Clone(config.EventTemplates)
+
 	monsters := slices.Clone(config.MonsterTemplates)
 	for i := range monsters {
 		monsters[i].Init()
 	}
 
-	g := Game{}
+	g := Game{
+		Settings: config.Settings,
+		Player: config.HeroTemplate,
+		Floors: models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel),
+		AllMoves: config.Moves,
+	}
 
-	g.ID = newUUID()
-	g.Settings = config.Settings
-	g.Player = config.HeroTemplate
 	g.Player.Init()
-	g.Floors = models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel)
-	g.AllMoves = config.Moves
 	models.FillFloorEncounters(g.Floors, monsters, events)
 
 	return &g
-}
-
-// for testing purposes, later on the id will be assigned by the database
-func newUUID() string {
-	var b [16]byte
-	crand.Read(b[:])
-	b[6] = (b[6] & 0x0f) | 0x40
-	b[8] = (b[8] & 0x3f) | 0x80
-	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
-		b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
 func (g *Game) RoomByID(id string) *models.Room {
@@ -90,7 +86,7 @@ func (g *Game) EnterRoom(roomID string) error {
 			g.BattleLog = append(g.BattleLog, "You applied black magic to revive an already defeated foe. They are as hostile as you remember them to be.")
 
 			if mrand.Int()%100 <= g.Settings.PercentChanceMonsterLevelsUp {
-				room.Encounter.Monster.LevelUp()
+				room.Encounter.Monster.SetToLevel(room.Encounter.Monster.Level+1)
 				g.BattleLog = append(g.BattleLog, "However, upon reviving the monster for another duel, something went wrong in the ritual, and the monster is now permanently stronger!")
 			}
 		}
@@ -102,8 +98,9 @@ func (g *Game) EnterRoom(roomID string) error {
 	case models.EncounterKindEvent:
 		if room.Encounter.Event != nil && !room.Encounter.Event.Applied {
 			g.applyEvent(room.Encounter.Event)
+			g.CompleteRoom(roomID)
 		}
-		g.CompleteRoom(roomID)
+		// g.CompleteRoom(roomID)
 	}
 	return nil
 }

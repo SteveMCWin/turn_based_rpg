@@ -1,14 +1,20 @@
 package handlers
 
 import (
-	"database/sql"
 	"html/template"
+	"math/rand"
+	"strconv"
+
 	// "log"
 	"net/http"
 	"sync"
+
 	// "time"
 
+	"tbrpg/database"
 	"tbrpg/game"
+	"tbrpg/models"
+
 	// "tbrpg/models"
 
 	"github.com/gin-gonic/gin"
@@ -52,17 +58,17 @@ func templateFuncs() template.FuncMap {
 
 type Server struct {
 	config *game.GameConfig
-	db     *sql.DB
-	games  map[string]*game.Game
+	db     *database.DataBase
+	games  map[int]*game.Game
 	mu     sync.RWMutex
 	router *gin.Engine
 }
 
-func NewServer(config *game.GameConfig, db *sql.DB) http.Handler {
+func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	s := &Server{
 		config: config,
 		db:     db,
-		games:  make(map[string]*game.Game),
+		games:  make(map[int]*game.Game),
 	}
 	r := gin.Default()
 
@@ -75,6 +81,7 @@ func NewServer(config *game.GameConfig, db *sql.DB) http.Handler {
 	r.GET("/", s.handleGetMenu)
 	r.GET("/map", s.handleGetMap)
 	r.GET("/battle", s.handleGetBattle)
+	r.GET("/event", s.handleGetEvent)
 	r.GET("/post-battle", s.handleGetAfterBattle)
 	r.GET("/moves", s.handleGetMoves)
 
@@ -105,7 +112,7 @@ func (s *Server) setSession(c *gin.Context, g *game.Game) {
 	s.mu.Unlock()
 
 	one_week := 60*60*24*7
-	c.SetCookie(gameSessionCookieName, g.ID, one_week, "/", "", false, true)
+	c.SetCookie(gameSessionCookieName, strconv.Itoa(g.ID), one_week, "/", "", false, true)
 }
 
 // Get a specific game based on the id of the game stored in a cookie
@@ -114,10 +121,15 @@ func (s *Server) gameFromRequest(c *gin.Context) (*game.Game, bool) {
 	if err != nil {
 		return nil, false
 	}
+
+	id, err := strconv.Atoi(cookie)
+	if err != nil {
+		return nil, false
+	}
+
 	s.mu.RLock()
-	g, ok := s.games[cookie]
+	g, ok := s.games[id]
 	s.mu.RUnlock()
-	
 	
 	return g, ok
 }
@@ -139,12 +151,20 @@ func (s *Server) handleGetBattle(c *gin.Context) {
 }
 
 func (s *Server) handleGetAfterBattle(c *gin.Context) {
-	c.HTML(http.StatusOK, "menu.html", gin.H{})
+	c.HTML(http.StatusOK, "post_battle.html", gin.H{})
+}
+
+func (s *Server) handleGetEvent(c *gin.Context) {
+	c.HTML(http.StatusOK, "event.html", gin.H{})
 }
 
 func (s *Server) handleGetMoves(c *gin.Context) {
-	c.HTML(http.StatusOK, "menu.html", gin.H{})
+	c.HTML(http.StatusOK, "moves.html", gin.H{})
 }
+
+// ====================================================
+// ================= UTILITY HANDLERS =================
+// ====================================================
 
 func (s *Server) handleGetGameState(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
@@ -155,8 +175,22 @@ func (s *Server) handleGetGameState(c *gin.Context) {
 	c.JSON(http.StatusOK, g)
 }
 
+// ======================================================
+// ================= GAME FLOW HANDLERS =================
+// ======================================================
+
 func (s *Server) handlePostNewGame(c *gin.Context) {
+	if s.db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "database unavailable"})
+		return
+	}
 	g := game.NewGame(s.config)
+	id, err := s.db.CreateGame(g)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	g.ID = id
 	s.setSession(c, g)
 	c.JSON(http.StatusOK, g)
 }
@@ -166,15 +200,18 @@ func (s *Server) handlePostEnterRoom(c *gin.Context) {
 	if !ok {
 		return
 	}
+
 	var req struct { RoomID string `json:"room_id" binding:"required"` }
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "room_id is required"})
 		return
 	}
+
 	if err := g.EnterRoom(req.RoomID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	c.JSON(http.StatusOK, g)
 }
 
@@ -197,16 +234,118 @@ func (s *Server) handlePostBattleMove(c *gin.Context) {
 }
 
 func (s *Server) handlePostEquipMove(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		return
+	}
 
+	var req struct { MoveID string `json:"move_id" binding:"required"` }
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
+		return
+	}
+	hero := &g.Player
+
+	maxEquipped := s.config.Settings.MaxEquippedMoves
+
+	if len(hero.EquippedMoves) >= maxEquipped {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "equipped moves at maximum"})
+		return
+	}
+
+	for _, id := range hero.EquippedMoves {
+		if id == req.MoveID {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "move already equipped"})
+			return
+		}
+	}
+
+	if hero.GetMoveLevel(req.MoveID) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "move not learned"})
+		return
+	}
+
+	hero.EquippedMoves = append(hero.EquippedMoves, req.MoveID)
+	c.JSON(http.StatusOK, g)
 }
 
 func (s *Server) handlePostUnequipMove(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		return
+	}
+	var req struct { MoveID string `json:"move_id" binding:"required"` }
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
+		return
+	}
 
+	hero := &g.Player
+	if len(hero.EquippedMoves) <= 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "must keep at least one move equipped"})
+		return
+	}
+
+	updated := hero.EquippedMoves[:0:0]
+	for _, id := range hero.EquippedMoves {
+		if id != req.MoveID {
+			updated = append(updated, id)
+		}
+	}
+
+	hero.EquippedMoves = updated
+	c.JSON(http.StatusOK, g)
 }
 
 func (s *Server) handlePostLevelUp(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		return
+	}
+	if g.PendingLevelUp == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no pending level up"})
+		return
+	}
 
+	var req struct { Allocations map[string]int `json:"allocations"` }
+	c.ShouldBindJSON(&req)
+	if req.Allocations == nil {
+		req.Allocations = map[string]int{}
+	}
+
+	pending := g.PendingLevelUp
+	hero := &g.Player
+
+	spent := 0
+	for stat, pts := range req.Allocations {
+		if pts <= 0 {
+			continue
+		}
+		available := pending.ManualPoints - spent
+		if available <= 0 {
+			break
+		}
+		if pts > available {
+			pts = available
+		}
+		hero.LevelUpStat(models.StatType(stat), pts)
+		spent += pts
+	}
+
+	// Randomize remaining manual points + the automatic random points
+	total := (pending.ManualPoints - spent) + pending.RandomPoints
+	statPool := []models.StatType{models.HealthStat, models.AttackStat, models.DefenseStat, models.MagicStat, models.ManaStat}
+	for i := 0; i < total; i++ {
+		hero.LevelUpStat(statPool[rand.Intn(len(statPool))], 1)
+	}
+
+	g.PendingLevelUp = nil
+	c.JSON(http.StatusOK, g)
 }
+
+// ==========================================
+// ================= SAVING =================
+// ==========================================
 
 func (s *Server) handlePostSave(c *gin.Context) {
 

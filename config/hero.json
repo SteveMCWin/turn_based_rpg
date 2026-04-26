@@ -1,0 +1,23 @@
+{
+  "name": "Knight",
+  "level": 1,
+  "health": 100,
+  "attack": 20,
+  "defense": 8,
+  "magic": 10,
+  "mana": 50,
+  "stat_scaling": {
+    "health_scaling": 0.12,
+    "attack_scaling": 0.08,
+    "defense_scaling": 0.06,
+    "magic_scaling": 0.08,
+    "mana_scaling": 0.05
+  },
+  "learned_moves": [
+    { "move_id": "slash",       "level": 1 },
+    { "move_id": "shield_up",   "level": 1 },
+    { "move_id": "battle_cry",  "level": 1 },
+    { "move_id": "second_wind", "level": 1 }
+  ],
+  "max_move_level": 5
+}

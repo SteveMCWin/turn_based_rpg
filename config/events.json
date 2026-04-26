@@ -1,0 +1,12 @@
+[
+  { "description": "You find a hidden shrine. Permanently gain +5 max health.", "stat_affected": "health", "delta": 5 },
+  { "description": "A traveling merchant teaches you a new technique. +3 attack permanently.", "stat_affected": "attack", "delta": 3 },
+  { "description": "You rest by a campfire and feel refreshed. +2 defense permanently.", "stat_affected": "defense", "delta": 2 },
+  { "description": "Studying ancient runes increases your magical power. +3 magic permanently.", "stat_affected": "magic", "delta": 3 },
+  { "description": "You discover a mana crystal. +10 max mana permanently.", "stat_affected": "mana", "delta": 10 },
+  { "description": "A poisoned trap! -3 defense permanently.", "stat_affected": "defense", "delta": -3 },
+  { "description": "You stumble through cursed ground. -5 max health permanently.", "stat_affected": "health", "delta": -5 },
+  { "description": "A mysterious potion restores your vitality. +8 max health.", "stat_affected": "health", "delta": 8 },
+  { "description": "An old knight shares his wisdom. +4 attack permanently.", "stat_affected": "attack", "delta": 4 },
+  { "description": "You meditate in a clearing. +5 magic permanently.", "stat_affected": "magic", "delta": 5 }
+]
