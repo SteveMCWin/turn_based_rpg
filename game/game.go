@@ -109,6 +109,11 @@ func (g *Game) CompleteRoom(roomID string) {
 	if room == nil {
 		return
 	}
+
+	if room.IsCompleted {
+		return
+	}
+
 	room.IsCompleted = true
 
 	fi, _, err := models.GetFloorIdx(roomID)

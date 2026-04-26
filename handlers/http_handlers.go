@@ -367,18 +367,52 @@ func (s *Server) handlePostLevelUp(c *gin.Context) {
 // ==========================================
 
 func (s *Server) handlePostSave(c *gin.Context) {
-
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		return
+	}
+	if err := s.db.SaveGame(g); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (s *Server) handleGetListSaves(c *gin.Context) {
-
+	saves, err := s.db.ListSaves()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, saves)
 }
 
 func (s *Server) handlePostLoadSave(c *gin.Context) {
-
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid save id"})
+		return
+	}
+	g, err := s.db.LoadSave(id)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "save not found"})
+		return
+	}
+	s.setSession(c, g)
+	c.JSON(http.StatusOK, g)
 }
 
 func (s *Server) handleDeleteDeleteSave(c *gin.Context) {
-
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid save id"})
+		return
+	}
+	if err := s.db.DeleteSave(id); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 

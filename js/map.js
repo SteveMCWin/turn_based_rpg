@@ -70,7 +70,9 @@ function renderRoomRow(room, floor) {
     label = room.IsCompleted && event ? escHtml(event.description) : 'Unknown event';
   }
 
-  if (room.IsCompleted) {
+  if (room.IsCompleted && kind === 'monster' && room.CanEnter && !state.pending_level_up) {
+    action = `<button class="btn btn-secondary btn-small" onclick="enterRoom('${room.ID}')">Rematch</button>`;
+  } else if (room.IsCompleted) {
     action = `<span class="tag-done">✓</span>`;
   } else if (room.CanEnter && !state.pending_level_up) {
     if (kind === 'monster') {

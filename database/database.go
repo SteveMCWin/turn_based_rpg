@@ -99,7 +99,7 @@ func (db *DataBase) LoadSave(id int) (*game.Game, error) {
 }
 
 func (db *DataBase) ListSaves() ([]Save, error) {
-	rows, err := db.Data.Query(`SELECT id, label, saved_at FROM saves ORDER BY saved_at DESC`)
+	rows, err := db.Data.Query(`SELECT id, COALESCE(label, ''), saved_at FROM saves ORDER BY saved_at DESC`)
 	if err != nil {
 		return nil, err
 	}

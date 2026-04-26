@@ -41,6 +41,8 @@ func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
 
 	moveLevel := hero.GetMoveLevel(moveID)
 
+	hero.CurrentMana -= move_def.CostAmount
+
 	scaled_value := int(float64(move_def.BaseValue) * (1.0 + float64(moveLevel-1)*float64(g.Settings.MoveLevelBonusPct)/100.0))
 	effMove := move_def
 	effMove.BaseValue = scaled_value
@@ -237,7 +239,10 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 
 		if levelsGained > 0 {
 			g.BattleLog = append(g.BattleLog, fmt.Sprintf("Level up! Now Lv.%d", g.Player.Level))
-			// TODO: Handle levels gained
+			g.PendingLevelUp = &PendingAllocation{
+				ManualPoints: g.Settings.ManualPointsOnLevelUp * levelsGained,
+				RandomPoints: g.Settings.RandomPointsOnLevelUp * levelsGained,
+			}
 		}
 
 		learned := g.learnRandomMove()

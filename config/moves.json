@@ -1,285 +1,383 @@
 [
-  {
-    "id": "slash",
-    "name": "Slash",
-    "description": "A swift sword strike. Deals moderate physical damage.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 80,
-    "scaling_stat": "attack"
-  },
-  {
-    "id": "shield_up",
-    "name": "Shield Up",
-    "description": "Raise your shield. Increases Defense for 2 turns.",
-    "move_type": "physical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "battle_cry",
-    "name": "Battle Cry",
-    "description": "A fearsome war cry. Increases Attack for 2 turns.",
-    "move_type": "physical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "attack", "delta": 8, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "second_wind",
-    "name": "Second Wind",
-    "description": "Draw on inner reserves. Heals based on Magic.",
-    "move_type": "magical",
-    "primary": "heal",
-    "base_value": 80,
-    "scaling_stat": "magic"
-  },
-  {
-    "id": "rusty_blade",
-    "name": "Rusty Blade",
-    "description": "A clumsy but painful strike with a corroded weapon.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 80,
-    "scaling_stat": "attack"
-  },
-  {
-    "id": "dirty_kick",
-    "name": "Dirty Kick",
-    "description": "A low blow that lowers the target's Defense for 2 turns.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 55,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "defense", "delta": -6, "duration": 2, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "frenzy",
-    "name": "Frenzy",
-    "description": "Enter a frenzied state. Raises Attack for 2 turns.",
-    "move_type": "physical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "attack", "delta": 8, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "headbutt",
-    "name": "Headbutt",
-    "description": "A reckless full-force strike. Deals heavy physical damage.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 130,
-    "scaling_stat": "attack"
-  },
-  {
-    "id": "firebolt",
-    "name": "Firebolt",
-    "description": "A bolt of conjured flame. Deals moderate magic damage.",
-    "move_type": "magical",
-    "primary": "damage",
-    "base_value": 75,
-    "scaling_stat": "magic"
-  },
-  {
-    "id": "arcane_surge",
-    "name": "Arcane Surge",
-    "description": "Channel raw magic. Raises Magic for 2 turns.",
-    "move_type": "magical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "magic",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "magic", "delta": 8, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "mana_drain",
-    "name": "Mana Drain",
-    "description": "Sap the target's magical power. Light damage and lowers Magic for 2 turns.",
-    "move_type": "magical",
-    "primary": "damage",
-    "base_value": 50,
-    "scaling_stat": "magic",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "magic", "delta": -6, "duration": 2, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "hex_shield",
-    "name": "Hex Shield",
-    "description": "A ward of hex magic. Raises Defense for 2 turns.",
-    "move_type": "magical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "magic",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "bite",
-    "name": "Bite",
-    "description": "A vicious fang attack. Deals moderate physical damage.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 80,
-    "scaling_stat": "attack"
-  },
-  {
-    "id": "web_throw",
-    "name": "Web Throw",
-    "description": "Hurl sticky webbing. Light damage and lowers target's Defense for 2 turns.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 55,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "defense", "delta": -6, "duration": 2, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "pounce",
-    "name": "Pounce",
-    "description": "A lightning-fast leap attack. Deals heavy physical damage.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 130,
-    "scaling_stat": "attack"
-  },
-  {
-    "id": "skitter",
-    "name": "Skitter",
-    "description": "Dodge and weave to raise Defense for 2 turns.",
-    "move_type": "physical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "shadow_bolt",
-    "name": "Shadow Bolt",
-    "description": "Hurl a bolt of dark energy. Deals heavy magic damage.",
-    "move_type": "magical",
-    "primary": "damage",
-    "base_value": 70,
-    "scaling_stat": "magic"
-  },
-  {
-    "id": "drain_life",
-    "name": "Drain Life",
-    "description": "Siphon life from the target. Deals magic damage and weakens their attack for 2 turns.",
-    "move_type": "magical",
-    "primary": "damage",
-    "base_value": 50,
-    "scaling_stat": "magic",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "attack", "delta": -5, "duration": 2, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "curse",
-    "name": "Curse",
-    "description": "Lay a curse on the target. Lowers their Attack for 2 turns.",
-    "move_type": "magical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "magic",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "attack", "delta": -8, "duration": 2, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "dark_pact",
-    "name": "Dark Pact",
-    "description": "Trade mana for power. Costs 15 mana to raise Magic for 2 turns.",
-    "move_type": "magical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "magic",
-    "cost_amount": 15,
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "magic", "delta": 10, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "flame_breath",
-    "name": "Flame Breath",
-    "description": "Unleash a torrent of fire. Deals devastating magic damage.",
-    "move_type": "magical",
-    "primary": "damage",
-    "base_value": 90,
-    "scaling_stat": "magic"
-  },
-  {
-    "id": "claw_swipe",
-    "name": "Claw Swipe",
-    "description": "A sweeping claw attack. Deals moderate physical damage.",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 80,
-    "scaling_stat": "attack"
-  },
-  {
-    "id": "intimidate",
-    "name": "Intimidate",
-    "description": "A terrifying roar. Lowers the target's Attack for 2 turns.",
-    "move_type": "physical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "attack", "delta": -8, "duration": 2, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "dragon_scales",
-    "name": "Dragon Scales",
-    "description": "Harden the scales. Raises Defense for 2 turns.",
-    "move_type": "physical",
-    "primary": "none",
-    "base_value": 0,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "stat_mod", "stat_affected": "defense", "delta": 10, "duration": 2, "target": "self" }
-    ]
-  },
-  {
-    "id": "poison_bite",
-    "name": "Poison Bite",
-    "description": "A venomous bite. Deals light damage and poisons the target for 3 turns (5 dmg/turn).",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 55,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "dot", "stat_affected": "health", "delta": 5, "duration": 3, "target": "opponent" }
-    ]
-  },
-  {
-    "id": "bleed_bite",
-    "name": "Bleed Bite",
-    "description": "A savage bite that causes bleeding for 2 turns (7 dmg/turn).",
-    "move_type": "physical",
-    "primary": "damage",
-    "base_value": 60,
-    "scaling_stat": "attack",
-    "effect": [
-      { "type": "dot", "stat_affected": "health", "delta": 7, "duration": 2, "target": "opponent" }
-    ]
-  }
+    {
+        "id": "slash",
+        "name": "Slash",
+        "description": "A swift sword strike. Deals moderate physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 80,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "shield_up",
+        "name": "Shield Up",
+        "description": "Raise your shield. Increases Defense for 2 turns.",
+        "move_type": "physical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "battle_cry",
+        "name": "Battle Cry",
+        "description": "A fearsome war cry. Increases Attack for 2 turns.",
+        "move_type": "physical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": 8,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "second_wind",
+        "name": "Second Wind",
+        "description": "Draw on inner reserves. Heals based on Magic.",
+        "move_type": "magical",
+        "primary": "heal",
+        "base_value": 80,
+        "scaling_stat": "magic"
+    },
+    {
+        "id": "rusty_blade",
+        "name": "Rusty Blade",
+        "description": "A clumsy but painful strike with a corroded weapon.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 80,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "dirty_kick",
+        "name": "Dirty Kick",
+        "description": "A low blow that lowers the target's Defense for 2 turns.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 55,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": -6,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "frenzy",
+        "name": "Frenzy",
+        "description": "Enter a frenzied state. Raises Attack for 2 turns.",
+        "move_type": "physical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": 8,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "headbutt",
+        "name": "Headbutt",
+        "description": "A reckless full-force strike. Deals heavy physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 130,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "firebolt",
+        "name": "Firebolt",
+        "description": "A bolt of conjured flame. Deals moderate magic damage.",
+        "move_type": "magical",
+        "primary": "damage",
+        "base_value": 75,
+        "cost_amount": 15,
+        "scaling_stat": "magic"
+    },
+    {
+        "id": "arcane_surge",
+        "name": "Arcane Surge",
+        "description": "Channel raw magic. Raises Magic for 2 turns.",
+        "move_type": "magical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "magic",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": 8,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "mana_drain",
+        "name": "Mana Drain",
+        "description": "Sap the target's magical power. Light damage and lowers Magic for 2 turns.",
+        "move_type": "magical",
+        "primary": "damage",
+        "base_value": 50,
+        "scaling_stat": "magic",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": -6,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "hex_shield",
+        "name": "Hex Shield",
+        "description": "A ward of hex magic. Raises Defense for 2 turns.",
+        "move_type": "magical",
+        "primary": "none",
+        "base_value": 0,
+        "cost_amount": 10,
+        "scaling_stat": "magic",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "bite",
+        "name": "Bite",
+        "description": "A vicious fang attack. Deals moderate physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 80,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "web_throw",
+        "name": "Web Throw",
+        "description": "Hurl sticky webbing. Light damage and lowers target's Defense for 2 turns.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 55,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": -6,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "pounce",
+        "name": "Pounce",
+        "description": "A lightning-fast leap attack. Deals heavy physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 130,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "skitter",
+        "name": "Skitter",
+        "description": "Dodge and weave to raise Defense for 2 turns.",
+        "move_type": "physical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "shadow_bolt",
+        "name": "Shadow Bolt",
+        "description": "Hurl a bolt of dark energy. Deals heavy magic damage.",
+        "move_type": "magical",
+        "primary": "damage",
+        "base_value": 70,
+        "scaling_stat": "magic"
+    },
+    {
+        "id": "drain_life",
+        "name": "Drain Life",
+        "description": "Siphon life from the target. Deals magic damage and weakens their attack for 2 turns.",
+        "move_type": "magical",
+        "primary": "damage",
+        "base_value": 50,
+        "scaling_stat": "magic",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -5,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "curse",
+        "name": "Curse",
+        "description": "Lay a curse on the target. Lowers their Attack for 2 turns.",
+        "move_type": "magical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "magic",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -8,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "dark_pact",
+        "name": "Dark Pact",
+        "description": "Trade mana for power. Costs 15 mana to raise Magic for 2 turns.",
+        "move_type": "magical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "magic",
+        "cost_amount": 15,
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": 10,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "flame_breath",
+        "name": "Flame Breath",
+        "description": "Unleash a torrent of fire. Deals devastating magic damage.",
+        "move_type": "magical",
+        "primary": "damage",
+        "base_value": 90,
+        "scaling_stat": "magic"
+    },
+    {
+        "id": "claw_swipe",
+        "name": "Claw Swipe",
+        "description": "A sweeping claw attack. Deals moderate physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 80,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "intimidate",
+        "name": "Intimidate",
+        "description": "A terrifying roar. Lowers the target's Attack for 2 turns.",
+        "move_type": "physical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -8,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "dragon_scales",
+        "name": "Dragon Scales",
+        "description": "Harden the scales. Raises Defense for 2 turns.",
+        "move_type": "physical",
+        "primary": "none",
+        "base_value": 0,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 10,
+                "duration": 2,
+                "target": "self"
+            }
+        ]
+    },
+    {
+        "id": "poison_bite",
+        "name": "Poison Bite",
+        "description": "A venomous bite. Deals light damage and poisons the target for 3 turns (5 dmg/turn).",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 55,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "dot",
+                "stat_affected": "health",
+                "delta": 5,
+                "duration": 3,
+                "target": "opponent"
+            }
+        ]
+    },
+    {
+        "id": "bleed_bite",
+        "name": "Bleed Bite",
+        "description": "A savage bite that causes bleeding for 2 turns (7 dmg/turn).",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 60,
+        "scaling_stat": "attack",
+        "effect": [
+            {
+                "type": "dot",
+                "stat_affected": "health",
+                "delta": 7,
+                "duration": 2,
+                "target": "opponent"
+            }
+        ]
+    }
 ]
