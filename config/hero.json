@@ -1,23 +1,77 @@
-{
-  "name": "Knight",
-  "level": 1,
-  "health": 100,
-  "attack": 20,
-  "defense": 8,
-  "magic": 10,
-  "mana": 50,
-  "stat_scaling": {
-    "health_scaling": 0.12,
-    "attack_scaling": 0.08,
-    "defense_scaling": 0.06,
-    "magic_scaling": 0.08,
-    "mana_scaling": 0.05
+[
+  {
+    "id": "knight",
+    "name": "Knight",
+    "description": "A well-rounded warrior clad in heavy armor. Reliable in both offense and defense, the Knight is the ideal choice for those who want a balanced experience.",
+    "level": 1,
+    "health": 100,
+    "attack": 20,
+    "defense": 8,
+    "magic": 10,
+    "mana": 50,
+    "stat_scaling": {
+      "health_scaling": 0.12,
+      "attack_scaling": 0.08,
+      "defense_scaling": 0.06,
+      "magic_scaling": 0.08,
+      "mana_scaling": 0.05
+    },
+    "learned_moves": [
+      { "move_id": "slash",       "level": 1 },
+      { "move_id": "shield_up",   "level": 1 },
+      { "move_id": "battle_cry",  "level": 1 },
+      { "move_id": "second_wind", "level": 1 }
+    ],
+    "max_move_level": 5
   },
-  "learned_moves": [
-    { "move_id": "slash",       "level": 1 },
-    { "move_id": "shield_up",   "level": 1 },
-    { "move_id": "battle_cry",  "level": 1 },
-    { "move_id": "second_wind", "level": 1 }
-  ],
-  "max_move_level": 5
-}
+  {
+    "id": "mage",
+    "name": "Mage",
+    "description": "A scholarly spellcaster who commands the arcane arts. Frail and vulnerable up close, but capable of devastating magical burst damage and powerful debuffs.",
+    "level": 1,
+    "health": 65,
+    "attack": 8,
+    "defense": 4,
+    "magic": 28,
+    "mana": 120,
+    "stat_scaling": {
+      "health_scaling": 0.07,
+      "attack_scaling": 0.03,
+      "defense_scaling": 0.04,
+      "magic_scaling": 0.13,
+      "mana_scaling": 0.10
+    },
+    "learned_moves": [
+      { "move_id": "firebolt",     "level": 1 },
+      { "move_id": "arcane_surge", "level": 1 },
+      { "move_id": "mana_drain",   "level": 1 },
+      { "move_id": "hex_shield",   "level": 1 }
+    ],
+    "max_move_level": 5
+  },
+  {
+    "id": "rogue",
+    "name": "Rogue",
+    "description": "A swift and cunning assassin who strikes from the shadows. Relies on weakening enemies with debuffs and poison rather than brute force.",
+    "level": 1,
+    "health": 75,
+    "attack": 26,
+    "defense": 5,
+    "magic": 8,
+    "mana": 35,
+    "stat_scaling": {
+      "health_scaling": 0.09,
+      "attack_scaling": 0.12,
+      "defense_scaling": 0.05,
+      "magic_scaling": 0.04,
+      "mana_scaling": 0.03
+    },
+    "learned_moves": [
+      { "move_id": "slash",       "level": 1 },
+      { "move_id": "dirty_kick",  "level": 1 },
+      { "move_id": "poison_bite", "level": 1 },
+      { "move_id": "battle_cry",  "level": 1 }
+    ],
+    "max_move_level": 5
+  }
+]

@@ -1,5 +1,5 @@
 {
-  "xp_per_monster_level": 30,
+  "xp_per_monster_level": 60,
   "xp_to_level_up": [0, 100, 250, 450, 700],
   "move_level_bonus_percent": 10,
   "max_rooms_per_level": 3,

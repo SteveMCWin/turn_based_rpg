@@ -87,6 +87,7 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 
 	// Game state (read-only)
 	r.GET("/game/state", s.handleGetGameState)
+	r.GET("/game/heroes", s.handleGetHeroes)
 
 	// Game lifecycle
 	r.POST("/game/new", s.handlePostNewGame)
@@ -166,6 +167,10 @@ func (s *Server) handleGetMoves(c *gin.Context) {
 // ================= UTILITY HANDLERS =================
 // ====================================================
 
+func (s *Server) handleGetHeroes(c *gin.Context) {
+	c.JSON(http.StatusOK, s.config.HeroTemplates)
+}
+
 func (s *Server) handleGetGameState(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
@@ -184,7 +189,21 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "database unavailable"})
 		return
 	}
-	g := game.NewGame(s.config)
+
+	var req struct {
+		HeroID string `json:"hero_id"`
+	}
+	c.ShouldBindJSON(&req)
+
+	hero := s.config.HeroTemplates[0]
+	for _, h := range s.config.HeroTemplates {
+		if h.ID == req.HeroID {
+			hero = h
+			break
+		}
+	}
+
+	g := game.NewGame(s.config, hero)
 	id, err := s.db.CreateGame(g)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

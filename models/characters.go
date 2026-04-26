@@ -5,7 +5,9 @@ package models
 // equipped moves is self explanatory :^)
 type Hero struct {
 	Entity
+	ID            string        `json:"id"`
 	Name          string        `json:"name"`
+	Description   string        `json:"description"`
 	LearnedMoves  []LearnedMove `json:"learned_moves"`
 	EquippedMoves []string      `json:"equipped_moves"`
 	MaxMoveLevel  int           `json:"max_move_level"`

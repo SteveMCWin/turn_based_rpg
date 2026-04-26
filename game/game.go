@@ -28,8 +28,7 @@ type PendingAllocation struct {
 	RandomPoints int `json:"random_points"`
 }
 
-func NewGame(config *GameConfig) *Game {
-
+func NewGame(config *GameConfig, hero models.Hero) *Game {
 	events := slices.Clone(config.EventTemplates)
 
 	monsters := slices.Clone(config.MonsterTemplates)
@@ -39,8 +38,8 @@ func NewGame(config *GameConfig) *Game {
 
 	g := Game{
 		Settings: config.Settings,
-		Player: config.HeroTemplate,
-		Floors: models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel),
+		Player:   hero,
+		Floors:   models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel),
 		AllMoves: config.Moves,
 	}
 

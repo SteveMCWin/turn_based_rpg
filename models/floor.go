@@ -103,7 +103,12 @@ func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Ev
 				for room_idx := max_room_connect_idx; room_idx <= room_indexes_to_connect; room_idx++ {
 					floors[i].Rooms[j].NextRoomIDs = append(floors[i].Rooms[j].NextRoomIDs, strconv.Itoa(i+1)+","+strconv.Itoa(room_idx))
 				}
-				max_room_connect_idx = room_indexes_to_connect + 1
+
+				max_room_connect_idx = room_indexes_to_connect
+				// 50% chance for better branching. hard to explain with just text, if you are reading this, ask me about it in the interview :D
+				if max_room_connect_idx < nextFloorLen - 1 {
+					max_room_connect_idx += rand.Intn(2) 
+				}
 			}
 		}
 	}

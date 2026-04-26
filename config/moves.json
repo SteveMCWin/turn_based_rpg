@@ -176,7 +176,7 @@
     "description": "Hurl a bolt of dark energy. Deals heavy magic damage.",
     "move_type": "magical",
     "primary": "damage",
-    "base_value": 120,
+    "base_value": 70,
     "scaling_stat": "magic"
   },
   {
@@ -222,7 +222,7 @@
     "description": "Unleash a torrent of fire. Deals devastating magic damage.",
     "move_type": "magical",
     "primary": "damage",
-    "base_value": 130,
+    "base_value": 90,
     "scaling_stat": "magic"
   },
   {

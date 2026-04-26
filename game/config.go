@@ -23,7 +23,7 @@ type GameSettings struct {
 }
 
 type GameConfig struct {
-	HeroTemplate     models.Hero
+	HeroTemplates    []models.Hero
 	MonsterTemplates []models.Monster
 	Moves            map[string]models.MoveDefinition
 	Settings         GameSettings
@@ -33,7 +33,7 @@ type GameConfig struct {
 func LoadConfig(configDir string) (*GameConfig, error) {
 	cfg := &GameConfig{}
 
-	if err := loadJSON(configDir+"/hero.json", &cfg.HeroTemplate); err != nil {
+	if err := loadJSON(configDir+"/hero.json", &cfg.HeroTemplates); err != nil {
 		return nil, fmt.Errorf("hero config: %w", err)
 	}
 

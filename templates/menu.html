@@ -6,17 +6,39 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="menu-page">
-  <div class="menu-container">
+
+  <button class="settings-btn" id="btn-settings" onclick="openSettings()">⚙ Settings</button>
+
+  <div class="menu-container menu-wide">
     <h1 class="game-title">Knight's Gauntlet</h1>
-    <div class="menu-buttons">
-      <button id="btn-new-run" class="btn btn-primary">Start New Run</button>
-    </div>
-    <p id="menu-error" class="error-text hidden"></p>
-    <div id="saves-section" class="saves-section hidden">
-      <h3 class="saves-title">Saved Runs</h3>
-      <div id="saves-list" class="saves-list"></div>
+    <p class="menu-subtitle">Choose your hero</p>
+
+    <div id="hero-select-grid" class="hero-select-grid"></div>
+
+    <div class="menu-actions">
+      <button id="btn-new-run" class="btn btn-primary" disabled>Start Run</button>
+      <p id="menu-error" class="error-text hidden"></p>
     </div>
   </div>
+
+  <!-- Settings modal -->
+  <div id="settings-overlay" class="modal-overlay hidden" onclick="closeSettingsOnBackdrop(event)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span id="modal-title" class="modal-title">Settings</span>
+        <button class="btn btn-small btn-secondary" onclick="closeSettings()">✕ Close</button>
+      </div>
+      <div id="settings-main">
+        <button class="btn btn-secondary modal-menu-btn" onclick="showSaves()">📂 Saves</button>
+      </div>
+      <div id="settings-saves" class="hidden">
+        <button class="btn btn-small btn-secondary modal-back-btn" onclick="backToSettings()">← Back</button>
+        <div id="saves-list" class="saves-list"></div>
+        <p id="saves-empty" class="muted-text hidden">No saved runs found.</p>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/game.js"></script>
   <script src="/js/menu.js"></script>
 </body>
