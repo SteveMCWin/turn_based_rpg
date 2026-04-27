@@ -95,9 +95,17 @@ func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
 
 func (g *Game) pickMonsterMove() string {
 	monster := g.CurrentRoom().Encounter.Monster
-	pool := monster.Moves
 	monsterHP := float64(monster.CurrentHP) / float64(max(1, monster.MaxHP()))
-	// heroHP := float64(hero.CurrentHP) / float64(max(1, hero.MaxHP()))
+
+	// Environmental buffs have TurnsRemaining 99; move-applied buffs are short (duration 2).
+	// A monster should only use its buff move if it hasn't already buffed recently
+	hasActiveBuff := false
+	for _, se := range monster.StatusEffects {
+		if se.Type == models.StatModifier && se.Delta > 0 && se.TurnsRemaining < 99 && se.TurnsToActivate <= 0 {
+			hasActiveBuff = true
+			break
+		}
+	}
 
 	type candidate struct {
 		id     string
@@ -105,7 +113,7 @@ func (g *Game) pickMonsterMove() string {
 	}
 	var candidates []candidate
 
-	for _, m := range pool {
+	for _, m := range monster.Moves {
 		def, ok := g.AllMoves[m.MoveID]
 		if !ok {
 			continue
@@ -120,11 +128,16 @@ func (g *Game) pickMonsterMove() string {
 			weight = 4
 		case models.PrimaryHeal:
 			if monsterHP < 0.35 {
-				weight = 6
+				weight = 8
+			} else if monsterHP < 0.5 {
+				weight = 5
 			} else {
 				weight = 0
 			}
-			// TODO: check if hero has negative stat effects and if this move applies a debuff, give it a weight
+		case models.PrimaryNone:
+			if isSelfBuff(def) && !hasActiveBuff {
+				weight = 6
+			}
 		}
 
 		if weight > 0 {
@@ -133,7 +146,7 @@ func (g *Game) pickMonsterMove() string {
 	}
 
 	if len(candidates) == 0 {
-		return pool[rand.Intn(len(pool))].MoveID
+		return monster.Moves[rand.Intn(len(monster.Moves))].MoveID
 	}
 
 	total := 0
@@ -148,6 +161,15 @@ func (g *Game) pickMonsterMove() string {
 		}
 	}
 	return candidates[len(candidates)-1].id
+}
+
+func isSelfBuff(def models.MoveDefinition) bool {
+	for _, e := range def.Effects {
+		if e.Type == models.StatModifier && e.Target == models.TargetSelf && e.Delta > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func applyMove(move models.MoveDefinition, attacker, defender *models.Entity) {

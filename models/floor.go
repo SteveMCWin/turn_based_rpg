@@ -31,7 +31,7 @@ type Floor struct {
 	IsCompleted bool
 }
 
-func GenerateFloors(numFloors, maxRoomsPerFloor int) []Floor {
+func GenerateFloors(numFloors, maxRoomsPerFloor int, isEndless bool) []Floor {
 	floors := make([]Floor, numFloors)
 
 	floors[0] = Floor{

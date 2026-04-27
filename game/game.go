@@ -43,7 +43,7 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 	g := Game{
 		Settings: config.Settings,
 		Player:   hero,
-		Floors:   models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel),
+		Floors:   models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel, false),
 		AllMoves: config.Moves,
 		AllItems: config.Items,
 		Shop:     models.NewShop(config.Items),
