@@ -28,8 +28,14 @@
     "env_effects": {
       "plains":   { "type": "stat_mod", "stat_affected": "defense", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
       "cave":     { "type": "stat_mod", "stat_affected": "defense", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
-      "swamp":    { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "volcanic": { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+      "swamp":           { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":        { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "open_sky":        { "type": "stat_mod", "stat_affected": "defense", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "graveyard":       { "type": "stat_mod", "stat_affected": "attack",  "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "haunted_manor":   { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "crypt":           { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "misty_mountains": { "type": "stat_mod", "stat_affected": "attack",  "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "marshlands":      { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   },
   {
@@ -61,8 +67,14 @@
     "env_effects": {
       "ancient_ruins": { "type": "stat_mod", "stat_affected": "magic", "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
       "plains":        { "type": "stat_mod", "stat_affected": "magic", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "cave":          { "type": "stat_mod", "stat_affected": "magic", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "volcanic":      { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+      "cave":            { "type": "stat_mod", "stat_affected": "magic", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":        { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "haunted_manor":   { "type": "stat_mod", "stat_affected": "magic", "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
+      "graveyard":       { "type": "stat_mod", "stat_affected": "magic", "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "crypt":           { "type": "stat_mod", "stat_affected": "magic", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "open_sky":        { "type": "stat_mod", "stat_affected": "magic", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "misty_mountains": { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "marshlands":      { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   },
   {
@@ -95,8 +107,14 @@
       "cave":          { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
       "forest":        { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
       "ancient_ruins": { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
-      "swamp":         { "type": "stat_mod", "stat_affected": "defense", "delta": -4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "plains":        { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
+      "swamp":           { "type": "stat_mod", "stat_affected": "defense", "delta": -4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":          { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "haunted_manor":   { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "graveyard":       { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "crypt":           { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "misty_mountains": { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "open_sky":        { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "marshlands":      { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   }
 ]

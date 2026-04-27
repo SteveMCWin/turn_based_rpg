@@ -17,13 +17,7 @@
         "base_value": 0,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "defense",
-                "delta": 8,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -35,13 +29,7 @@
         "base_value": 0,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "attack",
-                "delta": 8,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "attack", "delta": 8, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -71,13 +59,7 @@
         "base_value": 55,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "defense",
-                "delta": -6,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "stat_mod", "stat_affected": "defense", "delta": -6, "duration": 2, "target": "opponent" }
         ]
     },
     {
@@ -89,13 +71,7 @@
         "base_value": 0,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "attack",
-                "delta": 8,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "attack", "delta": 8, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -126,13 +102,7 @@
         "base_value": 0,
         "scaling_stat": "magic",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "magic",
-                "delta": 8,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "magic", "delta": 8, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -144,13 +114,7 @@
         "base_value": 50,
         "scaling_stat": "magic",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "magic",
-                "delta": -6,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "stat_mod", "stat_affected": "magic", "delta": -6, "duration": 2, "target": "opponent" }
         ]
     },
     {
@@ -163,13 +127,7 @@
         "cost_amount": 10,
         "scaling_stat": "magic",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "defense",
-                "delta": 8,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -190,13 +148,7 @@
         "base_value": 55,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "defense",
-                "delta": -6,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "stat_mod", "stat_affected": "defense", "delta": -6, "duration": 2, "target": "opponent" }
         ]
     },
     {
@@ -217,13 +169,7 @@
         "base_value": 0,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "defense",
-                "delta": 8,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -244,13 +190,7 @@
         "base_value": 50,
         "scaling_stat": "magic",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "attack",
-                "delta": -5,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "stat_mod", "stat_affected": "attack", "delta": -5, "duration": 2, "target": "opponent" }
         ]
     },
     {
@@ -262,13 +202,7 @@
         "base_value": 0,
         "scaling_stat": "magic",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "attack",
-                "delta": -8,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "stat_mod", "stat_affected": "attack", "delta": -8, "duration": 2, "target": "opponent" }
         ]
     },
     {
@@ -281,13 +215,7 @@
         "scaling_stat": "magic",
         "cost_amount": 15,
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "magic",
-                "delta": 10,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "magic", "delta": 10, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -317,13 +245,7 @@
         "base_value": 0,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "attack",
-                "delta": -8,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "stat_mod", "stat_affected": "attack", "delta": -8, "duration": 2, "target": "opponent" }
         ]
     },
     {
@@ -335,13 +257,7 @@
         "base_value": 0,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "stat_mod",
-                "stat_affected": "defense",
-                "delta": 10,
-                "duration": 2,
-                "target": "self"
-            }
+            { "type": "stat_mod", "stat_affected": "defense", "delta": 10, "duration": 2, "target": "self" }
         ]
     },
     {
@@ -353,13 +269,7 @@
         "base_value": 55,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "dot",
-                "stat_affected": "health",
-                "delta": 5,
-                "duration": 3,
-                "target": "opponent"
-            }
+            { "type": "dot", "stat_affected": "health", "delta": 5, "duration": 3, "target": "opponent" }
         ]
     },
     {
@@ -371,13 +281,124 @@
         "base_value": 60,
         "scaling_stat": "attack",
         "effect": [
-            {
-                "type": "dot",
-                "stat_affected": "health",
-                "delta": 7,
-                "duration": 2,
-                "target": "opponent"
-            }
+            { "type": "dot", "stat_affected": "health", "delta": 7, "duration": 2, "target": "opponent" }
+        ]
+    },
+    {
+        "id": "wind_slash",
+        "name": "Wind Slash",
+        "description": "A blade of compressed air. Deals damage and tears through the target's armor.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 65,
+        "scaling_stat": "attack",
+        "effect": [
+            { "type": "stat_mod", "stat_affected": "defense", "delta": -5, "duration": 2, "target": "opponent" }
+        ]
+    },
+    {
+        "id": "bone_smash",
+        "name": "Bone Smash",
+        "description": "A crushing blow with a bone-reinforced fist. Deals heavy physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 120,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "arrow_shot",
+        "name": "Arrow Shot",
+        "description": "A well-aimed arrow. Deals moderate physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 75,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "piercing_shot",
+        "name": "Piercing Shot",
+        "description": "An arrow aimed at weak points. Deals damage and lowers Defense for 2 turns.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 55,
+        "scaling_stat": "attack",
+        "effect": [
+            { "type": "stat_mod", "stat_affected": "defense", "delta": -7, "duration": 2, "target": "opponent" }
+        ]
+    },
+    {
+        "id": "phase_shift",
+        "name": "Phase Shift",
+        "description": "Become partially ethereal. Raises Defense for 2 turns.",
+        "move_type": "magical",
+        "primary": "none",
+        "base_value": 0,
+        "cost_amount": 10,
+        "scaling_stat": "magic",
+        "effect": [
+            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
+        ]
+    },
+    {
+        "id": "rotten_claw",
+        "name": "Rotten Claw",
+        "description": "A festering swipe that infects the wound. Deals damage and poisons for 2 turns.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 50,
+        "scaling_stat": "attack",
+        "effect": [
+            { "type": "dot", "stat_affected": "health", "delta": 6, "duration": 2, "target": "opponent" }
+        ]
+    },
+    {
+        "id": "blood_drain",
+        "name": "Blood Drain",
+        "description": "Drain the life force from the target. Restores HP based on Magic.",
+        "move_type": "magical",
+        "primary": "heal",
+        "base_value": 70,
+        "cost_amount": 15,
+        "scaling_stat": "magic"
+    },
+    {
+        "id": "talon_strike",
+        "name": "Talon Strike",
+        "description": "A devastating strike with razor-sharp talons. Deals heavy physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 110,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "regenerate",
+        "name": "Regenerate",
+        "description": "Channel regenerative energy to restore HP.",
+        "move_type": "magical",
+        "primary": "heal",
+        "base_value": 90,
+        "cost_amount": 10,
+        "scaling_stat": "magic"
+    },
+    {
+        "id": "multi_bite",
+        "name": "Multi Bite",
+        "description": "A flurry of snapping heads. Deals heavy physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 100,
+        "scaling_stat": "attack"
+    },
+    {
+        "id": "constrict",
+        "name": "Constrict",
+        "description": "Coil around the target, crushing their strength. Deals damage and lowers Attack for 2 turns.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 60,
+        "scaling_stat": "attack",
+        "effect": [
+            { "type": "stat_mod", "stat_affected": "attack", "delta": -7, "duration": 2, "target": "opponent" }
         ]
     }
 ]
