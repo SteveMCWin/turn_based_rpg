@@ -174,12 +174,12 @@ func applyMove(move models.MoveDefinition, attacker, defender *models.Entity) {
 			if move.Effects[i].Target == models.TargetSelf {
 				target = attacker
 			}
-			applyEffect(move.Effects[i], target)
+			addEffect(move.Effects[i], target)
 		}
 	}
 }
 
-func applyEffect(effect *models.Effect, target *models.Entity) {
+func addEffect(effect *models.Effect, target *models.Entity) {
 	target.StatusEffects = append(target.StatusEffects, models.StatusEffect{
 		Effect:          *effect,
 		TurnsRemaining:  effect.Duration,

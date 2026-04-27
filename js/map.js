@@ -56,7 +56,7 @@ function renderRoomNode(room, floor) {
   const floorHasCompleted = (floor.Rooms || []).some(r => r.IsCompleted);
 
   const icon    = kind === 'monster' ? '⚔' : '?';
-  const domId   = 'room-' + room.ID.replace(',', '_');
+  const domId   = 'room-' + room.Id.replace(',', '_');
   const tooltip = roomTooltipHTML(room);
 
   const isRematch = room.IsCompleted && kind === 'monster' && room.CanEnter && !state.pending_level_up;
@@ -68,11 +68,13 @@ function renderRoomNode(room, floor) {
   if (isLocked)         classes.push('locked');
   if (canClick)         classes.push('can-enter');
 
-  const onclick = canClick ? `onclick="enterRoom('${room.ID}')"` : '';
-  const check   = room.IsCompleted && !isRematch ? '<span class="room-done-check">✓</span>' : '';
+  const onclick   = canClick ? `onclick="enterRoom('${room.Id}')"` : '';
+  const check     = room.IsCompleted && !isRematch ? '<span class="room-done-check">✓</span>' : '';
+  const envLabel  = kind === 'monster' && room.Environment?.Name
+    ? `<span class="room-env-label">${escHtml(room.Environment.Name)}</span>` : '';
 
   return `<div class="${classes.join(' ')}" id="${domId}" data-tooltip="${escHtml(tooltip)}" ${onclick}>
-    <span class="room-node-icon">${icon}</span>${check}
+    <span class="room-node-icon">${icon}</span>${check}${envLabel}
   </div>`;
 }
 
@@ -80,8 +82,11 @@ function roomTooltipHTML(room) {
   const enc  = room.Encounter;
   const kind = enc?.kind;
   if (kind === 'monster' && enc?.monster) {
-    const m = enc.monster;
-    return `<b>${escHtml(m.name)}</b> Lv.${m.level}<br>HP ${m.current_hp}/${maxHP(m)} &middot; ATK ${effAtk(m)} DEF ${effDef(m)} MAG ${effMag(m)}`;
+    const m   = enc.monster;
+    const env = room.Environment;
+    let tip = `<b>${escHtml(m.name)}</b> Lv.${m.level}<br>HP ${m.current_hp}/${maxHP(m)} &middot; ATK ${effAtk(m)} DEF ${effDef(m)} MAG ${effMag(m)}`;
+    if (env?.Name) tip += `<br><span class="tooltip-badge">${escHtml(env.Name)}</span> ${escHtml(env.Description)}`;
+    return tip;
   }
   if (room.IsCompleted && enc?.event?.description) {
     return escHtml(enc.event.description);
@@ -113,7 +118,7 @@ function drawConnections() {
   (state.floors || []).forEach(floor => {
     (floor.Rooms || []).forEach(room => {
       if (!room.NextRoomIDs?.length) return;
-      const fromEl = document.getElementById('room-' + room.ID.replace(',', '_'));
+      const fromEl = document.getElementById('room-' + room.Id.replace(',', '_'));
       if (!fromEl) return;
       const fo = getOffsetFrom(fromEl, container);
       const fx = fo.x + fromEl.offsetWidth  / 2;

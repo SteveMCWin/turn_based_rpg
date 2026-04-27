@@ -12,17 +12,29 @@ function renderAll() {
   renderCombatant('hero', state.player);
   if (monster) renderCombatant('monster', monster);
   renderMonsterInfo(monster);
+  renderEnvironment();
   renderMoveButtons();
   renderBattleLog();
 }
 
-function currentMonster() {
+function renderEnvironment() {
+  const el = document.getElementById('env-banner');
+  if (!el) return;
+  const env = currentRoom()?.Environment;
+  if (!env?.Name) { el.innerHTML = ''; return; }
+  el.innerHTML = `<span class="env-banner-name">${escHtml(env.Name)}</span><span class="env-banner-desc">${escHtml(env.Description)}</span>`;
+}
+
+function currentRoom() {
   if (!state.current_room_id || !state.floors) return null;
   for (const floor of state.floors)
-    for (const room of floor.Rooms)       // capital R
-      if (room.ID === state.current_room_id)  // capital ID
-        return room.Encounter?.monster || null;  // capital Encounter, .monster lowercase
+    for (const room of floor.Rooms)
+      if (room.Id === state.current_room_id) return room;
   return null;
+}
+
+function currentMonster() {
+  return currentRoom()?.Encounter?.monster || null;
 }
 
 function renderCombatant(side, entity) {

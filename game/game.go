@@ -20,8 +20,8 @@ type Game struct {
 	LastBattleResult *BattleResult      `json:"last_battle_result"`
 	PendingLevelUp   *PendingAllocation `json:"pending_level_up"`
 
-	AllMoves map[string]models.MoveDefinition `json:"moves,omitempty"`
-	AllItems map[string]models.Item           `json:"items,omitempty"`
+	AllMoves        map[string]models.MoveDefinition `json:"moves,omitempty"`
+	AllItems        map[string]models.Item           `json:"items,omitempty"`
 }
 
 type PendingAllocation struct {
@@ -37,6 +37,8 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 		monsters[i].Init()
 	}
 
+	environments := slices.Clone(config.EnvironmentTemplates)
+
 	g := Game{
 		Settings: config.Settings,
 		Player:   hero,
@@ -46,7 +48,7 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 	}
 
 	g.Player.Init()
-	models.FillFloorEncounters(g.Floors, monsters, events)
+	models.FillFloorEncounters(g.Floors, monsters, events, environments)
 
 	return &g
 }
@@ -54,7 +56,7 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 func (g *Game) RoomByID(id string) *models.Room {
 	for fi := range g.Floors {
 		for ri := range g.Floors[fi].Rooms {
-			if g.Floors[fi].Rooms[ri].ID == id {
+			if g.Floors[fi].Rooms[ri].Id == id {
 				return &g.Floors[fi].Rooms[ri]
 			}
 		}
@@ -96,6 +98,19 @@ func (g *Game) EnterRoom(roomID string) error {
 		g.CurrentRoomID = roomID
 		g.IsInBattle = true
 
+		for env_id, effect := range room.Encounter.Monster.EnvironmentEffects {
+			if env_id == room.Environment.Id {
+				addEffect(&effect, &room.Encounter.Monster.Entity)
+			}
+		}
+
+		for env_id, effect := range g.Player.EnvironmentEffects {
+			if env_id == room.Environment.Id {
+				addEffect(&effect, &g.Player.Entity)
+			}
+		}
+
+
 	case models.EncounterKindEvent:
 		if room.Encounter.Event != nil && !room.Encounter.Event.Applied {
 			g.applyEvent(room.Encounter.Event)
@@ -124,7 +139,7 @@ func (g *Game) CompleteRoom(roomID string) {
 	}
 
 	for ri := range g.Floors[fi].Rooms {
-		if g.Floors[fi].Rooms[ri].ID != roomID {
+		if g.Floors[fi].Rooms[ri].Id != roomID {
 			g.Floors[fi].Rooms[ri].CanEnter = false
 		}
 	}

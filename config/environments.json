@@ -1,0 +1,37 @@
+[
+  {
+    "id": "cave",
+    "name": "Cave",
+    "description": "A damp underground cavern. Shadows cling to the walls and echoes carry far."
+  },
+  {
+    "id": "plains",
+    "name": "Plains",
+    "description": "Open grasslands with clear skies and little cover."
+  },
+  {
+    "id": "desert",
+    "name": "Desert",
+    "description": "Scorching sands stretch in every direction under a relentless sun."
+  },
+  {
+    "id": "swamp",
+    "name": "Swamp",
+    "description": "A murky bog of thick mud and choking mist."
+  },
+  {
+    "id": "ancient_ruins",
+    "name": "Ancient Ruins",
+    "description": "Crumbling stone structures humming with residual arcane energy."
+  },
+  {
+    "id": "volcanic",
+    "name": "Volcanic",
+    "description": "Rivers of molten rock wind between jagged obsidian spires."
+  },
+  {
+    "id": "forest",
+    "name": "Forest",
+    "description": "Dense woodland where shadows blur and underbrush conceals movement."
+  }
+]
