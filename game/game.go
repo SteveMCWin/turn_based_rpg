@@ -22,6 +22,7 @@ type Game struct {
 
 	AllMoves        map[string]models.MoveDefinition `json:"moves,omitempty"`
 	AllItems        map[string]models.Item           `json:"items,omitempty"`
+	Shop            *models.Shop                     `json:"shop,omitempty"`
 }
 
 type PendingAllocation struct {
@@ -45,6 +46,7 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 		Floors:   models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel),
 		AllMoves: config.Moves,
 		AllItems: config.Items,
+		Shop:     models.NewShop(config.Items),
 	}
 
 	g.Player.Init()

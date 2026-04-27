@@ -9,5 +9,8 @@
   "mana_restore_between_fights_pct": 0.3,
   "pct_chance_monster_lvl_up": 20,
   "manual_points_on_level_up": 2,
-  "random_points_on_level_up": 3
+  "random_points_on_level_up": 3,
+  "min_gold_after_battle": 15,
+  "max_gold_after_battle": 50,
+  "sell_modifier": 0.6
 }

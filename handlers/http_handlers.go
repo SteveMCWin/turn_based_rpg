@@ -103,6 +103,10 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	r.POST("/game/items/unequip", s.handlePostUnequipItem)
 	r.POST("/game/items/use", s.handlePostUseItem)
 
+	// Shop
+	r.POST("/game/shop/buy", s.handlePostBuyItem)
+	r.POST("/game/shop/sell", s.handlePostSellItem)
+
 	// Saves
 	r.POST("/game/save", s.handlePostSave)
 	r.GET("/game/saves", s.handleGetListSaves)
@@ -489,6 +493,50 @@ func (s *Server) handlePostLevelUp(c *gin.Context) {
 	}
 
 	g.PendingLevelUp = nil
+	c.JSON(http.StatusOK, g)
+}
+
+// ==========================================
+// ================= SHOP ===================
+// ==========================================
+
+func (s *Server) handlePostBuyItem(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		return
+	}
+	var req struct {
+		ItemID string `json:"item_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
+		return
+	}
+	if err := g.BuyItem(req.ItemID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, g)
+}
+
+func (s *Server) handlePostSellItem(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		return
+	}
+	var req struct {
+		ItemID string `json:"item_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
+		return
+	}
+	if err := g.SellItem(req.ItemID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, g)
 }
 

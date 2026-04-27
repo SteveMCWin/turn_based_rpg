@@ -21,6 +21,27 @@
   </div>
 </div>
 
+<div id="shop-overlay" class="shop-overlay hidden" onclick="closeShopOnBackdrop(event)">
+  <div class="shop-panel">
+    <div class="shop-header">
+      <h2>Shop</h2>
+      <span id="shop-gold-display" class="shop-gold-display"></span>
+      <button class="btn btn-secondary btn-small" onclick="closeShop()">✕ Close</button>
+    </div>
+    <div id="shop-error" class="error-text hidden"></div>
+    <div class="shop-layout">
+      <div class="shop-section">
+        <h3>For Sale</h3>
+        <div id="shop-stock"></div>
+      </div>
+      <div class="shop-section">
+        <h3>Your Items <span class="muted-text">(sell)</span></h3>
+        <div id="shop-inventory"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="map-layout">
   <aside class="hero-panel">
     <h2 id="hero-name"></h2>
@@ -29,12 +50,14 @@
     <div class="hp-bar-wrapper"><div id="hero-mana-bar" class="mana-bar"></div></div>
     <p id="hero-mana-text"></p>
     <div class="stat-grid" id="hero-stats"></div>
+    <p id="hero-gold" class="hero-gold"></p>
     <div class="equipped-moves">
       <h3>Equipped</h3>
       <ul id="equipped-list"></ul>
     </div>
     <a href="/moves" class="btn btn-secondary">Manage Moves</a>
     <a href="/items" class="btn btn-secondary">Items</a>
+    <button class="btn btn-secondary" onclick="openShop()">Shop</button>
     <button class="btn btn-secondary" onclick="saveAndExit()">Save &amp; Exit</button>
   </aside>
 
@@ -46,5 +69,6 @@
 
 <script src="/js/game.js"></script>
 <script src="/js/map.js"></script>
+<script src="/js/shop.js"></script>
 </body>
 </html>

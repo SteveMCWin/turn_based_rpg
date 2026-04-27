@@ -5,6 +5,7 @@
     "description": "A sturdy iron blade. Slightly increases Attack.",
     "item_type": "weapon",
     "drop_rate": 30,
+    "price": 80,
     "stat_affected": { "attack": 5 }
   },
   {
@@ -13,6 +14,7 @@
     "description": "A heavy two-handed axe. Considerably increases Attack.",
     "item_type": "weapon",
     "drop_rate": 18,
+    "price": 150,
     "stat_affected": { "attack": 9 }
   },
   {
@@ -21,6 +23,7 @@
     "description": "A staff imbued with arcane energy. Considerably increases Magic.",
     "item_type": "weapon",
     "drop_rate": 25,
+    "price": 120,
     "stat_affected": { "magic": 7 }
   },
   {
@@ -29,6 +32,7 @@
     "description": "A slim blade tipped with dark residue. Increases Attack and Magic.",
     "item_type": "weapon",
     "drop_rate": 22,
+    "price": 130,
     "stat_affected": { "attack": 4, "magic": 3 }
   },
   {
@@ -37,6 +41,7 @@
     "description": "A slender wand crackling with stored energy. Increases Magic.",
     "item_type": "weapon",
     "drop_rate": 30,
+    "price": 90,
     "stat_affected": { "magic": 5 }
   },
   {
@@ -45,6 +50,7 @@
     "description": "Light but dependable protection. Slightly increases Defense.",
     "item_type": "armor",
     "drop_rate": 35,
+    "price": 60,
     "stat_affected": { "defense": 3 }
   },
   {
@@ -53,6 +59,7 @@
     "description": "Interlocked iron rings that provide solid protection.",
     "item_type": "armor",
     "drop_rate": 18,
+    "price": 140,
     "stat_affected": { "defense": 7 }
   },
   {
@@ -61,6 +68,7 @@
     "description": "A flowing robe woven with mana threads. Increases Defense and Mana.",
     "item_type": "armor",
     "drop_rate": 25,
+    "price": 110,
     "stat_affected": { "defense": 2, "mana": 20 }
   },
   {
@@ -69,6 +77,7 @@
     "description": "A reinforced shield that can absorb heavy blows.",
     "item_type": "armor",
     "drop_rate": 18,
+    "price": 130,
     "stat_affected": { "defense": 6 }
   },
   {
@@ -77,6 +86,7 @@
     "description": "Forged from a dragon's shed scales. Greatly increases Defense and Health.",
     "item_type": "armor",
     "drop_rate": 10,
+    "price": 200,
     "stat_affected": { "defense": 10, "health": 15 }
   },
   {
@@ -85,6 +95,7 @@
     "description": "A glowing amulet that bolsters the wearer's constitution.",
     "item_type": "trinket",
     "drop_rate": 28,
+    "price": 100,
     "stat_affected": { "health": 22 }
   },
   {
@@ -93,6 +104,7 @@
     "description": "A ring pulsing with raw energy. Increases both Attack and Magic.",
     "item_type": "trinket",
     "drop_rate": 20,
+    "price": 120,
     "stat_affected": { "attack": 3, "magic": 3 }
   },
   {
@@ -101,6 +113,7 @@
     "description": "A shard of crystallized mana. Considerably increases maximum Mana.",
     "item_type": "trinket",
     "drop_rate": 28,
+    "price": 90,
     "stat_affected": { "mana": 28 }
   },
   {
@@ -109,6 +122,7 @@
     "description": "A simple iron pendant worn by veteran warriors. Increases Defense and Attack.",
     "item_type": "trinket",
     "drop_rate": 28,
+    "price": 100,
     "stat_affected": { "defense": 2, "attack": 3 }
   },
   {
@@ -117,6 +131,7 @@
     "description": "A vial of red liquid. Restores 30 HP when consumed.",
     "item_type": "consumable",
     "drop_rate": 45,
+    "price": 30,
     "stat_affected": { "health": 30 }
   },
   {
@@ -125,6 +140,7 @@
     "description": "A concentrated healing draught. Restores 65 HP when consumed.",
     "item_type": "consumable",
     "drop_rate": 20,
+    "price": 60,
     "stat_affected": { "health": 65 }
   },
   {
@@ -133,6 +149,7 @@
     "description": "A vial of blue liquid. Restores 30 MP when consumed.",
     "item_type": "consumable",
     "drop_rate": 35,
+    "price": 30,
     "stat_affected": { "mana": 30 }
   },
   {
@@ -141,6 +158,7 @@
     "description": "A shimmering blend of health and mana tonics. Restores 25 HP and 25 MP.",
     "item_type": "consumable",
     "drop_rate": 22,
+    "price": 50,
     "stat_affected": { "health": 25, "mana": 25 }
   }
 ]

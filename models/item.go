@@ -15,6 +15,7 @@ type Item struct {
 	Type        ItemType `json:"item_type"`
 	DropRate    int      `json:"drop_rate"`
 	Description string   `json:"description"`
+	Price       int      `json:"price"`
 
 	StatsAffected map[StatType]int `json:"stat_affected"`
 }
