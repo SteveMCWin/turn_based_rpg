@@ -7,6 +7,25 @@ let selectedHeroId = null;
   renderHeroCards(heroes);
 })();
 
+const STAT_ABBR = { attack: 'ATK', defense: 'DEF', magic: 'MAG', health: 'HP', mana: 'MP' };
+
+function envPrefsHTML(envEffects) {
+  if (!envEffects || !Object.keys(envEffects).length) return '';
+  const buffs = [], debuffs = [];
+  for (const [envId, eff] of Object.entries(envEffects)) {
+    const stat  = STAT_ABBR[eff.stat_affected] || eff.stat_affected;
+    const sign  = eff.delta > 0 ? '+' : '';
+    const name  = envId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const entry = `${name} (${sign}${eff.delta} ${stat})`;
+    if (eff.delta > 0) buffs.push(entry);
+    else debuffs.push(entry);
+  }
+  let html = '';
+  if (buffs.length)   html += `<div class="env-pref env-buff">▲ ${buffs.join(' · ')}</div>`;
+  if (debuffs.length) html += `<div class="env-pref env-debuff">▼ ${debuffs.join(' · ')}</div>`;
+  return html ? `<div class="hero-card-env">${html}</div>` : '';
+}
+
 function renderHeroCards(heroes) {
   const grid = document.getElementById('hero-select-grid');
   grid.innerHTML = heroes.map(h => {
@@ -27,6 +46,7 @@ function renderHeroCards(heroes) {
         <span title="Mana">◈ ${h.mana}</span>
       </div>
       ${startingItems ? `<div class="hero-card-items">${startingItems}</div>` : ''}
+      ${envPrefsHTML(h.env_effects)}
     </div>`;
   }).join('');
 

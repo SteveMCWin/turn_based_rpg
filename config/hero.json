@@ -23,7 +23,13 @@
       { "move_id": "second_wind", "level": 1 }
     ],
     "item_pool": ["iron_sword", "leather_vest"],
-    "max_move_level": 5
+    "max_move_level": 5,
+    "env_effects": {
+      "plains":   { "type": "stat_mod", "stat_affected": "defense", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "cave":     { "type": "stat_mod", "stat_affected": "defense", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "swamp":    { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic": { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   },
   {
     "id": "mage",
@@ -49,7 +55,13 @@
       { "move_id": "hex_shield",   "level": 1 }
     ],
     "item_pool": ["magic_staff", "arcane_robe"],
-    "max_move_level": 5
+    "max_move_level": 5,
+    "env_effects": {
+      "ancient_ruins": { "type": "stat_mod", "stat_affected": "magic", "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":        { "type": "stat_mod", "stat_affected": "magic", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "cave":          { "type": "stat_mod", "stat_affected": "magic", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":      { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   },
   {
     "id": "rogue",
@@ -75,6 +87,13 @@
       { "move_id": "battle_cry",  "level": 1 }
     ],
     "item_pool": ["shadow_dagger", "leather_vest"],
-    "max_move_level": 5
+    "max_move_level": 5,
+    "env_effects": {
+      "cave":          { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "forest":        { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "ancient_ruins": { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "swamp":         { "type": "stat_mod", "stat_affected": "defense", "delta": -4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":        { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   }
 ]

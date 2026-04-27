@@ -12,11 +12,18 @@ const ROOM_ID_SEPARATOR string = ","
 
 // id of room is floor_num,room_num
 type Room struct {
-	ID          string
+	Id          string
 	Encounter   Encounter
 	NextRoomIDs []string
 	IsCompleted bool
 	CanEnter    bool
+	Environment Environment
+}
+
+type Environment struct {
+	Id string
+	Name string
+	Description string
 }
 
 type Floor struct {
@@ -63,8 +70,11 @@ func GetFloorIdx(room_id string) (int, int, error) {
 	return f_idx, r_idx, nil
 }
 
-func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Event) {
+func FillFloorEncounters(floors []Floor, monsterTemplates []Monster, eventTemplates []Event, environmentTemplates []Environment) {
 	events := slices.Clone(eventTemplates)
+	monsters := slices.Clone(monsterTemplates)
+	environments := slices.Clone(environmentTemplates)
+
 	rand_monster_indexes := rand.Perm(len(monsters))
 	rand_event_indexes := rand.Perm(len(events))
 
@@ -73,11 +83,13 @@ func FillFloorEncounters(floors []Floor, monsters []Monster, eventTemplates []Ev
 		max_room_connect_idx := 0
 
 		for j := range floors[i].Rooms {
-			floors[i].Rooms[j].ID = strconv.Itoa(i) + ROOM_ID_SEPARATOR + strconv.Itoa(j)
+			floors[i].Rooms[j].Id = strconv.Itoa(i) + ROOM_ID_SEPARATOR + strconv.Itoa(j)
 
 			if j == monster_room_idx {
 				floors[i].Rooms[j].Encounter.Kind = EncounterKindMonster
 				floors[i].Rooms[j].Encounter.Monster = &monsters[rand_monster_indexes[len(rand_monster_indexes)-1]]
+				floors[i].Rooms[j].Environment = environments[rand.Intn(len(environments))]
+
 				rand_monster_indexes = rand_monster_indexes[:len(rand_monster_indexes)-1]
 
 				floors[i].Rooms[j].Encounter.Monster.SetToLevel(i+1)

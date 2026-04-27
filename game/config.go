@@ -24,12 +24,13 @@ type GameSettings struct {
 }
 
 type GameConfig struct {
-	Moves            map[string]models.MoveDefinition
-	Items            map[string]models.Item
-	HeroTemplates    []models.Hero
-	MonsterTemplates []models.Monster
-	Settings         GameSettings
-	EventTemplates   []models.Event
+	Moves                map[string]models.MoveDefinition
+	Items                map[string]models.Item
+	HeroTemplates        []models.Hero
+	MonsterTemplates     []models.Monster
+	Settings             GameSettings
+	EventTemplates       []models.Event
+	EnvironmentTemplates []models.Environment
 }
 
 func LoadConfig(configDir string) (*GameConfig, error) {
@@ -77,7 +78,6 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 		}
 	}
 
-
 	if err := loadJSON(configDir+"/game.json", &config.Settings); err != nil {
 		return nil, fmt.Errorf("game settings: %w", err)
 	}
@@ -85,6 +85,10 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 	// events.json is optional
 	if err := loadJSON(configDir+"/events.json", &config.EventTemplates); err != nil {
 		return nil, fmt.Errorf("events not loaded: %w", err)
+	}
+
+	if err := loadJSON(configDir+"/environments.json", &config.EnvironmentTemplates); err != nil {
+		return nil, fmt.Errorf("environments not loaded: %w", err)
 	}
 
 	return config, nil

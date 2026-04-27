@@ -6,9 +6,10 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"tbrpg/game"
 
 	_ "github.com/mattn/go-sqlite3"
+
+	"tbrpg/game"
 )
 
 type DataBase struct {

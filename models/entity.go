@@ -21,6 +21,8 @@ type Entity struct {
 	StatusEffects []StatusEffect   `json:"status_effects"`
 	ItemPool      []string         `json:"item_pool"`
 	EquippedItems []Item           `json:"equipment"`
+
+	EnvironmentEffects map[string]Effect `json:"env_effects"`
 }
 
 func (e *Entity) IsAlive() bool {
@@ -91,14 +93,13 @@ func (e *Entity) ApplyConsumableItem(item Item) error {
 	}
 
 	for stat, delta := range item.StatsAffected {
-		switch stat{
+		switch stat {
 		case HealthStat:
-			e.CurrentHP = min(e.MaxHP(), e.CurrentHP + delta)
+			e.CurrentHP = min(e.MaxHP(), e.CurrentHP+delta)
 		case ManaStat:
-			e.CurrentMana = min(e.MaxMana(), e.CurrentMana + delta)
+			e.CurrentMana = min(e.MaxMana(), e.CurrentMana+delta)
 		}
 	}
-
 
 	return nil
 }

@@ -14,7 +14,11 @@
       { "move_id": "frenzy",      "level": 1 },
       { "move_id": "headbutt",    "level": 1 }
     ],
-    "item_pool": ["iron_sword", "leather_vest", "health_potion", "iron_pendant"]
+    "item_pool": ["iron_sword", "leather_vest", "health_potion", "iron_pendant"],
+    "env_effects": {
+      "cave":  { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "swamp": { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   },
   {
     "id": "goblin_mage",
@@ -31,7 +35,11 @@
       { "move_id": "mana_drain",   "level": 1 },
       { "move_id": "hex_shield",   "level": 1 }
     ],
-    "item_pool": ["enchanted_wand", "arcane_robe", "mana_potion", "mana_crystal"]
+    "item_pool": ["enchanted_wand", "arcane_robe", "mana_potion", "mana_crystal"],
+    "env_effects": {
+      "ancient_ruins": { "type": "stat_mod", "stat_affected": "magic", "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
+      "cave":          { "type": "stat_mod", "stat_affected": "magic", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   },
   {
     "id": "giant_spider",
@@ -49,7 +57,12 @@
       { "move_id": "skitter",     "level": 1 },
       { "move_id": "poison_bite", "level": 1 }
     ],
-    "item_pool": ["amulet_of_vitality", "health_potion", "iron_pendant", "leather_vest"]
+    "item_pool": ["amulet_of_vitality", "health_potion", "iron_pendant", "leather_vest"],
+    "env_effects": {
+      "cave":   { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "forest": { "type": "stat_mod", "stat_affected": "defense", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "desert": { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   },
   {
     "id": "witch",
@@ -66,7 +79,12 @@
       { "move_id": "curse",       "level": 1 },
       { "move_id": "dark_pact",   "level": 1 }
     ],
-    "item_pool": ["magic_staff", "mana_crystal", "elixir", "ring_of_power"]
+    "item_pool": ["magic_staff", "mana_crystal", "elixir", "ring_of_power"],
+    "env_effects": {
+      "swamp":         { "type": "stat_mod", "stat_affected": "magic", "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
+      "ancient_ruins": { "type": "stat_mod", "stat_affected": "magic", "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":        { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   },
   {
     "id": "dragon",
@@ -83,6 +101,12 @@
       { "move_id": "intimidate",    "level": 1 },
       { "move_id": "dragon_scales", "level": 1 }
     ],
-    "item_pool": ["dragon_scale_armor", "ring_of_power", "greater_health_potion", "battle_axe"]
+    "item_pool": ["dragon_scale_armor", "ring_of_power", "greater_health_potion", "battle_axe"],
+    "env_effects": {
+      "volcanic": { "type": "stat_mod", "stat_affected": "attack", "delta":  6, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":   { "type": "stat_mod", "stat_affected": "attack", "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "desert":   { "type": "stat_mod", "stat_affected": "magic",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "swamp":    { "type": "stat_mod", "stat_affected": "attack", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
   }
 ]

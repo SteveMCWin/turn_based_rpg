@@ -8,7 +8,7 @@ let state = null;
   let room = null;
   for (const floor of (state.floors || []))
     for (const r of (floor.Rooms || []))
-      if (r.ID === roomId) { room = r; break; }
+      if (r.Id === roomId) { room = r; break; }
 
   const ev = room?.Encounter?.event;
   const content = document.getElementById('event-content');
