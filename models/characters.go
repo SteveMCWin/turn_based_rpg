@@ -11,6 +11,7 @@ type Hero struct {
 	LearnedMoves  []LearnedMove `json:"learned_moves"`
 	EquippedMoves []string      `json:"equipped_moves"`
 	MaxMoveLevel  int           `json:"max_move_level"`
+	CurrentGold   int           `json:"current_gold"`
 }
 
 func (h *Hero) Init() {

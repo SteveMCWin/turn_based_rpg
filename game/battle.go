@@ -115,10 +115,10 @@ func (g *Game) pickMonsterMove() string {
 		}
 
 		weight := 1
-		switch {
-		case def.Primary == models.PrimaryDamage:
+		switch def.Primary {
+		case models.PrimaryDamage:
 			weight = 4
-		case def.Primary == models.PrimaryHeal:
+		case models.PrimaryHeal:
 			if monsterHP < 0.35 {
 				weight = 6
 			} else {
@@ -266,6 +266,12 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 		}
 		g.Player.ClearStatusEffects()
 
+		max_g := g.Settings.MaxGoldAfterBattle
+		min_g := g.Settings.MinGoldAfterBattle
+
+		gold_looted := rand.Intn(max_g-min_g) + min_g
+		g.Player.CurrentGold += gold_looted
+
 		g.LastBattleResult = &BattleResult{
 			PlayerWon:   true,
 			MonsterName: monster.Name,
@@ -274,6 +280,7 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 
 		g.CompleteRoom(g.CurrentRoomID)
 		g.CurrentRoomID = ""
+
 	} else {
 		g.BattleLog = append(g.BattleLog, "You were defeated...")
 		if room != nil && room.Encounter.Monster != nil {

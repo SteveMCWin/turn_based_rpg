@@ -21,6 +21,9 @@ type GameSettings struct {
 	PercentChanceMonsterLevelsUp int     `json:"pct_chance_monster_lvl_up"`
 	ManualPointsOnLevelUp        int     `json:"manual_points_on_level_up"`
 	RandomPointsOnLevelUp        int     `json:"random_points_on_level_up"`
+	MinGoldAfterBattle           int     `json:"min_gold_after_battle"`
+	MaxGoldAfterBattle           int     `json:"max_gold_after_battle"`
+	SellModifier                 float32 `json:"sell_modifier"`
 }
 
 type GameConfig struct {

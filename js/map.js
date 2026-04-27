@@ -30,6 +30,7 @@ function renderHeroPanel() {
     <span>MAG ${effMag(h)}</span>
     <span class="xp-text">XP ${h.current_xp || 0}</span>
   `;
+  document.getElementById('hero-gold').textContent = `💰 ${h.current_gold || 0}g`;
   document.getElementById('equipped-list').innerHTML = (h.equipped_moves || []).map(id => {
     const move = state.moves?.[id];
     const lm   = (h.learned_moves || []).find(m => m.move_id === id);
