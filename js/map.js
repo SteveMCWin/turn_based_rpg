@@ -38,61 +38,103 @@ function renderHeroPanel() {
 }
 
 function renderFloors() {
-  // Floor fields: Rooms (capital), IsCompleted (capital)
-  // Room fields:  ID (capital), Encounter (capital), IsCompleted (capital), CanEnter (capital)
-  // Encounter fields have json tags: kind, monster, event (lowercase)
-  document.getElementById('floors').innerHTML = (state.floors || []).map((floor, fi) => {
-    const rows = (floor.Rooms || []).map(room => renderRoomRow(room, floor)).join('');
+  const container = document.getElementById('floors');
+  container.innerHTML = (state.floors || []).map((floor, fi) => {
+    const nodes = (floor.Rooms || []).map(room => renderRoomNode(room, floor)).join('');
     return `
-      <div class="floor-block ${floor.IsCompleted ? 'floor-done' : ''}">
+      <div class="floor-section ${floor.IsCompleted ? 'floor-done' : ''}">
         <div class="floor-label">Floor ${fi + 1}${floor.IsCompleted ? ' ✓' : ''}</div>
-        <div class="floor-rooms">${rows}</div>
+        <div class="floor-row">${nodes}</div>
       </div>`;
   }).join('');
+  requestAnimationFrame(drawConnections);
 }
 
-function renderRoomRow(room, floor) {
-  const enc     = room.Encounter;
-  const kind    = enc?.kind;
-  const monster = enc?.monster;
-  const event   = enc?.event;
-
-  // Disable sibling buttons if any room on this floor is completed
+function renderRoomNode(room, floor) {
+  const enc  = room.Encounter;
+  const kind = enc?.kind;
   const floorHasCompleted = (floor.Rooms || []).some(r => r.IsCompleted);
 
-  let icon, label, action;
+  const icon    = kind === 'monster' ? '⚔' : '?';
+  const domId   = 'room-' + room.ID.replace(',', '_');
+  const tooltip = roomTooltipHTML(room);
 
-  if (kind === 'monster' && monster) {
-    icon  = '⚔';
-    label = `${escHtml(monster.name)} — Lv.${monster.level} (${monster.current_hp}/${maxHP(monster)} HP)`;
-  } else {
-    icon  = '✦';
-    label = room.IsCompleted && event ? escHtml(event.description) : 'Unknown event';
+  const isRematch = room.IsCompleted && kind === 'monster' && room.CanEnter && !state.pending_level_up;
+  const canClick  = isRematch || (!room.IsCompleted && room.CanEnter && !state.pending_level_up);
+  const isLocked  = !room.CanEnter || (floorHasCompleted && !room.IsCompleted && !isRematch);
+
+  const classes = ['room-node', kind === 'monster' ? 'monster' : 'event'];
+  if (room.IsCompleted) classes.push('done');
+  if (isLocked)         classes.push('locked');
+  if (canClick)         classes.push('can-enter');
+
+  const onclick = canClick ? `onclick="enterRoom('${room.ID}')"` : '';
+  const check   = room.IsCompleted && !isRematch ? '<span class="room-done-check">✓</span>' : '';
+
+  return `<div class="${classes.join(' ')}" id="${domId}" data-tooltip="${escHtml(tooltip)}" ${onclick}>
+    <span class="room-node-icon">${icon}</span>${check}
+  </div>`;
+}
+
+function roomTooltipHTML(room) {
+  const enc  = room.Encounter;
+  const kind = enc?.kind;
+  if (kind === 'monster' && enc?.monster) {
+    const m = enc.monster;
+    return `<b>${escHtml(m.name)}</b> Lv.${m.level}<br>HP ${m.current_hp}/${maxHP(m)} &middot; ATK ${effAtk(m)} DEF ${effDef(m)} MAG ${effMag(m)}`;
   }
-
-  if (room.IsCompleted && kind === 'monster' && room.CanEnter && !state.pending_level_up) {
-    action = `<button class="btn btn-secondary btn-small" onclick="enterRoom('${room.ID}')">Rematch</button>`;
-  } else if (room.IsCompleted) {
-    action = `<span class="tag-done">✓</span>`;
-  } else if (room.CanEnter && !state.pending_level_up) {
-    if (kind === 'monster') {
-      action = `<button class="btn btn-primary btn-small" onclick="enterRoom('${room.ID}')">Fight</button>`;
-    } else {
-      action = `<button class="btn btn-event btn-small" onclick="enterRoom('${room.ID}')">?</button>`;
-    }
-  } else {
-    // locked: either not can_enter, or sibling was completed
-    const reason = floorHasCompleted && !room.IsCompleted ? 'disabled' : 'locked';
-    action = `<span class="tag-locked tag-${reason}">—</span>`;
+  if (room.IsCompleted && enc?.event?.description) {
+    return escHtml(enc.event.description);
   }
+  return 'Unknown event';
+}
 
-  const cls = room.IsCompleted ? 'room-row done' : (room.CanEnter ? 'room-row' : 'room-row locked');
-  return `
-    <div class="${cls}">
-      <span class="room-icon ${kind}">${icon}</span>
-      <span class="room-label">${label}</span>
-      <span class="room-action">${action}</span>
-    </div>`;
+function getOffsetFrom(el, container) {
+  let x = 0, y = 0;
+  let node = el;
+  while (node && node !== container) {
+    x += node.offsetLeft;
+    y += node.offsetTop;
+    node = node.offsetParent;
+  }
+  return { x, y };
+}
+
+function drawConnections() {
+  const container = document.getElementById('floors');
+  const old = document.getElementById('connections-svg');
+  if (old) old.remove();
+
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.id = 'connections-svg';
+  svg.setAttribute('aria-hidden', 'true');
+  container.prepend(svg);
+
+  (state.floors || []).forEach(floor => {
+    (floor.Rooms || []).forEach(room => {
+      if (!room.NextRoomIDs?.length) return;
+      const fromEl = document.getElementById('room-' + room.ID.replace(',', '_'));
+      if (!fromEl) return;
+      const fo = getOffsetFrom(fromEl, container);
+      const fx = fo.x + fromEl.offsetWidth  / 2;
+      const fy = fo.y + fromEl.offsetHeight / 2;
+
+      room.NextRoomIDs.forEach(nextId => {
+        const toEl = document.getElementById('room-' + nextId.replace(',', '_'));
+        if (!toEl) return;
+        const to = getOffsetFrom(toEl, container);
+        const tx = to.x + toEl.offsetWidth  / 2;
+        const ty = to.y + toEl.offsetHeight / 2;
+
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', fx); line.setAttribute('y1', fy);
+        line.setAttribute('x2', tx); line.setAttribute('y2', ty);
+        line.setAttribute('stroke', '#2a4a7f');
+        line.setAttribute('stroke-width', '2');
+        svg.appendChild(line);
+      });
+    });
+  });
 }
 
 async function enterRoom(roomId) {

@@ -22,11 +22,27 @@ async function postAction(url, body = {}) {
 
 // Stats fields are flat (Stats is an anonymous embed in Entity).
 // Entity-level fields have json tags (lowercase). Floor/Room do NOT — use capitals there.
-function maxHP(e)   { return (e.health   || 0) + (e.level_bonuses?.health   || 0); }
-function maxMana(e) { return (e.mana     || 0) + (e.level_bonuses?.mana     || 0); }
-function effAtk(e)  { return (e.attack   || 0) + (e.level_bonuses?.attack   || 0); }
-function effDef(e)  { return (e.defense  || 0) + (e.level_bonuses?.defense  || 0); }
-function effMag(e)  { return (e.magic    || 0) + (e.level_bonuses?.magic    || 0); }
+function itemStatBonus(e, stat) {
+  return (e.equipment || []).reduce((sum, item) => {
+    if (item.item_type === 'consumable') return sum;
+    return sum + (item.stat_affected?.[stat] || 0);
+  }, 0);
+}
+
+function maxHP(e)   { return (e.health  || 0) + (e.level_bonuses?.health  || 0) + itemStatBonus(e, 'health'); }
+function maxMana(e) { return (e.mana    || 0) + (e.level_bonuses?.mana    || 0) + itemStatBonus(e, 'mana'); }
+function effAtk(e)  { return (e.attack  || 0) + (e.level_bonuses?.attack  || 0) + itemStatBonus(e, 'attack'); }
+function effDef(e)  { return (e.defense || 0) + (e.level_bonuses?.defense || 0) + itemStatBonus(e, 'defense'); }
+function effMag(e)  { return (e.magic   || 0) + (e.level_bonuses?.magic   || 0) + itemStatBonus(e, 'magic'); }
+
+function itemTooltipHTML(item) {
+  if (!item) return '';
+  const bonuses = Object.entries(item.stat_affected || {})
+    .map(([k, v]) => `${k}: ${v > 0 ? '+' : ''}${v}`).join(', ');
+  return `<strong>${escHtml(item.name)}</strong><br>${escHtml(item.description || '')}`
+    + (bonuses ? `<br><span class="tooltip-badge">${bonuses}</span>` : '')
+    + `<br><span class="tooltip-badge">${item.item_type}</span>`;
+}
 
 function pct(val, max) {
   return max > 0 ? Math.max(0, Math.round(val / max * 100)) + '%' : '0%';

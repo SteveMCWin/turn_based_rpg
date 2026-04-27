@@ -63,11 +63,6 @@ func (m *Monster) Init() {
 	m.StatusEffects = make([]StatusEffect, 0)
 }
 
-// func (m *Monster) LevelUp() {
-// 	m.Level++
-// 	m.LevelUpStats(m.Level)
-// }
-
 func (m *Monster) ResetForBattle() {
 	m.CurrentHP = m.MaxHP()
 	m.ClearStatusEffects()

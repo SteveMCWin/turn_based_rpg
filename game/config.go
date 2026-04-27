@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 
 	"tbrpg/models"
@@ -23,43 +24,70 @@ type GameSettings struct {
 }
 
 type GameConfig struct {
+	Moves            map[string]models.MoveDefinition
+	Items            map[string]models.Item
 	HeroTemplates    []models.Hero
 	MonsterTemplates []models.Monster
-	Moves            map[string]models.MoveDefinition
 	Settings         GameSettings
 	EventTemplates   []models.Event
 }
 
 func LoadConfig(configDir string) (*GameConfig, error) {
-	cfg := &GameConfig{}
-
-	if err := loadJSON(configDir+"/hero.json", &cfg.HeroTemplates); err != nil {
-		return nil, fmt.Errorf("hero config: %w", err)
-	}
-
-	if err := loadJSON(configDir+"/monsters.json", &cfg.MonsterTemplates); err != nil {
-		return nil, fmt.Errorf("monsters config: %w", err)
-	}
+	config := &GameConfig{}
 
 	var moveList []models.MoveDefinition
 	if err := loadJSON(configDir+"/moves.json", &moveList); err != nil {
 		return nil, fmt.Errorf("moves config: %w", err)
 	}
-	cfg.Moves = make(map[string]models.MoveDefinition, len(moveList))
+	config.Moves = make(map[string]models.MoveDefinition, len(moveList))
 	for _, m := range moveList {
-		cfg.Moves[m.ID] = m
+		config.Moves[m.ID] = m
 	}
 
-	if err := loadJSON(configDir+"/game.json", &cfg.Settings); err != nil {
+	var itemList []models.Item
+	if err := loadJSON(configDir+"/items.json", &itemList); err != nil {
+		return nil, fmt.Errorf("items config: %w", err)
+	}
+	config.Items = make(map[string]models.Item, len(itemList))
+	for _, item := range itemList {
+		config.Items[item.Id] = item
+	}
+
+	if err := loadJSON(configDir+"/hero.json", &config.HeroTemplates); err != nil {
+		return nil, fmt.Errorf("hero config: %w", err)
+	}
+	for hero_idx := range config.HeroTemplates {
+		for _, item_id := range config.HeroTemplates[hero_idx].ItemPool {
+			config.HeroTemplates[hero_idx].EquipItem(config.Items[item_id])
+		}
+		// Clear item_pool so starting gear doesn't also appear in the player's inventory
+		config.HeroTemplates[hero_idx].ItemPool = nil
+	}
+
+	if err := loadJSON(configDir+"/monsters.json", &config.MonsterTemplates); err != nil {
+		return nil, fmt.Errorf("monsters config: %w", err)
+	}
+	for monster_idx := range config.MonsterTemplates {
+		for _, item_id := range config.MonsterTemplates[monster_idx].ItemPool {
+			item := config.Items[item_id]
+			if rand.Intn(100) < item.DropRate {
+				config.MonsterTemplates[monster_idx].EquipItem(item)
+				break
+			}
+		}
+	}
+
+
+	if err := loadJSON(configDir+"/game.json", &config.Settings); err != nil {
 		return nil, fmt.Errorf("game settings: %w", err)
 	}
 
 	// events.json is optional
-	if err := loadJSON(configDir+"/events.json", &cfg.EventTemplates); err != nil {
-		fmt.Printf("warning: events config not loaded: %v\n", err)
+	if err := loadJSON(configDir+"/events.json", &config.EventTemplates); err != nil {
+		return nil, fmt.Errorf("events not loaded: %w", err)
 	}
 
-	return cfg, nil
+	return config, nil
 }
 
 func loadJSON(path string, v any) error {

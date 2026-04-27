@@ -13,7 +13,8 @@
       { "move_id": "dirty_kick",  "level": 1 },
       { "move_id": "frenzy",      "level": 1 },
       { "move_id": "headbutt",    "level": 1 }
-    ]
+    ],
+    "item_pool": ["iron_sword", "leather_vest", "health_potion", "iron_pendant"]
   },
   {
     "id": "goblin_mage",
@@ -29,7 +30,8 @@
       { "move_id": "arcane_surge", "level": 1 },
       { "move_id": "mana_drain",   "level": 1 },
       { "move_id": "hex_shield",   "level": 1 }
-    ]
+    ],
+    "item_pool": ["enchanted_wand", "arcane_robe", "mana_potion", "mana_crystal"]
   },
   {
     "id": "giant_spider",
@@ -46,7 +48,8 @@
       { "move_id": "pounce",      "level": 1 },
       { "move_id": "skitter",     "level": 1 },
       { "move_id": "poison_bite", "level": 1 }
-    ]
+    ],
+    "item_pool": ["amulet_of_vitality", "health_potion", "iron_pendant", "leather_vest"]
   },
   {
     "id": "witch",
@@ -62,7 +65,8 @@
       { "move_id": "drain_life",  "level": 1 },
       { "move_id": "curse",       "level": 1 },
       { "move_id": "dark_pact",   "level": 1 }
-    ]
+    ],
+    "item_pool": ["magic_staff", "mana_crystal", "elixir", "ring_of_power"]
   },
   {
     "id": "dragon",
@@ -78,6 +82,7 @@
       { "move_id": "claw_swipe",    "level": 1 },
       { "move_id": "intimidate",    "level": 1 },
       { "move_id": "dragon_scales", "level": 1 }
-    ]
+    ],
+    "item_pool": ["dragon_scale_armor", "ring_of_power", "greater_health_potion", "battle_axe"]
   }
 ]

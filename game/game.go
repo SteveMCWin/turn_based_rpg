@@ -10,7 +10,7 @@ import (
 )
 
 type Game struct {
-	ID               int                              `json:"id"`
+	ID               int                `json:"id"`
 	Settings         GameSettings       `json:"settings"`
 	Player           models.Hero        `json:"player"`
 	Floors           []models.Floor     `json:"floors"`
@@ -21,6 +21,7 @@ type Game struct {
 	PendingLevelUp   *PendingAllocation `json:"pending_level_up"`
 
 	AllMoves map[string]models.MoveDefinition `json:"moves,omitempty"`
+	AllItems map[string]models.Item           `json:"items,omitempty"`
 }
 
 type PendingAllocation struct {
@@ -41,6 +42,7 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 		Player:   hero,
 		Floors:   models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel),
 		AllMoves: config.Moves,
+		AllItems: config.Items,
 	}
 
 	g.Player.Init()
@@ -85,7 +87,7 @@ func (g *Game) EnterRoom(roomID string) error {
 			g.BattleLog = append(g.BattleLog, "You applied black magic to revive an already defeated foe. They are as hostile as you remember them to be.")
 
 			if mrand.Int()%100 <= g.Settings.PercentChanceMonsterLevelsUp {
-				room.Encounter.Monster.SetToLevel(room.Encounter.Monster.Level+1)
+				room.Encounter.Monster.SetToLevel(room.Encounter.Monster.Level + 1)
 				g.BattleLog = append(g.BattleLog, "However, upon reviving the monster for another duel, something went wrong in the ritual, and the monster is now permanently stronger!")
 			}
 		}
@@ -138,29 +140,31 @@ func (g *Game) CompleteRoom(roomID string) {
 
 func (g *Game) applyEvent(e *models.Event) {
 	h := &g.Player
-	switch e.StatAffected {
-	case models.HealthStat:
-		prevMax := h.MaxHP()
-		h.LevelBonuses.Health += e.Delta
-		newMax := h.MaxHP()
-		if e.Delta > 0 {
-			h.CurrentHP += newMax - prevMax
+	for stat, delta := range e.StatsAffected {
+		switch stat {
+		case models.HealthStat:
+			prevMax := h.MaxHP()
+			h.LevelBonuses.Health += delta
+			newMax := h.MaxHP()
+			if delta > 0 {
+				h.CurrentHP += newMax - prevMax
+			}
+			h.CurrentHP = min(max(h.CurrentHP, 1), newMax)
+		case models.AttackStat:
+			h.LevelBonuses.Attack = max(0, h.LevelBonuses.Attack+delta)
+		case models.DefenseStat:
+			h.LevelBonuses.Defense = max(0, h.LevelBonuses.Defense+delta)
+		case models.MagicStat:
+			h.LevelBonuses.Magic = max(0, h.LevelBonuses.Magic+delta)
+		case models.ManaStat:
+			prevMax := h.MaxMana()
+			h.LevelBonuses.Mana += delta
+			newMax := h.MaxMana()
+			if delta > 0 {
+				h.CurrentMana += newMax - prevMax
+			}
+			h.CurrentMana = min(max(h.CurrentMana, 0), newMax)
 		}
-		h.CurrentHP = min(max(h.CurrentHP, 1), newMax)
-	case models.AttackStat:
-		h.LevelBonuses.Attack = max(0, h.LevelBonuses.Attack+e.Delta)
-	case models.DefenseStat:
-		h.LevelBonuses.Defense = max(0, h.LevelBonuses.Defense+e.Delta)
-	case models.MagicStat:
-		h.LevelBonuses.Magic = max(0, h.LevelBonuses.Magic+e.Delta)
-	case models.ManaStat:
-		prevMax := h.MaxMana()
-		h.LevelBonuses.Mana += e.Delta
-		newMax := h.MaxMana()
-		if e.Delta > 0 {
-			h.CurrentMana += newMax - prevMax
-		}
-		h.CurrentMana = min(max(h.CurrentMana, 0), newMax)
 	}
 	e.Applied = true
 }
@@ -184,4 +188,26 @@ func (g *Game) learnRandomMove() *models.LearnedMove {
 	chosen := pool[mrand.Intn(len(pool))]
 	learned := g.Player.LearnMove(chosen, monster.Level)
 	return &learned
+}
+
+func (g *Game) getRandomItem() *models.Item {
+	monster := g.CurrentRoom().Encounter.Monster
+	var pool []models.Item
+	for _, item_id := range monster.ItemPool {
+		if item, ok := g.AllItems[item_id]; ok {
+			pool = append(pool, item)
+		}
+	}
+	if len(pool) == 0 {
+		return nil
+	}
+
+	mrand.Shuffle(len(pool), func(i, j int) { pool[i], pool[j] = pool[j], pool[i] })
+	for i := range pool {
+		if mrand.Intn(100) < pool[i].DropRate {
+			g.Player.ItemPool = append(g.Player.ItemPool, pool[i].Id)
+			return &pool[i]
+		}
+	}
+	return nil
 }

@@ -14,8 +14,8 @@ type Encounter struct {
 }
 
 type Event struct {
-	Description  string   `json:"description"`
-	StatAffected StatType `json:"stat_affected"`
-	Delta        int      `json:"delta"`
-	Applied      bool     `json:"applied,omitempty"`
+	Description string `json:"description"`
+	Applied     bool   `json:"applied,omitempty"`
+
+	StatsAffected map[StatType]int `json:"stat_affected"`
 }

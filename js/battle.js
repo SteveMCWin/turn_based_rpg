@@ -53,6 +53,11 @@ function renderCombatant(side, entity) {
       : `DoT ${se.delta}`;
     return `<span class="effect-tag">${label} (${se.TurnsRemaining}t)</span>`;
   }).join('');
+
+  document.getElementById(`${side}-items`).innerHTML = (entity.equipment || []).map(item => {
+    const icon = item.item_type === 'weapon' ? '⚔' : item.item_type === 'armor' ? '🛡' : '💎';
+    return `<span class="item-icon" data-tooltip="${escHtml(itemTooltipHTML(item))}">${icon}</span>`;
+  }).join('');
 }
 
 function renderMonsterInfo(monster) {

@@ -22,6 +22,7 @@
       { "move_id": "battle_cry",  "level": 1 },
       { "move_id": "second_wind", "level": 1 }
     ],
+    "item_pool": ["iron_sword", "leather_vest"],
     "max_move_level": 5
   },
   {
@@ -47,6 +48,7 @@
       { "move_id": "mana_drain",   "level": 1 },
       { "move_id": "hex_shield",   "level": 1 }
     ],
+    "item_pool": ["magic_staff", "arcane_robe"],
     "max_move_level": 5
   },
   {
@@ -72,6 +74,7 @@
       { "move_id": "poison_bite", "level": 1 },
       { "move_id": "battle_cry",  "level": 1 }
     ],
+    "item_pool": ["shadow_dagger", "leather_vest"],
     "max_move_level": 5
   }
 ]
