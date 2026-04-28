@@ -33,5 +33,35 @@
     "id": "forest",
     "name": "Forest",
     "description": "Dense woodland where shadows blur and underbrush conceals movement."
+  },
+  {
+    "id": "graveyard",
+    "name": "Graveyard",
+    "description": "Rows of crumbling headstones under a moonless sky. The air reeks of old death."
+  },
+  {
+    "id": "misty_mountains",
+    "name": "Misty Mountains",
+    "description": "Jagged peaks shrouded in cold fog. Visibility is poor and the air bites with chill."
+  },
+  {
+    "id": "haunted_manor",
+    "name": "Haunted Manor",
+    "description": "A decaying estate crackling with dark energy. Every shadow seems to breathe."
+  },
+  {
+    "id": "crypt",
+    "name": "Crypt",
+    "description": "A sealed underground tomb. The silence is absolute and the darkness total."
+  },
+  {
+    "id": "open_sky",
+    "name": "Open Sky",
+    "description": "A vast cliff-top arena open to the winds. Aerial creatures thrive here."
+  },
+  {
+    "id": "marshlands",
+    "name": "Marshlands",
+    "description": "Waterlogged flats choked with reeds. The ground shifts underfoot and poisons linger."
   }
 ]
