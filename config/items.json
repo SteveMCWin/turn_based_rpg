@@ -160,5 +160,32 @@
     "drop_rate": 22,
     "price": 50,
     "stat_affected": { "health": 25, "mana": 25 }
+  },
+  {
+    "id": "inferno_core",
+    "name": "Inferno Core",
+    "description": "A smouldering gem torn from a dragon's chest. Greatly increases Attack and Magic.",
+    "item_type": "trinket",
+    "drop_rate": 100,
+    "price": 350,
+    "stat_affected": { "attack": 5, "magic": 8 }
+  },
+  {
+    "id": "hydra_fang",
+    "name": "Hydra Fang",
+    "description": "A severed fang still dripping with regenerative venom. Increases Attack, Defense, and Health.",
+    "item_type": "trinket",
+    "drop_rate": 100,
+    "price": 320,
+    "stat_affected": { "attack": 6, "defense": 5, "health": 10 }
+  },
+  {
+    "id": "giants_sigil",
+    "name": "Giant's Sigil",
+    "description": "A stone medallion etched with runes of immense strength. Greatly increases Health and Attack.",
+    "item_type": "trinket",
+    "drop_rate": 100,
+    "price": 300,
+    "stat_affected": { "health": 30, "attack": 6 }
   }
 ]

@@ -12,9 +12,11 @@ type BattleResult struct {
 	GameState    *Game               `json:"game_state,omitempty"`
 	BattleOver   bool                `json:"battle_over"`
 	PlayerWon    bool                `json:"player_won"`
+	WasBoss      bool                `json:"was_boss,omitempty"`
 	MonsterName  string              `json:"monster_name,omitempty"`
+	FloorReached int                 `json:"floor_reached,omitempty"`
 	LearnedMove  *models.LearnedMove `json:"learned_move,omitempty"`
-	ItemAcquired *models.Item         `json:"item_acquired,omitempty"`
+	ItemAcquired *models.Item        `json:"item_acquired,omitempty"`
 }
 
 func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
@@ -292,10 +294,16 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 		min_g := g.Settings.MinGoldAfterBattle
 
 		gold_looted := rand.Intn(max_g-min_g) + min_g
+		isBoss := room.Encounter.Kind == models.EncounterKindBoss
+		if isBoss {
+			gold_looted *= 2
+			result.WasBoss = true
+		}
 		g.Player.CurrentGold += gold_looted
 
 		g.LastBattleResult = &BattleResult{
 			PlayerWon:   true,
+			WasBoss:     isBoss,
 			MonsterName: monster.Name,
 			LearnedMove: learned,
 		}
@@ -310,9 +318,16 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 		}
 		g.Player.ClearStatusEffects()
 
+		floorReached := 0
+		if g.IsEndless {
+			if fi, _, err := models.GetFloorIdx(room.Id); err == nil {
+				floorReached = fi + 1
+			}
+		}
 		g.LastBattleResult = &BattleResult{
-			PlayerWon:   false,
-			MonsterName: room.Encounter.Monster.Name,
+			PlayerWon:    false,
+			MonsterName:  room.Encounter.Monster.Name,
+			FloorReached: floorReached,
 		}
 
 		g.CurrentRoomID = ""

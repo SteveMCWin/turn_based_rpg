@@ -16,6 +16,7 @@ type Game struct {
 	Floors           []models.Floor     `json:"floors"`
 	BattleLog        []string           `json:"battle_log,omitempty"`
 	IsInBattle       bool               `json:"in_battle"`
+	IsEndless        bool               `json:"is_endless"`
 	CurrentRoomID    string             `json:"current_room_id,omitempty"`
 	LastBattleResult *BattleResult      `json:"last_battle_result"`
 	PendingLevelUp   *PendingAllocation `json:"pending_level_up"`
@@ -38,21 +39,47 @@ func NewGame(config *GameConfig, hero models.Hero) *Game {
 		monsters[i].Init()
 	}
 
+	bosses := slices.Clone(config.BossTemplates)
+	for i := range bosses {
+		bosses[i].Init()
+	}
+
 	environments := slices.Clone(config.EnvironmentTemplates)
 
 	g := Game{
 		Settings: config.Settings,
 		Player:   hero,
-		Floors:   models.GenerateFloors(len(monsters), config.Settings.MaxRoomsPerLevel, false),
+		Floors:   models.MakeFirstRealm(config.Settings.FloorsPerRealms, config.Settings.MaxRoomsPerLevel, config.Settings.MonsterSpawnChance),
 		AllMoves: config.Moves,
 		AllItems: config.Items,
 		Shop:     models.NewShop(config.Items),
 	}
 
 	g.Player.Init()
-	models.FillFloorEncounters(g.Floors, monsters, events, environments)
+	models.FillFloorEncounters(g.Floors, monsters, bosses, events, environments)
 
 	return &g
+}
+
+func (g *Game) AddRealm(config *GameConfig) {
+	monsters := slices.Clone(config.MonsterTemplates)
+	for i := range monsters {
+		monsters[i].Init()
+	}
+	bosses := slices.Clone(config.BossTemplates)
+	for i := range bosses {
+		bosses[i].Init()
+	}
+	g.Floors = models.AddRealmToExistingOne(
+		g.Floors,
+		config.Settings.FloorsPerRealms,
+		config.Settings.MaxRoomsPerLevel,
+		config.Settings.MonsterSpawnChance,
+		monsters,
+		bosses,
+		config.EventTemplates,
+		config.EnvironmentTemplates,
+	)
 }
 
 func (g *Game) RoomByID(id string) *models.Room {
@@ -84,6 +111,23 @@ func (g *Game) EnterRoom(roomID string) error {
 	}
 
 	switch room.Encounter.Kind {
+	case models.EncounterKindBoss:
+		g.BattleLog = nil
+		room.Encounter.Monster.ResetForBattle()
+		g.CurrentRoomID = roomID
+		g.IsInBattle = true
+
+		for env_id, effect := range room.Encounter.Monster.EnvironmentEffects {
+			if env_id == room.Environment.Id {
+				addEffect(&effect, &room.Encounter.Monster.Entity)
+			}
+		}
+		for env_id, effect := range g.Player.EnvironmentEffects {
+			if env_id == room.Environment.Id {
+				addEffect(&effect, &g.Player.Entity)
+			}
+		}
+
 	case models.EncounterKindMonster:
 		g.BattleLog = nil
 		if room.IsCompleted {
