@@ -4,6 +4,7 @@ type EncounterKind string
 
 const (
 	EncounterKindMonster EncounterKind = "monster"
+	EncounterKindBoss EncounterKind = "boss"
 	EncounterKindEvent   EncounterKind = "event"
 )
 

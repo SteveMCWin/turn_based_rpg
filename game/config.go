@@ -14,6 +14,7 @@ type GameSettings struct {
 	XPToLevelUp                  []int   `json:"xp_to_level_up"`
 	MoveLevelBonusPct            int     `json:"move_level_bonus_percent"`
 	MaxRoomsPerLevel             int     `json:"max_rooms_per_level"`
+	FloorsPerRealms              int     `json:"floors_per_realm"`
 	MaxEquippedMoves             int     `json:"max_equipped_moves"`
 	MaxMoveLevel                 int     `json:"max_move_level"`
 	ManaRegenPerTurn             int     `json:"mana_regen_per_turn"`
@@ -24,6 +25,7 @@ type GameSettings struct {
 	MinGoldAfterBattle           int     `json:"min_gold_after_battle"`
 	MaxGoldAfterBattle           int     `json:"max_gold_after_battle"`
 	SellModifier                 float32 `json:"sell_modifier"`
+	MonsterSpawnChance           int     `json:"monster_spawn_chance"`
 }
 
 type GameConfig struct {
@@ -31,6 +33,7 @@ type GameConfig struct {
 	Items                map[string]models.Item
 	HeroTemplates        []models.Hero
 	MonsterTemplates     []models.Monster
+	BossTemplates        []models.Monster
 	Settings             GameSettings
 	EventTemplates       []models.Event
 	EnvironmentTemplates []models.Environment
@@ -76,6 +79,19 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 			item := config.Items[item_id]
 			if rand.Intn(100) < item.DropRate {
 				config.MonsterTemplates[monster_idx].EquipItem(item)
+				break
+			}
+		}
+	}
+
+	if err := loadJSON(configDir+"/bosses.json", &config.BossTemplates); err != nil {
+		return nil, fmt.Errorf("bosses config: %w", err)
+	}
+	for boss_idx := range config.BossTemplates {
+		for _, item_id := range config.BossTemplates[boss_idx].ItemPool {
+			item := config.Items[item_id]
+			if rand.Intn(100) < item.DropRate {
+				config.BossTemplates[boss_idx].EquipItem(item)
 				break
 			}
 		}

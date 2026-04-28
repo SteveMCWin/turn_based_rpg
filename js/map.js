@@ -56,15 +56,16 @@ function renderRoomNode(room, floor) {
   const kind = enc?.kind;
   const floorHasCompleted = (floor.Rooms || []).some(r => r.IsCompleted);
 
-  const icon    = kind === 'monster' ? '⚔' : '?';
-  const domId   = 'room-' + room.Id.replace(',', '_');
-  const tooltip = roomTooltipHTML(room);
+  const isBoss   = kind === 'boss';
+  const icon     = kind === 'monster' ? '⚔' : isBoss ? '★' : '?';
+  const domId    = 'room-' + room.Id.replace(',', '_');
+  const tooltip  = roomTooltipHTML(room);
 
-  const isRematch = room.IsCompleted && kind === 'monster' && room.CanEnter && !state.pending_level_up;
+  const isRematch = room.IsCompleted && (kind === 'monster' || isBoss) && room.CanEnter && !state.pending_level_up;
   const canClick  = isRematch || (!room.IsCompleted && room.CanEnter && !state.pending_level_up);
   const isLocked  = !room.CanEnter || (floorHasCompleted && !room.IsCompleted && !isRematch);
 
-  const classes = ['room-node', kind === 'monster' ? 'monster' : 'event'];
+  const classes = ['room-node', kind === 'monster' ? 'monster' : isBoss ? 'boss' : 'event'];
   if (room.IsCompleted) classes.push('done');
   if (isLocked)         classes.push('locked');
   if (canClick)         classes.push('can-enter');
@@ -82,10 +83,12 @@ function renderRoomNode(room, floor) {
 function roomTooltipHTML(room) {
   const enc  = room.Encounter;
   const kind = enc?.kind;
-  if (kind === 'monster' && enc?.monster) {
+  if ((kind === 'monster' || kind === 'boss') && enc?.monster) {
     const m   = enc.monster;
     const env = room.Environment;
-    let tip = `<b>${escHtml(m.name)}</b> Lv.${m.level}<br>HP ${m.current_hp}/${maxHP(m)} &middot; ATK ${effAtk(m)} DEF ${effDef(m)} MAG ${effMag(m)}`;
+    let tip = `<b>${escHtml(m.name)}</b> Lv.${m.level}`;
+    if (kind === 'boss') tip += ' <span class="tooltip-badge">BOSS</span>';
+    tip += `<br>HP ${m.current_hp}/${maxHP(m)} &middot; ATK ${effAtk(m)} DEF ${effDef(m)} MAG ${effMag(m)}`;
     if (env?.Name) tip += `<br><span class="tooltip-badge">${escHtml(env.Name)}</span> ${escHtml(env.Description)}`;
     return tip;
   }

@@ -292,6 +292,9 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 		min_g := g.Settings.MinGoldAfterBattle
 
 		gold_looted := rand.Intn(max_g-min_g) + min_g
+		if room.Encounter.Kind == models.EncounterKindBoss {
+			gold_looted *= 2
+		}
 		g.Player.CurrentGold += gold_looted
 
 		g.LastBattleResult = &BattleResult{

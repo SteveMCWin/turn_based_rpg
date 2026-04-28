@@ -2,7 +2,8 @@
   "xp_per_monster_level": 60,
   "xp_to_level_up": [0, 100, 250, 450, 700],
   "move_level_bonus_percent": 10,
-  "max_rooms_per_level": 3,
+  "max_rooms_per_level": 4,
+  "floors_per_realm": 6,
   "max_equipped_moves": 4,
   "max_move_level": 5,
   "mana_regen_per_turn": 5,
@@ -12,5 +13,6 @@
   "random_points_on_level_up": 3,
   "min_gold_after_battle": 15,
   "max_gold_after_battle": 50,
-  "sell_modifier": 0.6
+  "sell_modifier": 0.6,
+  "monster_spawn_chance": 70
 }
