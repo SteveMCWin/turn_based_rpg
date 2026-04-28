@@ -65,11 +65,12 @@ document.getElementById('btn-new-run').addEventListener('click', async () => {
   if (!selectedHeroId) return;
   const btn = document.getElementById('btn-new-run');
   const err = document.getElementById('menu-error');
+  const isEndless = document.getElementById('chk-endless').checked;
   btn.disabled = true;
   btn.textContent = 'Loading...';
   err.classList.add('hidden');
   try {
-    await postAction('/game/new', { hero_id: selectedHeroId });
+    await postAction('/game/new', { hero_id: selectedHeroId, is_endless: isEndless });
     window.location.href = '/map';
   } catch (e) {
     err.textContent = e.message;

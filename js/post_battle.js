@@ -27,22 +27,31 @@ let state = null;
       document.getElementById('learned-move').classList.remove('hidden');
     }
 
-    // all floors completed = game won
-    const allDone = (state.floors || []).length > 0
-      && state.floors.every(f => f.IsCompleted);  // capital IsCompleted
-    if (allDone) {
-      content.innerHTML = `<h1 class="win-title">You Win!</h1><p>All floors cleared!</p>`;
-      document.getElementById('btn-continue').textContent = 'Play Again';
-      document.getElementById('btn-continue').onclick = () => { window.location.href = '/'; };
-    } else {
+    if (state.is_endless) {
       document.getElementById('btn-continue').onclick = () => { window.location.href = '/map'; };
+    } else {
+      const allDone = (state.floors || []).length > 0
+        && state.floors.every(f => f.IsCompleted);
+      if (allDone) {
+        content.innerHTML = `<h1 class="win-title">You Win!</h1><p>All floors cleared!</p>`;
+        document.getElementById('btn-continue').textContent = 'Play Again';
+        document.getElementById('btn-continue').onclick = () => { window.location.href = '/'; };
+      } else {
+        document.getElementById('btn-continue').onclick = () => { window.location.href = '/map'; };
+      }
     }
   } else {
-    content.innerHTML = `<h1 class="lose-title">Defeated</h1>
-      <p><strong>${escHtml(result.monster_name)}</strong> was too powerful.</p>`;
-    document.getElementById('btn-continue').textContent = 'Back to Map';
+    if (state.is_endless && result.floor_reached) {
+      content.innerHTML = `<h1 class="lose-title">Fallen</h1>
+        <p><strong>${escHtml(result.monster_name)}</strong> ended your run on floor ${result.floor_reached}.</p>`;
+      document.getElementById('btn-continue').classList.add('hidden');
+    } else {
+      content.innerHTML = `<h1 class="lose-title">Defeated</h1>
+        <p><strong>${escHtml(result.monster_name)}</strong> was too powerful.</p>`;
+      document.getElementById('btn-continue').textContent = 'Back to Map';
+      document.getElementById('btn-continue').onclick = () => { window.location.href = '/map'; };
+    }
     document.getElementById('btn-restart').classList.remove('hidden');
-    document.getElementById('btn-continue').onclick = () => { window.location.href = '/map'; };
-    document.getElementById('btn-restart').onclick  = () => { window.location.href = '/'; };
+    document.getElementById('btn-restart').onclick = () => { window.location.href = '/'; };
   }
 })();

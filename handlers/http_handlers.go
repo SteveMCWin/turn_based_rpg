@@ -205,7 +205,8 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 	}
 
 	var req struct {
-		HeroID string `json:"hero_id"`
+		HeroID    string `json:"hero_id"`
+		IsEndless bool   `json:"is_endless"`
 	}
 	c.ShouldBindJSON(&req)
 
@@ -218,6 +219,7 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 	}
 
 	g := game.NewGame(s.config, hero)
+	g.IsEndless = req.IsEndless
 	id, err := s.db.CreateGame(g)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -262,6 +264,9 @@ func (s *Server) handlePostBattleMove(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	if result.BattleOver && result.PlayerWon && result.WasBoss && g.IsEndless {
+		g.AddRealm(s.config)
 	}
 	c.JSON(http.StatusOK, result)
 }

@@ -57,8 +57,14 @@ func AddRealmToExistingOne(existing []Floor, numFloors, maxRoomsPerFloor, monste
 
 	new_realm := GenerateFloors(numFloors, maxRoomsPerFloor, len(existing), monster_spawn_chance)
 
-	ConnectFloorRooms(&existing[len(existing)-1], &new_realm[0])
 	FillFloorEncounters(new_realm, monsterTemplates, bossTemplates, eventTemplates, environmentTemplates)
+	ConnectFloorRooms(&existing[len(existing)-1], &new_realm[0])
+
+	// CompleteRoom already ran for the boss before AddRealm was called, so
+	// the new entry rooms were never enabled by it. Enable them now.
+	for j := range new_realm[0].Rooms {
+		new_realm[0].Rooms[j].CanEnter = true
+	}
 
 	existing = append(existing, new_realm...)
 
@@ -164,7 +170,7 @@ func FillFloorEncounters(floors []Floor, monsterTemplates, bossTemplates []Monst
 				if len(rand_boss_indexes) <= 0 {
 					rand_boss_indexes = rand.Perm(len(bosses))
 				}
-				floors[i].Rooms[j].Encounter.Monster.SetToLevel(i + 1)
+				floors[i].Rooms[j].Encounter.Monster.SetToLevel(floors[i].Idx + 1)
 			} else if floors[i].Rooms[j].Encounter.Kind == EncounterKindMonster {
 				floors[i].Rooms[j].Encounter.Monster = &monsters[rand_monster_indexes[len(rand_monster_indexes)-1]]
 				floors[i].Rooms[j].Environment = environments[rand.Intn(len(environments))]
@@ -172,7 +178,7 @@ func FillFloorEncounters(floors []Floor, monsterTemplates, bossTemplates []Monst
 				if len(rand_monster_indexes) <= 0 {
 					rand_monster_indexes = rand.Perm(len(monsters))
 				}
-				floors[i].Rooms[j].Encounter.Monster.SetToLevel(i + 1)
+				floors[i].Rooms[j].Encounter.Monster.SetToLevel(floors[i].Idx + 1)
 			} else {
 				floors[i].Rooms[j].Encounter.Event = &events[rand_event_indexes[len(rand_event_indexes)-1]]
 				rand_event_indexes = rand_event_indexes[:len(rand_event_indexes)-1]
