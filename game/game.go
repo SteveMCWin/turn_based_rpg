@@ -31,8 +31,16 @@ type PendingAllocation struct {
 	RandomPoints int `json:"random_points"`
 }
 
+func eventSlice(m map[string]models.Event) []models.Event {
+	s := make([]models.Event, 0, len(m))
+	for _, e := range m {
+		s = append(s, e)
+	}
+	return s
+}
+
 func NewGame(config *GameConfig, hero models.Hero) *Game {
-	events := slices.Clone(config.EventTemplates)
+	events := eventSlice(config.EventTemplates)
 
 	monsters := slices.Clone(config.MonsterTemplates)
 	for i := range monsters {
@@ -77,7 +85,7 @@ func (g *Game) AddRealm(config *GameConfig) {
 		config.Settings.MonsterSpawnChance,
 		monsters,
 		bosses,
-		config.EventTemplates,
+		eventSlice(config.EventTemplates),
 		config.EnvironmentTemplates,
 	)
 }

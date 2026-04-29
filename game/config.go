@@ -35,7 +35,7 @@ type GameConfig struct {
 	MonsterTemplates     []models.Monster
 	BossTemplates        []models.Monster
 	Settings             GameSettings
-	EventTemplates       []models.Event
+	EventTemplates       map[string]models.Event
 	EnvironmentTemplates []models.Environment
 }
 
@@ -102,8 +102,13 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 	}
 
 	// events.json is optional
-	if err := loadJSON(configDir+"/events.json", &config.EventTemplates); err != nil {
+	var eventList []models.Event
+	if err := loadJSON(configDir+"/events.json", &eventList); err != nil {
 		return nil, fmt.Errorf("events not loaded: %w", err)
+	}
+	config.EventTemplates = make(map[string]models.Event, len(eventList))
+	for _, e := range eventList {
+		config.EventTemplates[e.ID] = e
 	}
 
 	if err := loadJSON(configDir+"/environments.json", &config.EnvironmentTemplates); err != nil {

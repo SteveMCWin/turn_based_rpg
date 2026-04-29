@@ -1,12 +1,12 @@
 [
-  { "description": "You find a hidden shrine. Permanently gain +5 max health.",          "stat_affected": { "health":  5 } },
-  { "description": "A traveling merchant teaches you a new technique. +3 attack permanently.", "stat_affected": { "attack":  3 } },
-  { "description": "You rest by a campfire and feel refreshed. +2 defense permanently.", "stat_affected": { "defense": 2 } },
-  { "description": "Studying ancient runes increases your magical power. +3 magic permanently.", "stat_affected": { "magic":  3 } },
-  { "description": "You discover a mana crystal. +10 max mana permanently.",             "stat_affected": { "mana":   10 } },
-  { "description": "A poisoned trap! -3 defense permanently.",                           "stat_affected": { "defense": -3 } },
-  { "description": "You stumble through cursed ground. -5 max health permanently.",      "stat_affected": { "health": -5 } },
-  { "description": "A mysterious potion restores your vitality. +8 max health.",         "stat_affected": { "health":  8 } },
-  { "description": "An old knight shares his wisdom. +4 attack permanently.",            "stat_affected": { "attack":  4 } },
-  { "description": "You meditate in a clearing. +5 magic permanently.",                  "stat_affected": { "magic":   5 } }
+  { "id": "shrine_health",    "description": "You find a hidden shrine. Permanently gain +5 max health.",          "stat_affected": { "health":  5 } },
+  { "id": "merchant_attack",  "description": "A traveling merchant teaches you a new technique. +3 attack permanently.", "stat_affected": { "attack":  3 } },
+  { "id": "campfire_defense", "description": "You rest by a campfire and feel refreshed. +2 defense permanently.", "stat_affected": { "defense": 2 } },
+  { "id": "runes_magic",      "description": "Studying ancient runes increases your magical power. +3 magic permanently.", "stat_affected": { "magic":  3 } },
+  { "id": "mana_crystal",     "description": "You discover a mana crystal. +10 max mana permanently.",             "stat_affected": { "mana":   10 } },
+  { "id": "poison_trap",      "description": "A poisoned trap! -3 defense permanently.",                           "stat_affected": { "defense": -3 } },
+  { "id": "cursed_ground",    "description": "You stumble through cursed ground. -5 max health permanently.",      "stat_affected": { "health": -5 } },
+  { "id": "mystery_potion",   "description": "A mysterious potion restores your vitality. +8 max health.",         "stat_affected": { "health":  8 } },
+  { "id": "old_knight",       "description": "An old knight shares his wisdom. +4 attack permanently.",            "stat_affected": { "attack":  4 } },
+  { "id": "meditation",       "description": "You meditate in a clearing. +5 magic permanently.",                  "stat_affected": { "magic":   5 } }
 ]
