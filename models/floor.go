@@ -163,7 +163,8 @@ func FillFloorEncounters(floors []Floor, monsterTemplates, bossTemplates []Monst
 
 	for i := range floors {
 		for j := range floors[i].Rooms {
-			if floors[i].Rooms[j].Encounter.Kind == EncounterKindBoss {
+			switch floors[i].Rooms[j].Encounter.Kind {
+			case EncounterKindBoss:
 				floors[i].Rooms[j].Encounter.Monster = &bosses[rand_boss_indexes[len(rand_boss_indexes)-1]]
 				floors[i].Rooms[j].Environment = environments[rand.Intn(len(environments))]
 				rand_boss_indexes = rand_boss_indexes[:len(rand_boss_indexes)-1]
@@ -171,7 +172,7 @@ func FillFloorEncounters(floors []Floor, monsterTemplates, bossTemplates []Monst
 					rand_boss_indexes = rand.Perm(len(bosses))
 				}
 				floors[i].Rooms[j].Encounter.Monster.SetToLevel(floors[i].Idx + 1)
-			} else if floors[i].Rooms[j].Encounter.Kind == EncounterKindMonster {
+			case EncounterKindMonster:
 				floors[i].Rooms[j].Encounter.Monster = &monsters[rand_monster_indexes[len(rand_monster_indexes)-1]]
 				floors[i].Rooms[j].Environment = environments[rand.Intn(len(environments))]
 				rand_monster_indexes = rand_monster_indexes[:len(rand_monster_indexes)-1]
@@ -179,7 +180,7 @@ func FillFloorEncounters(floors []Floor, monsterTemplates, bossTemplates []Monst
 					rand_monster_indexes = rand.Perm(len(monsters))
 				}
 				floors[i].Rooms[j].Encounter.Monster.SetToLevel(floors[i].Idx + 1)
-			} else {
+			default:
 				floors[i].Rooms[j].Encounter.Event = &events[rand_event_indexes[len(rand_event_indexes)-1]]
 				rand_event_indexes = rand_event_indexes[:len(rand_event_indexes)-1]
 				if len(rand_event_indexes) <= 0 {
