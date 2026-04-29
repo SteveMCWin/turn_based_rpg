@@ -30,11 +30,23 @@ func (e *Entity) IsAlive() bool {
 }
 
 func (e *Entity) MaxHP() int {
-	return e.Health + e.LevelBonuses.Health
+	hp := e.Health + e.LevelBonuses.Health
+	for _, item := range e.EquippedItems {
+		if item.Type != Consumable {
+			hp += item.StatsAffected[HealthStat]
+		}
+	}
+	return hp
 }
 
 func (e *Entity) MaxMana() int {
-	return e.Stats.Mana + e.LevelBonuses.Mana
+	mana := e.Stats.Mana + e.LevelBonuses.Mana
+	for _, item := range e.EquippedItems {
+		if item.Type != Consumable {
+			mana += item.StatsAffected[ManaStat]
+		}
+	}
+	return mana
 }
 
 // Since e.Stats is just the base, meant for level 1 characters,

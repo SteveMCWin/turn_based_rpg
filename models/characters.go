@@ -15,8 +15,8 @@ type Hero struct {
 }
 
 func (h *Hero) Init() {
-	h.CurrentHP = h.Stats.Health
-	h.CurrentMana = h.Stats.Mana
+	h.CurrentHP = h.MaxHP()
+	h.CurrentMana = h.MaxMana()
 	h.StatusEffects = make([]StatusEffect, 0)
 	if len(h.LearnedMoves) > 0 {
 		h.EquippedMoves = make([]string, len(h.LearnedMoves))
@@ -59,12 +59,13 @@ type Monster struct {
 }
 
 func (m *Monster) Init() {
-	m.CurrentHP = m.Stats.Health
-	m.CurrentMana = m.Stats.Mana
+	m.CurrentHP = m.MaxHP()
+	m.CurrentMana = m.MaxMana()
 	m.StatusEffects = make([]StatusEffect, 0)
 }
 
 func (m *Monster) ResetForBattle() {
 	m.CurrentHP = m.MaxHP()
+	m.CurrentMana = m.MaxMana()
 	m.ClearStatusEffects()
 }

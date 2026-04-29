@@ -8,6 +8,11 @@ let undoStack = [];
   if (!state) return;
   renderPage();
   initTooltips();
+  const savedScroll = sessionStorage.getItem('mapScroll');
+  if (savedScroll !== null) {
+    sessionStorage.removeItem('mapScroll');
+    requestAnimationFrame(() => { document.querySelector('.floor-list').scrollTop = parseInt(savedScroll, 10); });
+  }
 })();
 
 function renderPage() {
@@ -150,6 +155,7 @@ async function enterRoom(roomId) {
   if (state.pending_level_up) return;
   try {
     state = await postAction('/game/room/enter', { room_id: roomId });
+    sessionStorage.setItem('mapScroll', document.querySelector('.floor-list').scrollTop);
     if (state.in_battle) {
       window.location.href = '/battle';
     } else {

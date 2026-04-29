@@ -577,7 +577,7 @@ func (s *Server) handlePostLoadSave(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid save id"})
 		return
 	}
-	g, err := s.db.LoadSave(id)
+	g, err := s.db.LoadSave(id, s.config)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "save not found"})
 		return
