@@ -76,6 +76,7 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/css", "./css")
 	r.Static("/js", "./js")
+	r.Static("/sprites", "./spirtes")
 
 	// Page routes
 	r.GET("/", s.handleGetMenu)

@@ -44,25 +44,35 @@
 
 <div class="map-layout">
   <aside class="hero-panel">
-    <h2 id="hero-name"></h2>
-    <div class="hp-bar-wrapper"><div id="hero-hp-bar" class="hp-bar"></div></div>
-    <p id="hero-hp-text"></p>
-    <div class="hp-bar-wrapper"><div id="hero-mana-bar" class="mana-bar"></div></div>
-    <p id="hero-mana-text"></p>
-    <div class="stat-grid" id="hero-stats"></div>
+    <div class="hero-panel-top">
+      <img id="hero-panel-portrait" class="hero-panel-portrait" src="" alt="">
+      <div class="hero-panel-vitals">
+        <h2 id="hero-name"></h2>
+        <div class="hp-bar-wrapper"><div id="hero-hp-bar" class="hp-bar"></div></div>
+        <p id="hero-hp-text"></p>
+        <div class="hp-bar-wrapper"><div id="hero-mana-bar" class="mana-bar"></div></div>
+        <p id="hero-mana-text"></p>
+        <div class="stat-grid" id="hero-stats"></div>
+      </div>
+    </div>
     <p id="hero-gold" class="hero-gold"></p>
     <div class="equipped-moves">
       <h3>Equipped</h3>
       <ul id="equipped-list"></ul>
     </div>
-    <a href="/moves" class="btn btn-secondary">Manage Moves</a>
-    <a href="/items" class="btn btn-secondary">Items</a>
-    <button class="btn btn-secondary" onclick="openShop()">Shop</button>
-    <button class="btn btn-secondary" onclick="saveAndExit()">Save &amp; Exit</button>
+    <div class="hero-panel-btns">
+      <a href="/moves" class="btn btn-secondary">Manage Moves</a>
+      <a href="/items" class="btn btn-secondary">Items</a>
+      <button class="btn btn-secondary" onclick="openShop()">Shop</button>
+      <button class="btn btn-secondary" onclick="saveAndExit()">Save &amp; Exit</button>
+    </div>
   </aside>
 
   <main class="floor-list">
-    <h2>The Gauntlet</h2>
+    <div class="gauntlet-header">
+      <h2>The Gauntlet</h2>
+      <img id="endless-mode-badge" class="endless-mode-badge hidden" src="/sprites/endless.png" alt="Endless Mode">
+    </div>
     <div id="floors"></div>
   </main>
 </div>

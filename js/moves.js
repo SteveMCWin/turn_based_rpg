@@ -28,22 +28,20 @@ function render() {
     </div>`;
   }).join('');
 
-  document.getElementById('all-moves').innerHTML = (hero.learned_moves || []).map(lm => {
-    const move       = state.moves?.[lm.move_id];
-    const isEquipped = equipped.includes(lm.move_id);
-    const canEquip   = !isEquipped && equipped.length < max;
-    const btn = isEquipped
-      ? `<span class="tag-equipped">Equipped</span>`
-      : `<button class="btn btn-small btn-equip" onclick="equip('${lm.move_id}')" ${canEquip ? '' : 'disabled'}>Equip</button>`;
-    return `<div class="move-card ${isEquipped ? 'equipped' : ''}" data-tooltip="${escHtml(moveTooltipHTML(move))}">
-      <div class="move-card-info">
-        <strong>${escHtml(move?.name || lm.move_id)}</strong>
-        <span class="move-level">Lv.${lm.level}</span>
-        <small class="move-type">${move?.move_type || ''} · ${move?.primary || ''}</small>
-      </div>
-      ${btn}
-    </div>`;
-  }).join('');
+  document.getElementById('all-moves').innerHTML = (hero.learned_moves || [])
+    .filter(lm => !equipped.includes(lm.move_id))
+    .map(lm => {
+      const move     = state.moves?.[lm.move_id];
+      const canEquip = equipped.length < max;
+      return `<div class="move-card" data-tooltip="${escHtml(moveTooltipHTML(move))}">
+        <div class="move-card-info">
+          <strong>${escHtml(move?.name || lm.move_id)}</strong>
+          <span class="move-level">Lv.${lm.level}</span>
+          <small class="move-type">${move?.move_type || ''} · ${move?.primary || ''}</small>
+        </div>
+        <button class="btn btn-small btn-equip" onclick="equip('${lm.move_id}')" ${canEquip ? '' : 'disabled'}>Equip</button>
+      </div>`;
+    }).join('');
 }
 
 async function equip(id) {
