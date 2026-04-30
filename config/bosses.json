@@ -25,32 +25,33 @@
     }
   },
   {
-    "id": "hydra",
-    "name": "Hydra",
+    "id": "minotaur",
+    "name": "Minotaur",
     "level": 0,
-    "health": 60, "attack": 15, "defense": 7, "magic": 7, "mana": 40,
+    "health": 60, "attack": 19, "defense": 7, "magic": 2, "mana": 0,
     "stat_scaling": {
-      "health_scaling": 0.25, "attack_scaling": 0.18,
-      "defense_scaling": 0.20, "magic_scaling": 0.10, "mana_scaling": 0.10
+      "health_scaling": 0.22, "attack_scaling": 0.25,
+      "defense_scaling": 0.18, "magic_scaling": 0.03, "mana_scaling": 0.0
     },
     "learned_moves": [
-      { "move_id": "bite",       "level": 1 },
       { "move_id": "headbutt",   "level": 1 },
-      { "move_id": "regenerate", "level": 1 },
-      { "move_id": "multi_bite", "level": 1 },
-      { "move_id": "constrict",  "level": 1 }
+      { "move_id": "bone_smash", "level": 1 },
+      { "move_id": "frenzy",     "level": 1 },
+      { "move_id": "intimidate", "level": 1 },
+      { "move_id": "claw_swipe", "level": 1 }
     ],
-    "item_pool": ["hydra_fang"],
+    "item_pool": ["minotaur_horn"],
     "env_effects": {
-      "swamp":      { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "marshlands": { "type": "stat_mod", "stat_affected": "defense", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "desert":     { "type": "stat_mod", "stat_affected": "attack",  "delta": -4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "volcanic":   { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
+      "cave":          { "type": "stat_mod", "stat_affected": "attack",  "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
+      "ancient_ruins": { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":        { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "swamp":         { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":      { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   },
   {
-    "id": "giant",
-    "name": "Giant",
+    "id": "cyclops",
+    "name": "Cyclops",
     "level": 0,
     "health": 75, "attack": 22, "defense": 9, "magic": 3, "mana": 0,
     "stat_scaling": {

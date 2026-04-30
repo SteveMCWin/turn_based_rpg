@@ -171,13 +171,13 @@
     "stat_affected": { "attack": 5, "magic": 8 }
   },
   {
-    "id": "hydra_fang",
-    "name": "Hydra Fang",
-    "description": "A severed fang still dripping with regenerative venom. Increases Attack, Defense, and Health.",
+    "id": "minotaur_horn",
+    "name": "Minotaur Horn",
+    "description": "A massive horn from a defeated Minotaur, still radiating raw ferocity. Greatly increases Attack and Health.",
     "item_type": "trinket",
     "drop_rate": 100,
     "price": 320,
-    "stat_affected": { "attack": 6, "defense": 5, "health": 10 }
+    "stat_affected": { "attack": 8, "health": 12 }
   },
   {
     "id": "giants_sigil",
