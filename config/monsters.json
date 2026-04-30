@@ -95,29 +95,6 @@
     }
   },
   {
-    "id": "harpy",
-    "name": "Harpy",
-    "level": 0,
-    "health": 32, "attack": 13, "defense": 2, "magic": 6, "mana": 20,
-    "stat_scaling": {
-      "health_scaling": 0.12, "attack_scaling": 0.18,
-      "defense_scaling": 0.08, "magic_scaling": 0.10, "mana_scaling": 0.08
-    },
-    "learned_moves": [
-      { "move_id": "claw_swipe",  "level": 1 },
-      { "move_id": "pounce",      "level": 1 },
-      { "move_id": "wind_slash",  "level": 1 },
-      { "move_id": "intimidate",  "level": 1 }
-    ],
-    "item_pool": ["shadow_dagger", "amulet_of_vitality", "health_potion", "iron_pendant"],
-    "env_effects": {
-      "open_sky":        { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "misty_mountains": { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
-      "cave":            { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "crypt":           { "type": "stat_mod", "stat_affected": "defense", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
-    }
-  },
-  {
     "id": "skeleton_brute",
     "name": "Skeleton Brute",
     "level": 0,
@@ -141,26 +118,27 @@
     }
   },
   {
-    "id": "skeleton_archer",
-    "name": "Skeleton Archer",
+    "id": "skeleton_mage",
+    "name": "Skeleton Mage",
     "level": 0,
-    "health": 28, "attack": 11, "defense": 2, "magic": 3, "mana": 0,
+    "health": 25, "attack": 4, "defense": 2, "magic": 13, "mana": 40,
     "stat_scaling": {
-      "health_scaling": 0.12, "attack_scaling": 0.18,
-      "defense_scaling": 0.08, "magic_scaling": 0.05, "mana_scaling": 0.0
+      "health_scaling": 0.10, "attack_scaling": 0.05,
+      "defense_scaling": 0.08, "magic_scaling": 0.22, "mana_scaling": 0.15
     },
     "learned_moves": [
-      { "move_id": "arrow_shot",    "level": 1 },
-      { "move_id": "piercing_shot", "level": 1 },
-      { "move_id": "dirty_kick",    "level": 1 }
+      { "move_id": "shadow_bolt",  "level": 1 },
+      { "move_id": "arcane_surge", "level": 1 },
+      { "move_id": "mana_drain",   "level": 1 },
+      { "move_id": "hex_shield",   "level": 1 }
     ],
-    "item_pool": ["shadow_dagger", "iron_pendant", "health_potion", "leather_vest"],
+    "item_pool": ["enchanted_wand", "mana_crystal", "mana_potion", "iron_pendant"],
     "env_effects": {
-      "graveyard": { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "plains":    { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "open_sky":  { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
-      "cave":      { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "crypt":     { "type": "stat_mod", "stat_affected": "attack",  "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+      "graveyard":     { "type": "stat_mod", "stat_affected": "magic", "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "crypt":         { "type": "stat_mod", "stat_affected": "magic", "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "ancient_ruins": { "type": "stat_mod", "stat_affected": "magic", "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":        { "type": "stat_mod", "stat_affected": "magic", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":      { "type": "stat_mod", "stat_affected": "magic", "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   },
   {
@@ -236,30 +214,6 @@
     }
   },
   {
-    "id": "griffin",
-    "name": "Griffin",
-    "level": 0,
-    "health": 44, "attack": 15, "defense": 4, "magic": 7, "mana": 20,
-    "stat_scaling": {
-      "health_scaling": 0.18, "attack_scaling": 0.22,
-      "defense_scaling": 0.15, "magic_scaling": 0.08, "mana_scaling": 0.05
-    },
-    "learned_moves": [
-      { "move_id": "claw_swipe",  "level": 1 },
-      { "move_id": "pounce",      "level": 1 },
-      { "move_id": "talon_strike","level": 1 },
-      { "move_id": "battle_cry",  "level": 1 }
-    ],
-    "item_pool": ["battle_axe", "amulet_of_vitality", "leather_vest", "health_potion"],
-    "env_effects": {
-      "open_sky":        { "type": "stat_mod", "stat_affected": "attack",  "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
-      "misty_mountains": { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
-      "plains":          { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
-      "cave":            { "type": "stat_mod", "stat_affected": "attack",  "delta": -4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "crypt":           { "type": "stat_mod", "stat_affected": "defense", "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
-    }
-  },
-  {
     "id": "centipede",
     "name": "Centipede",
     "level": 0,
@@ -283,26 +237,27 @@
     }
   },
   {
-    "id": "giant_toad",
-    "name": "Giant Toad",
+    "id": "giant_lizard",
+    "name": "Giant Lizard",
     "level": 0,
-    "health": 45, "attack": 11, "defense": 5, "magic": 4, "mana": 0,
+    "health": 42, "attack": 13, "defense": 4, "magic": 3, "mana": 0,
     "stat_scaling": {
-      "health_scaling": 0.20, "attack_scaling": 0.15,
-      "defense_scaling": 0.18, "magic_scaling": 0.05, "mana_scaling": 0.0
+      "health_scaling": 0.18, "attack_scaling": 0.18,
+      "defense_scaling": 0.15, "magic_scaling": 0.05, "mana_scaling": 0.0
     },
     "learned_moves": [
-      { "move_id": "headbutt",  "level": 1 },
-      { "move_id": "constrict", "level": 1 },
-      { "move_id": "dirty_kick","level": 1 },
-      { "move_id": "skitter",   "level": 1 }
+      { "move_id": "bite",        "level": 1 },
+      { "move_id": "poison_bite", "level": 1 },
+      { "move_id": "constrict",   "level": 1 },
+      { "move_id": "headbutt",    "level": 1 }
     ],
     "item_pool": ["health_potion", "leather_vest", "amulet_of_vitality", "iron_pendant"],
     "env_effects": {
-      "swamp":      { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "marshlands": { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
-      "cave":       { "type": "stat_mod", "stat_affected": "defense", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
-      "desert":     { "type": "stat_mod", "stat_affected": "attack",  "delta": -4, "duration": 99, "target": "self", "activation_delay": 0 }
+      "desert":     { "type": "stat_mod", "stat_affected": "attack",  "delta":  5, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":   { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "forest":     { "type": "stat_mod", "stat_affected": "defense", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "cave":       { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "marshlands": { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   },
   {
@@ -375,6 +330,30 @@
       "forest":     { "type": "stat_mod", "stat_affected": "attack",  "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
       "desert":     { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
       "volcanic":   { "type": "stat_mod", "stat_affected": "attack",  "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
+    }
+  },
+  {
+    "id": "zombie",
+    "name": "Zombie",
+    "level": 0,
+    "health": 48, "attack": 11, "defense": 4, "magic": 1, "mana": 0,
+    "stat_scaling": {
+      "health_scaling": 0.20, "attack_scaling": 0.15,
+      "defense_scaling": 0.15, "magic_scaling": 0.02, "mana_scaling": 0.0
+    },
+    "learned_moves": [
+      { "move_id": "bite",        "level": 1 },
+      { "move_id": "rotten_claw", "level": 1 },
+      { "move_id": "bleed_bite",  "level": 1 },
+      { "move_id": "bone_smash",  "level": 1 }
+    ],
+    "item_pool": ["health_potion", "leather_vest", "iron_pendant", "amulet_of_vitality"],
+    "env_effects": {
+      "graveyard":     { "type": "stat_mod", "stat_affected": "attack",  "delta":  4, "duration": 99, "target": "self", "activation_delay": 0 },
+      "crypt":         { "type": "stat_mod", "stat_affected": "attack",  "delta":  3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "swamp":         { "type": "stat_mod", "stat_affected": "defense", "delta":  2, "duration": 99, "target": "self", "activation_delay": 0 },
+      "volcanic":      { "type": "stat_mod", "stat_affected": "attack",  "delta": -3, "duration": 99, "target": "self", "activation_delay": 0 },
+      "plains":        { "type": "stat_mod", "stat_affected": "attack",  "delta": -2, "duration": 99, "target": "self", "activation_delay": 0 }
     }
   }
 ]
