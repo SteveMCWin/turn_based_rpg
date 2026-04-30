@@ -145,7 +145,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 /* Saves list */
 .saves-section { margin-top: 28px; text-align: left; }
 .saves-title { color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.saves-list { display: flex; flex-direction: column; gap: 8px; }
+.saves-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
 .save-slot {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   background: var(--bg); border: 2px solid var(--accent2); border-radius: var(--radius);
@@ -165,7 +165,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
   display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start;
 }
 .hero-panel-portrait {
-  width: 128px; height: 160px; image-rendering: pixelated;
+  width: 160px; height: 200px; image-rendering: pixelated;
   display: block; border: var(--border) solid var(--accent2);
 }
 .hero-panel-vitals { display: flex; flex-direction: column; gap: 5px; }
@@ -274,7 +274,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 .hero-side h2    { color: var(--accent2); }
 .monster-side h2 { color: var(--accent); }
 .combatant-sprite {
-  width: 128px; height: 160px; image-rendering: pixelated;
+  width: 160px; height: 200px; image-rendering: pixelated;
   display: block; margin: 6px auto 10px;
 }
 #hero-sprite    { border: var(--border) solid var(--accent2); }
@@ -299,7 +299,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 .item-icons { display: flex; gap: 6px; flex-wrap: wrap; margin: 3px 0; }
 
 /* Environment banner */
-.env-banner { display: flex; align-items: baseline; gap: 8px; padding: 5px 9px; background: rgba(32,60,86,0.6); border: 2px solid var(--accent2); border-radius: var(--radius); font-size: 12px; }
+.env-banner { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 5px 9px; background: rgba(32,60,86,0.6); border: 2px solid var(--accent2); border-radius: var(--radius); font-size: 12px; }
 .env-banner:empty { display: none; }
 .env-banner-name { color: var(--accent2); white-space: nowrap; }
 .env-banner-desc { color: var(--text-secondary); }

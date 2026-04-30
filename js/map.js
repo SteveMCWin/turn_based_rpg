@@ -39,7 +39,7 @@ function renderHeroPanel() {
     <span>${statIcon('magic')}MAG ${effMag(h)}</span>
     <span class="xp-text">XP ${h.current_xp || 0}</span>
   `;
-  document.getElementById('hero-gold').innerHTML = `<img class="stat-icon" src="/sprites/gold.png" alt="Gold" onerror="this.style.display='none'">${h.current_gold || 0}`;
+  document.getElementById('hero-gold').innerHTML = `<img class="stat-icon" src="/sprites/gold.png" alt="Gold" data-tooltip="Gold" onerror="this.style.display='none'">${h.current_gold || 0}`;
   document.getElementById('equipped-list').innerHTML = (h.equipped_moves || []).map(id => {
     const move = state.moves?.[id];
     const lm   = (h.learned_moves || []).find(m => m.move_id === id);

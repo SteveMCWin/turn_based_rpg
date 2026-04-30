@@ -129,13 +129,16 @@ async function submitMove(moveId) {
   try {
     const result = await postAction('/game/battle/move', { move_id: moveId });
 
-    // Phase 1: show player's action (update monster side only)
-    const gs = result.game_state;
+    // Phase 1: show player's action (update monster side only).
+    // Use the old state.current_room_id — the server clears it when battle ends,
+    // so gs.current_room_id would be empty on a killing blow.
+    const gs      = result.game_state;
+    const roomId  = state.current_room_id;
     const newMonster = (() => {
-      if (!gs?.current_room_id || !gs?.floors) return null;
+      if (!roomId || !gs?.floors) return null;
       for (const floor of gs.floors)
         for (const room of floor.Rooms)
-          if (room.Id === gs.current_room_id) return room.Encounter?.monster || null;
+          if (room.Id === roomId) return room.Encounter?.monster || null;
       return null;
     })();
     if (newMonster) renderCombatant('monster', newMonster);

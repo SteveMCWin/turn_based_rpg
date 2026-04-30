@@ -95,7 +95,7 @@ const _STAT_SPRITE = { attack: 'weapon', defense: 'armor', magic: 'magic', healt
 function statIcon(stat) {
   const src   = '/sprites/' + (_STAT_SPRITE[stat] || stat) + '.png';
   const label = stat.charAt(0).toUpperCase() + stat.slice(1);
-  return `<img class="stat-icon" src="${src}" alt="${label}" title="${label}" onerror="this.style.display='none'">`;
+  return `<img class="stat-icon" src="${src}" alt="${label}" data-tooltip="${label}" onerror="this.style.display='none'">`;
 }
 function itemTypeIcon(type, small) {
   const cls = small ? 'item-type-icon-sm' : 'item-type-icon';

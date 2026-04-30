@@ -14,7 +14,7 @@ function closeShopOnBackdrop(e) {
 
 function renderShop() {
   const gold = state?.player?.current_gold || 0;
-  document.getElementById('shop-gold-display').textContent = `💰 ${gold}g`;
+  document.getElementById('shop-gold-display').innerHTML = `<img class="stat-icon" src="/sprites/gold.png" alt="Gold" data-tooltip="Gold" onerror="this.style.display='none'"> ${gold}`;
   document.getElementById('shop-error').classList.add('hidden');
 
   const shopItems = state?.shop?.items || [];
