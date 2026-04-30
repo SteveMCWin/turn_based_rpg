@@ -29,21 +29,21 @@ function envPrefsHTML(envEffects) {
 function renderHeroCards(heroes) {
   const grid = document.getElementById('hero-select-grid');
   grid.innerHTML = heroes.map(h => {
-    const startingItems = (h.equipment || []).map(item => {
-      const icon = item.item_type === 'weapon' ? '⚔' : item.item_type === 'armor' ? '🛡' : '💎';
-      return `<span class="hero-card-item" title="${escHtml(item.name)}">${icon} ${escHtml(item.name)}</span>`;
-    }).join('');
+    const startingItems = (h.equipment || []).map(item =>
+      `<span class="hero-card-item" title="${escHtml(item.name)}">${itemTypeIcon(item.item_type, true)} ${escHtml(item.name)}</span>`
+    ).join('');
 
     return `
     <div class="hero-card" data-id="${escHtml(h.id)}" onclick="selectHero(this)">
+      <img class="hero-card-portrait" src="${heroSprite(h.id)}" alt="${escHtml(h.name)}">
       <div class="hero-card-name">${escHtml(h.name)}</div>
       <div class="hero-card-desc">${escHtml(h.description || '')}</div>
       <div class="hero-card-stats">
-        <span title="Health">❤ ${h.health}</span>
-        <span title="Attack">⚔ ${h.attack}</span>
-        <span title="Defense">🛡 ${h.defense}</span>
-        <span title="Magic">✦ ${h.magic}</span>
-        <span title="Mana">◈ ${h.mana}</span>
+        <span>${statIcon('health')}${h.health}</span>
+        <span>${statIcon('attack')}${h.attack}</span>
+        <span>${statIcon('defense')}${h.defense}</span>
+        <span>${statIcon('magic')}${h.magic}</span>
+        <span>${statIcon('mana')}${h.mana}</span>
       </div>
       ${startingItems ? `<div class="hero-card-items">${startingItems}</div>` : ''}
       ${envPrefsHTML(h.env_effects)}

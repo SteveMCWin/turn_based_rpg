@@ -23,6 +23,10 @@ function renderPage() {
 
 function renderHeroPanel() {
   const h = state.player;
+  const portrait = document.getElementById('hero-panel-portrait');
+  if (portrait) portrait.src = heroSprite(h.id);
+  const badge = document.getElementById('endless-mode-badge');
+  if (badge) badge.classList.toggle('hidden', !state.is_endless);
   document.getElementById('hero-name').textContent      = h.name;
   document.getElementById('hero-hp-text').textContent   = `HP: ${h.current_hp} / ${maxHP(h)}`;
   document.getElementById('hero-mana-text').textContent = `MP: ${h.current_mana || 0} / ${maxMana(h)}`;
@@ -30,12 +34,12 @@ function renderHeroPanel() {
   document.getElementById('hero-mana-bar').style.width  = pct(h.current_mana || 0, maxMana(h));
   document.getElementById('hero-stats').innerHTML = `
     <span>LVL ${h.level}</span>
-    <span>ATK ${effAtk(h)}</span>
-    <span>DEF ${effDef(h)}</span>
-    <span>MAG ${effMag(h)}</span>
+    <span>${statIcon('attack')}ATK ${effAtk(h)}</span>
+    <span>${statIcon('defense')}DEF ${effDef(h)}</span>
+    <span>${statIcon('magic')}MAG ${effMag(h)}</span>
     <span class="xp-text">XP ${h.current_xp || 0}</span>
   `;
-  document.getElementById('hero-gold').textContent = `💰 ${h.current_gold || 0}g`;
+  document.getElementById('hero-gold').innerHTML = `<img class="stat-icon" src="/sprites/gold.png" alt="Gold" onerror="this.style.display='none'">${h.current_gold || 0}`;
   document.getElementById('equipped-list').innerHTML = (h.equipped_moves || []).map(id => {
     const move = state.moves?.[id];
     const lm   = (h.learned_moves || []).find(m => m.move_id === id);
@@ -49,7 +53,7 @@ function renderFloors() {
     const nodes = (floor.Rooms || []).map(room => renderRoomNode(room, floor)).join('');
     return `
       <div class="floor-section ${floor.IsCompleted ? 'floor-done' : ''}">
-        <div class="floor-label">Floor ${fi + 1}${floor.IsCompleted ? ' ✓' : ''}</div>
+        <div class="floor-label">Floor ${fi + 1}</div>
         <div class="floor-row">${nodes}</div>
       </div>`;
   }).join('');
@@ -61,10 +65,9 @@ function renderRoomNode(room, floor) {
   const kind = enc?.kind;
   const floorHasCompleted = (floor.Rooms || []).some(r => r.IsCompleted);
 
-  const isBoss   = kind === 'boss';
-  const icon     = kind === 'monster' ? '⚔' : isBoss ? '★' : '?';
-  const domId    = 'room-' + room.Id.replace(',', '_');
-  const tooltip  = roomTooltipHTML(room);
+  const isBoss     = kind === 'boss';
+  const domId      = 'room-' + room.Id.replace(',', '_');
+  const tooltip    = roomTooltipHTML(room);
 
   const isRematch = room.IsCompleted && (kind === 'monster' || isBoss) && room.CanEnter && !state.pending_level_up;
   const canClick  = isRematch || (!room.IsCompleted && room.CanEnter && !state.pending_level_up);
@@ -75,13 +78,14 @@ function renderRoomNode(room, floor) {
   if (isLocked)         classes.push('locked');
   if (canClick)         classes.push('can-enter');
 
-  const onclick   = canClick ? `onclick="enterRoom('${room.Id}')"` : '';
-  const check     = room.IsCompleted && !isRematch ? '<span class="room-done-check">✓</span>' : '';
-  const envLabel  = kind === 'monster' && room.Environment?.Name
+  const spriteName = kind === 'monster' ? 'monster_encounter' : isBoss ? 'boss_encounter' : 'event_encounter';
+  const onclick    = canClick ? `onclick="enterRoom('${room.Id}')"` : '';
+  const check      = room.IsCompleted && !isRematch ? '<span class="room-done-check">✓</span>' : '';
+  const envLabel   = (kind === 'monster' || isBoss) && room.Environment?.Name
     ? `<span class="room-env-label">${escHtml(room.Environment.Name)}</span>` : '';
 
   return `<div class="${classes.join(' ')}" id="${domId}" data-tooltip="${escHtml(tooltip)}" ${onclick}>
-    <span class="room-node-icon">${icon}</span>${check}${envLabel}
+    <img src="/sprites/${spriteName}.png" alt="${kind}">${check}${envLabel}
   </div>`;
 }
 
@@ -114,6 +118,21 @@ function getOffsetFrom(el, container) {
   return { x, y };
 }
 
+function findRoom(id) {
+  for (const floor of (state.floors || []))
+    for (const room of (floor.Rooms || []))
+      if (room.Id === id) return room;
+  return null;
+}
+
+function isRoomAccessible(room) {
+  if (!room) return false;
+  const kind = room.Encounter?.kind;
+  const isBoss = kind === 'boss';
+  const isRematch = room.IsCompleted && (kind === 'monster' || isBoss) && room.CanEnter;
+  return isRematch || (!room.IsCompleted && room.CanEnter);
+}
+
 function drawConnections() {
   const container = document.getElementById('floors');
   const old = document.getElementById('connections-svg');
@@ -123,6 +142,13 @@ function drawConnections() {
   svg.id = 'connections-svg';
   svg.setAttribute('aria-hidden', 'true');
   container.prepend(svg);
+
+  // Find the completed room on the highest floor — that's the one whose exits to highlight
+  let lastCompleted = null;
+  for (let fi = (state.floors || []).length - 1; fi >= 0; fi--) {
+    const r = (state.floors[fi].Rooms || []).find(r => r.IsCompleted);
+    if (r) { lastCompleted = r; break; }
+  }
 
   (state.floors || []).forEach(floor => {
     (floor.Rooms || []).forEach(room => {
@@ -140,11 +166,16 @@ function drawConnections() {
         const tx = to.x + toEl.offsetWidth  / 2;
         const ty = to.y + toEl.offsetHeight / 2;
 
+        const toRoom    = findRoom(nextId);
+        const active    = room.Id === lastCompleted?.Id && isRoomAccessible(toRoom);
+        const stroke    = active ? '#ffaa5e' : '#544e68';
+        const thickness = active ? '3' : '2';
+
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', fx); line.setAttribute('y1', fy);
         line.setAttribute('x2', tx); line.setAttribute('y2', ty);
-        line.setAttribute('stroke', '#2a4a7f');
-        line.setAttribute('stroke-width', '2');
+        line.setAttribute('stroke', stroke);
+        line.setAttribute('stroke-width', thickness);
         svg.appendChild(line);
       });
     });
@@ -159,7 +190,6 @@ async function enterRoom(roomId) {
     if (state.in_battle) {
       window.location.href = '/battle';
     } else {
-      // Event was applied — go to event result page
       window.location.href = `/event?room=${encodeURIComponent(roomId)}`;
     }
   } catch (e) {

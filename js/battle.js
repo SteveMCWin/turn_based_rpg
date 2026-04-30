@@ -21,7 +21,7 @@ function renderEnvironment() {
   const el = document.getElementById('env-banner');
   if (!el) return;
   const env = currentRoom()?.Environment;
-  if (!env?.Name) { el.innerHTML = ''; return; }
+  if (!env?.Name) return;
   el.innerHTML = `<span class="env-banner-name">${escHtml(env.Name)}</span><span class="env-banner-desc">${escHtml(env.Description)}</span>`;
 }
 
@@ -42,6 +42,9 @@ function renderCombatant(side, entity) {
   const mp  = entity.current_mana || 0;
   const mhp = maxHP(entity);
   const mmp = maxMana(entity);
+
+  const spriteEl = document.getElementById(`${side}-sprite`);
+  if (spriteEl) spriteEl.src = side === 'hero' ? heroSprite(entity.id) : monsterSprite(entity.id);
 
   document.getElementById(`${side}-name`).textContent    = entity.name || 'Knight';
   document.getElementById(`${side}-hp-text`).textContent = `HP: ${hp} / ${mhp}`;
@@ -66,18 +69,17 @@ function renderCombatant(side, entity) {
     return `<span class="effect-tag">${label} (${se.TurnsRemaining}t)</span>`;
   }).join('');
 
-  document.getElementById(`${side}-items`).innerHTML = (entity.equipment || []).map(item => {
-    const icon = item.item_type === 'weapon' ? '⚔' : item.item_type === 'armor' ? '🛡' : '💎';
-    return `<span class="item-icon" data-tooltip="${escHtml(itemTooltipHTML(item))}">${icon}</span>`;
-  }).join('');
+  document.getElementById(`${side}-items`).innerHTML = (entity.equipment || []).map(item =>
+    `<span data-tooltip="${escHtml(itemTooltipHTML(item))}">${itemTypeIcon(item.item_type)}</span>`
+  ).join('');
 }
 
 function renderMonsterInfo(monster) {
   if (!monster) return;
   document.getElementById('monster-stats').innerHTML =
-    `<span>ATK ${effAtk(monster)}</span>`
-    + `<span>DEF ${effDef(monster)}</span>`
-    + `<span>MAG ${effMag(monster)}</span>`
+    `<span>${statIcon('attack')}ATK ${effAtk(monster)}</span>`
+    + `<span>${statIcon('defense')}DEF ${effDef(monster)}</span>`
+    + `<span>${statIcon('magic')}MAG ${effMag(monster)}</span>`
     + `<span>Lv.${monster.level}</span>`;
 
   // monster.learned_moves is []LearnedMove with {move_id, level}
@@ -122,15 +124,31 @@ function renderBattleLog() {
 }
 
 async function submitMove(moveId) {
-  document.getElementById('move-buttons').innerHTML = '<p class="waiting-text">Processing…</p>';
+  const grid = document.getElementById('move-buttons');
+  grid.querySelectorAll('button').forEach(b => b.disabled = true);
   try {
     const result = await postAction('/game/battle/move', { move_id: moveId });
-    state = result.game_state;
-    renderAll();
-    if (result.battle_over) {
-      document.getElementById('move-buttons').innerHTML =
-        `<button class="btn btn-primary" onclick="window.location.href='/post-battle'">Continue</button>`;
-    }
+
+    // Phase 1: show player's action (update monster side only)
+    const gs = result.game_state;
+    const newMonster = (() => {
+      if (!gs?.current_room_id || !gs?.floors) return null;
+      for (const floor of gs.floors)
+        for (const room of floor.Rooms)
+          if (room.Id === gs.current_room_id) return room.Encounter?.monster || null;
+      return null;
+    })();
+    if (newMonster) renderCombatant('monster', newMonster);
+
+    // Phase 2: after 1s show monster's response + full update
+    setTimeout(() => {
+      state = gs;
+      renderAll();
+      if (result.battle_over) {
+        grid.innerHTML =
+          `<button class="btn btn-primary" onclick="window.location.href='/post-battle'">Continue</button>`;
+      }
+    }, 1000);
   } catch (e) {
     alert(e.message);
     renderMoveButtons();

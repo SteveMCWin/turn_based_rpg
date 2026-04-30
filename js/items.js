@@ -12,9 +12,10 @@ function render() {
     document.getElementById('battle-warning').classList.remove('hidden');
   }
 
-  const equipped  = state.player.equipment || [];
-  const inventory = state.player.item_pool  || [];
-  const inBattle  = state.in_battle;
+  const equipped      = state.player.equipment || [];
+  const inventory     = state.player.item_pool  || [];
+  const inBattle      = state.in_battle;
+  const equippedTypes = new Set(equipped.map(e => e.item_type));
 
   // Equipped items
   const equippedEl    = document.getElementById('equipped-items');
@@ -54,13 +55,14 @@ function render() {
       const isEquipped   = equipped.some(e => e.id === id);
       const count        = counts[id] > 1 ? ` ×${counts[id]}` : '';
 
+      const slotFull = !isConsumable && !isEquipped && equippedTypes.has(item.item_type);
       let btn;
       if (isConsumable) {
         btn = `<button class="btn btn-small btn-primary" onclick="useItem('${id}')" ${inBattle ? 'disabled' : ''}>Use</button>`;
       } else if (isEquipped) {
         btn = `<span class="tag-equipped">Equipped</span>`;
       } else {
-        btn = `<button class="btn btn-small btn-equip" onclick="equipItem('${id}')" ${inBattle ? 'disabled' : ''}>Equip</button>`;
+        btn = `<button class="btn btn-small btn-equip" onclick="equipItem('${id}')" ${inBattle || slotFull ? 'disabled' : ''}>Equip</button>`;
       }
 
       return `<div class="item-card" data-tooltip="${escHtml(itemTooltipHTML(item))}">
@@ -75,9 +77,7 @@ function render() {
   }
 }
 
-function itemIcon(type) {
-  return type === 'weapon' ? '⚔' : type === 'armor' ? '🛡' : type === 'trinket' ? '💎' : '🧪';
-}
+function itemIcon(type) { return itemTypeIcon(type); }
 
 function formatStatBonuses(item) {
   const bonuses = Object.entries(item.stat_affected || {})

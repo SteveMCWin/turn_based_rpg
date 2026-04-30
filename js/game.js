@@ -85,3 +85,19 @@ function initTooltips() {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+const _HERO_SPRITE_ALIAS = { mage: 'wizard' };
+function heroSprite(id)       { return '/sprites/' + (_HERO_SPRITE_ALIAS[id] || id) + '.png'; }
+function monsterSprite(id)    { return '/sprites/' + id + '.png'; }
+function itemTypeSprite(type) { return '/sprites/' + type + '.png'; }
+
+const _STAT_SPRITE = { attack: 'weapon', defense: 'armor', magic: 'magic', health: 'health', mana: 'mana' };
+function statIcon(stat) {
+  const src   = '/sprites/' + (_STAT_SPRITE[stat] || stat) + '.png';
+  const label = stat.charAt(0).toUpperCase() + stat.slice(1);
+  return `<img class="stat-icon" src="${src}" alt="${label}" title="${label}" onerror="this.style.display='none'">`;
+}
+function itemTypeIcon(type, small) {
+  const cls = small ? 'item-type-icon-sm' : 'item-type-icon';
+  return `<img class="${cls}" src="${itemTypeSprite(type)}" alt="${type}" onerror="this.style.display='none'">`;
+}

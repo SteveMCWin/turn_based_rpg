@@ -261,8 +261,8 @@
     }
   },
   {
-    "id": "phoenix",
-    "name": "Phoenix",
+    "id": "pheonix",
+    "name": "Pheonix",
     "level": 0,
     "health": 30, "attack": 8, "defense": 3, "magic": 16, "mana": 60,
     "stat_scaling": {
