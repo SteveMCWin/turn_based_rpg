@@ -35,9 +35,13 @@ function renderHeroCards(heroes) {
 
     return `
     <div class="hero-card" data-id="${escHtml(h.id)}" onclick="selectHero(this)">
-      <img class="hero-card-portrait" src="${heroSprite(h.id)}" alt="${escHtml(h.name)}">
-      <div class="hero-card-name">${escHtml(h.name)}</div>
-      <div class="hero-card-desc">${escHtml(h.description || '')}</div>
+      <div class="hero-card-top">
+        <img class="hero-card-portrait" src="${heroSprite(h.id)}" alt="${escHtml(h.name)}">
+        <div class="hero-card-top-right">
+          <div class="hero-card-name">${escHtml(h.name)}</div>
+          <div class="hero-card-desc">${escHtml(h.description || '')}</div>
+        </div>
+      </div>
       <div class="hero-card-stats">
         <span>${statIcon('health')}${h.health}</span>
         <span>${statIcon('attack')}${h.attack}</span>

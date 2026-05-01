@@ -74,7 +74,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 /* Menu */
 .menu-page { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding-top: 60px; }
 .menu-container { text-align: center; width: 100%; max-width: 420px; padding: 0 24px 40px; }
-.menu-wide { max-width: 960px; }
+.menu-wide { max-width: 1440px; }
 .game-title { font-size: 30px; color: var(--accent2); margin-bottom: 10px; }
 .menu-subtitle { color: var(--text-secondary); font-size: 13px; margin-bottom: 28px; }
 .menu-buttons { display: flex; flex-direction: column; gap: 12px; }
@@ -91,27 +91,32 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
   transition: filter 0.15s, border-color 0.15s, box-shadow 0.15s;
 }
 .endless-toggle:has(input:checked) .endless-icon {
-  border-color: var(--accent2);
+  border-width: 0;
   filter: none;
   box-shadow: 0 0 10px rgba(255,170,94,0.45);
 }
 
 /* Hero selection cards */
-.hero-select-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+.hero-select-grid { display: flex; gap: 20px; justify-content: center; align-items: stretch; }
 .hero-card {
   background: var(--surface); border: var(--border) solid var(--muted); border-radius: var(--radius);
-  padding: 20px 18px; width: 230px; cursor: pointer; text-align: center;
+  padding: 20px; cursor: pointer;
+  display: flex; flex-direction: column;
+  flex: 1;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .hero-card:hover { border-color: var(--accent2); }
 .hero-card.selected { border-color: var(--accent2); box-shadow: 0 0 0 2px rgba(255,170,94,0.18); }
 .hero-card-portrait {
-  width: 96px; height: 120px; image-rendering: pixelated;
-  margin: 0 auto 14px; display: block;
+  width: auto; height: 100%; image-rendering: pixelated;
+  flex-shrink: 0;
+  border: var(--border) solid #ffaa5e;
 }
-.hero-card-name { font-size: 16px; color: var(--accent2); margin-bottom: 10px; }
-.hero-card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 14px; min-height: 56px; text-align: left; }
-.hero-card-stats { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.hero-card-top { display: flex; flex-direction: row; gap: 16px; height: 160px; padding-bottom: 12px; border-bottom: 2px solid var(--muted); margin-bottom: 4px; overflow: hidden; }
+.hero-card-top-right { flex: 1; display: flex; flex-direction: column; text-align: left; }
+.hero-card-name { font-size: 16px; color: var(--accent2); margin-bottom: 8px; }
+.hero-card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+.hero-card-stats { display: flex; flex-wrap: wrap; gap: 5px; border-top: 2px solid var(--muted); padding: 10px 0; }
 .hero-card-stats span {
   background: var(--bg); border: 2px solid var(--muted); border-radius: var(--radius);
   padding: 3px 7px; font-size: 12px; color: var(--text);
@@ -135,17 +140,19 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 .modal-box {
   background: var(--surface); border: var(--border) solid var(--accent2); border-radius: var(--radius);
   padding: 28px; width: 100%; max-width: 560px;
+  height: 50vh; display: flex; flex-direction: column; overflow: hidden;
 }
 .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .modal-title { font-size: 16px; color: var(--accent2); }
 .modal-menu-btn { width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 8px; }
 .modal-back-btn { margin-bottom: 16px; }
+#settings-saves { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .muted-text { color: var(--text-secondary); font-size: 13px; }
 
 /* Saves list */
 .saves-section { margin-top: 28px; text-align: left; }
 .saves-title { color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-.saves-list { display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto; }
+.saves-list { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; overflow-y: auto; }
 .save-slot {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
   background: var(--bg); border: 2px solid var(--accent2); border-radius: var(--radius);
@@ -348,7 +355,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 .battle-warning { background: rgba(208,129,89,0.12); border: 2px solid var(--accent); border-radius: var(--radius); padding: 10px 14px; color: var(--accent); font-size: 12px; margin-bottom: 16px; }
 
 /* Hero card starting items */
-.hero-card-items { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; border-top: 2px solid var(--muted); padding-top: 10px; }
+.hero-card-items { display: flex; flex-wrap: wrap; gap: 5px; border-top: 2px solid var(--muted); padding: 10px 0; }
 .hero-card-item {
   background: var(--bg); border: 2px solid var(--muted); border-radius: var(--radius);
   padding: 2px 7px; font-size: 11px; color: var(--text-secondary);
@@ -356,7 +363,8 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 }
 
 /* Hero card — environment preferences */
-.hero-card-env { margin-top: 10px; border-top: 2px solid var(--muted); padding-top: 8px; display: flex; flex-direction: column; gap: 3px; text-align: left; }
+.hero-card-env { border-top: 2px solid var(--muted); padding-top: 10px; display: flex; flex-direction: row; gap: 16px; text-align: left; }
+.hero-card-env .env-buff, .hero-card-env .env-debuff { flex: 1; }
 .env-pref { font-size: 11px; line-height: 1.5; }
 .env-buff   { color: var(--accent2); }
 .env-debuff { color: var(--accent); }

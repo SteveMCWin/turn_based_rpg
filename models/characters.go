@@ -48,7 +48,6 @@ func (h *Hero) GetMoveLevel(moveID string) int {
 	return 0
 }
 
-// Monster represents an enemy in the gauntlet.
 type Monster struct {
 	Entity
 	ID   string        `json:"id"`
