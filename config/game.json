@@ -1,11 +1,10 @@
 {
-  "xp_per_monster_level": 60,
-  "xp_to_level_up": [0, 100, 250, 450, 700],
+  "xp_per_monster_level": 35,
+  "xp_to_level_up": [0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700],
   "move_level_bonus_percent": 10,
   "max_rooms_per_level": 4,
   "floors_per_realm": 6,
   "max_equipped_moves": 4,
-  "max_move_level": 5,
   "mana_regen_per_turn": 5,
   "mana_restore_between_fights_pct": 0.3,
   "pct_chance_monster_lvl_up": 20,

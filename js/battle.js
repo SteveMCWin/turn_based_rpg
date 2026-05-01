@@ -1,10 +1,13 @@
 let state = null;
+let battleLog = JSON.parse(sessionStorage.getItem('battleInitialLog') || '[]');
+sessionStorage.removeItem('battleInitialLog');
 
 (async () => {
   state = await loadState();
   if (!state) return;
   renderAll();
   initTooltips();
+  if (state.waiting_for_monster) setTimeout(resolveMonsterTurn, 500);
 })();
 
 function renderAll() {
@@ -91,7 +94,7 @@ function renderMonsterInfo(monster) {
 
 function renderMoveButtons() {
   const grid = document.getElementById('move-buttons');
-  if (!state.in_battle) { grid.innerHTML = ''; return; }
+  if (!state.in_battle || state.waiting_for_monster) { grid.innerHTML = ''; return; }
 
   const bonusPct = state.settings?.move_level_bonus_percent || 0;
   grid.innerHTML = (state.player.equipped_moves || []).map(id => {
@@ -114,8 +117,7 @@ function renderMoveButtons() {
 function renderBattleLog() {
   const el = document.getElementById('battle-log');
   el.innerHTML = '';
-  // battle_log is []string in the new model — plain strings, no class
-  for (const line of (state.battle_log || [])) {
+  for (const line of battleLog) {
     const p = document.createElement('p');
     p.textContent = line;
     el.appendChild(p);
@@ -124,36 +126,35 @@ function renderBattleLog() {
 }
 
 async function submitMove(moveId) {
-  const grid = document.getElementById('move-buttons');
-  grid.querySelectorAll('button').forEach(b => b.disabled = true);
   try {
     const result = await postAction('/game/battle/move', { move_id: moveId });
-
-    // Phase 1: show player's action (update monster side only).
-    // Use the old state.current_room_id — the server clears it when battle ends,
-    // so gs.current_room_id would be empty on a killing blow.
-    const gs      = result.game_state;
-    const roomId  = state.current_room_id;
-    const newMonster = (() => {
-      if (!roomId || !gs?.floors) return null;
-      for (const floor of gs.floors)
-        for (const room of floor.Rooms)
-          if (room.Id === roomId) return room.Encounter?.monster || null;
-      return null;
-    })();
-    if (newMonster) renderCombatant('monster', newMonster);
-
-    // Phase 2: after 1s show monster's response + full update
-    setTimeout(() => {
-      state = gs;
-      renderAll();
-      if (result.battle_over) {
-        grid.innerHTML =
-          `<button class="btn btn-primary" onclick="window.location.href='/post-battle'">Continue</button>`;
-      }
-    }, 1000);
+    if (result.new_log_lines?.length) battleLog.push(...result.new_log_lines);
+    state = result.game_state;
+    renderAll();
+    if (result.battle_over) {
+      showContinueButton();
+      return;
+    }
+    setTimeout(resolveMonsterTurn, 1000);
   } catch (e) {
     alert(e.message);
     renderMoveButtons();
   }
+}
+
+async function resolveMonsterTurn() {
+  try {
+    const result = await postAction('/game/battle/monster-move');
+    if (result.new_log_lines?.length) battleLog.push(...result.new_log_lines);
+    state = result.game_state;
+    renderAll();
+    if (result.battle_over) showContinueButton();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+function showContinueButton() {
+  document.getElementById('move-buttons').innerHTML =
+    `<button class="btn btn-primary" onclick="window.location.href='/post-battle'">Continue</button>`;
 }

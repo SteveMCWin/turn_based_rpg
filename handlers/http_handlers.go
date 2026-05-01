@@ -5,23 +5,26 @@ import (
 	"math/rand"
 	"strconv"
 
-	// "log"
 	"net/http"
 	"sync"
-
-	// "time"
 
 	"tbrpg/database"
 	"tbrpg/game"
 	"tbrpg/models"
 
-	// "tbrpg/models"
-
 	"github.com/gin-gonic/gin"
 )
 
-const gameSessionCookieName = "current_game_session"
+// This file basically just creates the server and handles requests
+// handling requests is not that interesting here, mostly just using
+// logic defined in the the models and game packages
 
+// name of the cookie storing current game session id
+const gameSessionCookieName = "current_game_session"
+const oneWeekSecs = 60 * 60 * 24 * 7
+
+// funcitons used in html templates
+// (I just compied all of these from another project, prolly half of them aren't even used)
 func templateFuncs() template.FuncMap {
 	return template.FuncMap{
 		"add": func(a, b int) int {
@@ -56,6 +59,10 @@ func templateFuncs() template.FuncMap {
 	}
 }
 
+// struct that containes all games running and what not
+// oh also note that I was too lazy to delete the running games form the games map
+// so eventually it'd overflow and crash the app, so don't go around
+// playing 1000000 games without refresing the server! :^P
 type Server struct {
 	config *game.GameConfig
 	db     *database.DataBase
@@ -64,6 +71,7 @@ type Server struct {
 	router *gin.Engine
 }
 
+// creates a new server with all the endpoints
 func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	s := &Server{
 		config: config,
@@ -92,9 +100,10 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 	r.GET("/game/heroes", s.handleGetHeroes)
 
 	// Game lifecycle
-	r.POST("/game/new", s.handlePostNewGame)
+	r.POST("/game/new", s.handlePostCreateNewGame)
 	r.POST("/game/room/enter", s.handlePostEnterRoom)
 	r.POST("/game/battle/move", s.handlePostBattleMove)
+	r.POST("/game/battle/monster-move", s.handlePostMonsterMove)
 	r.POST("/game/moves/equip", s.handlePostEquipMove)
 	r.POST("/game/moves/unequip", s.handlePostUnequipMove)
 	r.POST("/game/levelup", s.handlePostLevelUp)
@@ -123,11 +132,9 @@ func (s *Server) setSession(c *gin.Context, g *game.Game) {
 	s.games[g.ID] = g
 	s.mu.Unlock()
 
-	one_week := 60*60*24*7
-	c.SetCookie(gameSessionCookieName, strconv.Itoa(g.ID), one_week, "/", "", false, true)
+	c.SetCookie(gameSessionCookieName, strconv.Itoa(g.ID), oneWeekSecs, "/", "", false, true)
 }
 
-// Get a specific game based on the id of the game stored in a cookie
 func (s *Server) gameFromRequest(c *gin.Context) (*game.Game, bool) {
 	cookie, err := c.Cookie(gameSessionCookieName)
 	if err != nil {
@@ -142,7 +149,7 @@ func (s *Server) gameFromRequest(c *gin.Context) (*game.Game, bool) {
 	s.mu.RLock()
 	g, ok := s.games[id]
 	s.mu.RUnlock()
-	
+
 	return g, ok
 }
 
@@ -199,7 +206,7 @@ func (s *Server) handleGetGameState(c *gin.Context) {
 // ================= GAME FLOW HANDLERS =================
 // ======================================================
 
-func (s *Server) handlePostNewGame(c *gin.Context) {
+func (s *Server) handlePostCreateNewGame(c *gin.Context) {
 	if s.db == nil {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "database unavailable"})
 		return
@@ -211,6 +218,7 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 	}
 	c.ShouldBindJSON(&req)
 
+	// pick first hero by default as fallback
 	hero := s.config.HeroTemplates[0]
 	for _, h := range s.config.HeroTemplates {
 		if h.ID == req.HeroID {
@@ -226,6 +234,7 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	g.ID = id
 	s.setSession(c, g)
 	c.JSON(http.StatusOK, g)
@@ -234,29 +243,37 @@ func (s *Server) handlePostNewGame(c *gin.Context) {
 func (s *Server) handlePostEnterRoom(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 
-	var req struct { RoomID string `json:"room_id" binding:"required"` }
+	var req struct {
+		RoomID string `json:"room_id" binding:"required"`
+	}
+
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "room_id is required"})
 		return
 	}
 
-	if err := g.EnterRoom(req.RoomID); err != nil {
+	initialLog, err := g.EnterRoom(req.RoomID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, g)
+	c.JSON(http.StatusOK, gin.H{"game_state": g, "initial_log": initialLog})
 }
 
 func (s *Server) handlePostBattleMove(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
-	var req struct { MoveID string `json:"move_id" binding:"required"` }
+	var req struct {
+		MoveID string `json:"move_id" binding:"required"`
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
@@ -272,67 +289,65 @@ func (s *Server) handlePostBattleMove(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+func (s *Server) handlePostMonsterMove(c *gin.Context) {
+	g, ok := s.gameFromRequest(c)
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
+		return
+	}
+	result, err := g.SubmitMonsterMove()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if result.BattleOver && result.PlayerWon && result.WasBoss && g.IsEndless {
+		g.AddRealm(s.config)
+	}
+	c.JSON(http.StatusOK, result)
+}
+
 func (s *Server) handlePostEquipMove(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 
-	var req struct { MoveID string `json:"move_id" binding:"required"` }
+	var req struct {
+		MoveID string `json:"move_id" binding:"required"`
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
 	}
-	hero := &g.Player
 
-	maxEquipped := s.config.Settings.MaxEquippedMoves
-
-	if len(hero.EquippedMoves) >= maxEquipped {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "equipped moves at maximum"})
+	if err := g.EquipMove(req.MoveID, s.config.Settings.MaxEquippedMoves); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	for _, id := range hero.EquippedMoves {
-		if id == req.MoveID {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "move already equipped"})
-			return
-		}
-	}
-
-	if hero.GetMoveLevel(req.MoveID) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "move not learned"})
-		return
-	}
-
-	hero.EquippedMoves = append(hero.EquippedMoves, req.MoveID)
 	c.JSON(http.StatusOK, g)
 }
 
 func (s *Server) handlePostUnequipMove(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
-	var req struct { MoveID string `json:"move_id" binding:"required"` }
+	var req struct {
+		MoveID string `json:"move_id" binding:"required"`
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
 	}
 
-	hero := &g.Player
-	if len(hero.EquippedMoves) <= 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "must keep at least one move equipped"})
+	if err := g.UnequipMove(req.MoveID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	updated := hero.EquippedMoves[:0:0]
-	for _, id := range hero.EquippedMoves {
-		if id != req.MoveID {
-			updated = append(updated, id)
-		}
-	}
-
-	hero.EquippedMoves = updated
 	c.JSON(http.StatusOK, g)
 }
 
@@ -343,7 +358,7 @@ func (s *Server) handlePostUnequipMove(c *gin.Context) {
 func (s *Server) handlePostEquipItem(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	if g.IsInBattle {
@@ -357,33 +372,9 @@ func (s *Server) handlePostEquipItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	item, exists := g.AllItems[req.ItemID]
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "unknown item"})
-		return
-	}
-	// Verify item is in player inventory
-	found := false
-	for _, id := range g.Player.ItemPool {
-		if id == req.ItemID {
-			found = true
-			break
-		}
-	}
-	if !found {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "item not in inventory"})
-		return
-	}
-	if err := g.Player.EquipItem(item); err != nil {
+	if err := g.EquipItemFromPool(req.ItemID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}
-	// Remove one occurrence from inventory
-	for i, id := range g.Player.ItemPool {
-		if id == req.ItemID {
-			g.Player.ItemPool = append(g.Player.ItemPool[:i], g.Player.ItemPool[i+1:]...)
-			break
-		}
 	}
 	c.JSON(http.StatusOK, g)
 }
@@ -391,7 +382,7 @@ func (s *Server) handlePostEquipItem(c *gin.Context) {
 func (s *Server) handlePostUnequipItem(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	if g.IsInBattle {
@@ -413,7 +404,7 @@ func (s *Server) handlePostUnequipItem(c *gin.Context) {
 func (s *Server) handlePostUseItem(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	if g.IsInBattle {
@@ -427,31 +418,9 @@ func (s *Server) handlePostUseItem(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	item, exists := g.AllItems[req.ItemID]
-	if !exists {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "unknown item"})
-		return
-	}
-	found := false
-	for _, id := range g.Player.ItemPool {
-		if id == req.ItemID {
-			found = true
-			break
-		}
-	}
-	if !found {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "item not in inventory"})
-		return
-	}
-	if err := g.Player.ApplyConsumableItem(item); err != nil {
+	if err := g.UseItemFromPool(req.ItemID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}
-	for i, id := range g.Player.ItemPool {
-		if id == req.ItemID {
-			g.Player.ItemPool = append(g.Player.ItemPool[:i], g.Player.ItemPool[i+1:]...)
-			break
-		}
 	}
 	c.JSON(http.StatusOK, g)
 }
@@ -459,6 +428,7 @@ func (s *Server) handlePostUseItem(c *gin.Context) {
 func (s *Server) handlePostLevelUp(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	if g.PendingLevelUp == nil {
@@ -466,8 +436,13 @@ func (s *Server) handlePostLevelUp(c *gin.Context) {
 		return
 	}
 
-	var req struct { Allocations map[string]int `json:"allocations"` }
-	c.ShouldBindJSON(&req)
+	var req struct {
+		Allocations map[string]int `json:"allocations"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	if req.Allocations == nil {
 		req.Allocations = map[string]int{}
 	}
@@ -491,7 +466,6 @@ func (s *Server) handlePostLevelUp(c *gin.Context) {
 		spent += pts
 	}
 
-	// Randomize remaining manual points + the automatic random points
 	total := (pending.ManualPoints - spent) + pending.RandomPoints
 	statPool := []models.StatType{models.HealthStat, models.AttackStat, models.DefenseStat, models.MagicStat, models.ManaStat}
 	for i := 0; i < total; i++ {
@@ -509,7 +483,7 @@ func (s *Server) handlePostLevelUp(c *gin.Context) {
 func (s *Server) handlePostBuyItem(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	var req struct {
@@ -529,7 +503,7 @@ func (s *Server) handlePostBuyItem(c *gin.Context) {
 func (s *Server) handlePostSellItem(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	var req struct {
@@ -553,7 +527,7 @@ func (s *Server) handlePostSellItem(c *gin.Context) {
 func (s *Server) handlePostSave(c *gin.Context) {
 	g, ok := s.gameFromRequest(c)
 	if !ok {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "no active game"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "no active game"})
 		return
 	}
 	if err := s.db.SaveGame(g); err != nil {
@@ -599,4 +573,3 @@ func (s *Server) handleDeleteDeleteSave(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
-

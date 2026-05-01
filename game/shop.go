@@ -43,7 +43,7 @@ func (g *Game) SellItem(itemID string) error {
 	if !found {
 		return fmt.Errorf("item not in inventory")
 	}
-	item, ok := g.AllItems[itemID]
+	item, ok := g.Config.Items[itemID]
 	if !ok {
 		return fmt.Errorf("unknown item")
 	}

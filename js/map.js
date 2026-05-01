@@ -69,7 +69,7 @@ function renderRoomNode(room, floor) {
   const domId      = 'room-' + room.Id.replace(',', '_');
   const tooltip    = roomTooltipHTML(room);
 
-  const isRematch = room.IsCompleted && (kind === 'monster' || isBoss) && room.CanEnter && !state.pending_level_up;
+  const isRematch = room.IsCompleted && kind === 'monster' && room.CanEnter && !state.pending_level_up;
   const canClick  = isRematch || (!room.IsCompleted && room.CanEnter && !state.pending_level_up);
   const isLocked  = !room.CanEnter || (floorHasCompleted && !room.IsCompleted && !isRematch);
 
@@ -129,7 +129,7 @@ function isRoomAccessible(room) {
   if (!room) return false;
   const kind = room.Encounter?.kind;
   const isBoss = kind === 'boss';
-  const isRematch = room.IsCompleted && (kind === 'monster' || isBoss) && room.CanEnter;
+  const isRematch = room.IsCompleted && kind === 'monster' && room.CanEnter;
   return isRematch || (!room.IsCompleted && room.CanEnter);
 }
 
@@ -185,7 +185,11 @@ function drawConnections() {
 async function enterRoom(roomId) {
   if (state.pending_level_up) return;
   try {
-    state = await postAction('/game/room/enter', { room_id: roomId });
+    const response = await postAction('/game/room/enter', { room_id: roomId });
+    state = response.game_state;
+    if (response.initial_log?.length) {
+      sessionStorage.setItem('battleInitialLog', JSON.stringify(response.initial_log));
+    }
     sessionStorage.setItem('mapScroll', document.querySelector('.floor-list').scrollTop);
     if (state.in_battle) {
       window.location.href = '/battle';
@@ -219,9 +223,10 @@ function showLevelUpOverlay() {
 
 function renderOverlay() {
   document.getElementById('points-remaining').textContent = remainingPoints;
+  document.querySelector('#levelup-overlay .btn-primary').disabled = remainingPoints > 0;
   const h = state.player;
   document.getElementById('overlay-stats').innerHTML = ['health','attack','defense','magic','mana'].map(stat => {
-    const base  = (h[stat] || 0) + (h.level_bonuses?.[stat] || 0);
+    const base  = (h[stat] || 0) + (h.level_stats?.[stat] || 0);
     const bonus = pendingBonuses[stat] || 0;
     const extra = bonus > 0 ? ` <span class="overlay-pending">(+${bonus})</span>` : '';
     return `<div class="overlay-stat-row">

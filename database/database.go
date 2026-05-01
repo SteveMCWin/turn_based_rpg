@@ -34,19 +34,23 @@ func (db *DataBase) InitDatabase() error {
 		return err
 	}
 
+	data_dir_name := "data"
+
 	var err error
-	db.Data, err = sql.Open("sqlite3", filepath.Join("data", "game.db")+"?_foreign_keys=on")
+	db.Data, err = sql.Open("sqlite3", filepath.Join(data_dir_name, "game.db")+"?_foreign_keys=on")
 	if err != nil {
 		return err
 	}
 
 	sqlFiles := []string{
-		"data/create_saves_table.sql",
-		"data/create_hero_tables.sql",
-		"data/create_floor_tables.sql",
-		"data/create_monster_tables.sql",
-		"data/create_shop_tables.sql",
+		filepath.Join(data_dir_name, "create_saves_table.sql"),
+		filepath.Join(data_dir_name, "create_saves_table.sql"),
+		filepath.Join(data_dir_name, "create_hero_tables.sql"),
+		filepath.Join(data_dir_name, "create_floor_tables.sql"),
+		filepath.Join(data_dir_name, "create_monster_tables.sql"),
+		filepath.Join(data_dir_name, "create_shop_tables.sql"),
 	}
+
 	for _, f := range sqlFiles {
 		content, err := os.ReadFile(f)
 		if err != nil {

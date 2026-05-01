@@ -39,8 +39,8 @@
     }
   },
   {
-    "id": "mage",
-    "name": "Mage",
+    "id": "wizard",
+    "name": "Wizard",
     "description": "A scholarly spellcaster who commands the arcane arts. Frail and vulnerable up close, but capable of devastating magical burst damage and powerful debuffs.",
     "level": 1,
     "health": 65,
@@ -56,9 +56,9 @@
       "mana_scaling": 0.10
     },
     "learned_moves": [
+      { "move_id": "staff_bash",   "level": 1 },
       { "move_id": "firebolt",     "level": 1 },
       { "move_id": "arcane_surge", "level": 1 },
-      { "move_id": "mana_drain",   "level": 1 },
       { "move_id": "hex_shield",   "level": 1 }
     ],
     "item_pool": ["magic_staff", "arcane_robe"],

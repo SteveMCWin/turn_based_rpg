@@ -2,11 +2,22 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
+	"slices"
 	"strings"
 
 	"tbrpg/game"
 	"tbrpg/models"
 )
+
+
+
+
+// this file handles saving updating fetching and deleting games from the database
+
+
+
+
 
 func (db *DataBase) ListSaves() ([]Save, error) {
 	rows, err := db.Data.Query(`SELECT id, COALESCE(label, ''), saved_at FROM saves ORDER BY saved_at DESC`)
@@ -142,6 +153,7 @@ func (db *DataBase) LoadSave(id int, config *game.GameConfig) (*game.Game, error
 	g.AllMoves = config.Moves
 	g.AllItems = config.Items
 	g.Settings = config.Settings
+	g.Config = config
 
 	return g, nil
 }
@@ -170,7 +182,7 @@ func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
 		`INSERT INTO save_heroes (save_id, hero_template_id, level, current_xp, current_hp, current_mana, current_gold, lb_health, lb_mana, lb_attack, lb_defense, lb_magic)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		saveID, h.ID, h.Level, h.CurrentXP, h.CurrentHP, h.CurrentMana, h.CurrentGold,
-		h.LevelBonuses.Health, h.LevelBonuses.Mana, h.LevelBonuses.Attack, h.LevelBonuses.Defense, h.LevelBonuses.Magic,
+		h.LevelStats.Health, h.LevelStats.Mana, h.LevelStats.Attack, h.LevelStats.Defense, h.LevelStats.Magic,
 	); err != nil {
 		return err
 	}
@@ -215,7 +227,7 @@ func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
 		if _, err := tx.Exec(
 			`INSERT INTO save_hero_status_effects (save_id, effect_type, stat_affected, delta, duration, target, activation_delay, turns_remaining, turns_to_activate)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			saveID, string(se.Type), string(se.StatAffected), se.Delta, se.Duration, string(se.Target),
+			saveID, string(se.Type), string(se.StatAffected), se.BaseDelta, se.Duration, string(se.Target),
 			se.ActivationDelay, se.TurnsRemaining, se.TurnsToActivate,
 		); err != nil {
 			return err
@@ -274,8 +286,8 @@ func writeMonster(tx *sql.Tx, roomDBID int64, m *models.Monster) error {
 	res, err := tx.Exec(
 		`INSERT INTO save_monsters (room_db_id, monster_template_id, is_defeated, level, current_xp, current_hp, current_mana, lb_health, lb_mana, lb_attack, lb_defense, lb_magic)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		roomDBID, m.ID, m.IsDefeated, m.Level, m.CurrentXP, m.CurrentHP, m.CurrentMana,
-		m.LevelBonuses.Health, m.LevelBonuses.Mana, m.LevelBonuses.Attack, m.LevelBonuses.Defense, m.LevelBonuses.Magic,
+		roomDBID, m.ID, false, m.Level, m.CurrentXP, m.CurrentHP, m.CurrentMana,
+		m.LevelStats.Health, m.LevelStats.Mana, m.LevelStats.Attack, m.LevelStats.Defense, m.LevelStats.Magic,
 	)
 	if err != nil {
 		return err
@@ -286,7 +298,7 @@ func writeMonster(tx *sql.Tx, roomDBID int64, m *models.Monster) error {
 		if _, err := tx.Exec(
 			`INSERT INTO save_monster_status_effects (monster_db_id, effect_type, stat_affected, delta, duration, target, activation_delay, turns_remaining, turns_to_activate)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			monsterDBID, string(se.Type), string(se.StatAffected), se.Delta, se.Duration, string(se.Target),
+			monsterDBID, string(se.Type), string(se.StatAffected), se.BaseDelta, se.Duration, string(se.Target),
 			se.ActivationDelay, se.TurnsRemaining, se.TurnsToActivate,
 		); err != nil {
 			return err
@@ -345,13 +357,16 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 			break
 		}
 	}
+	if hero.ID == "" {
+		return nil, fmt.Errorf("hero template %q not found in config", templateID)
+	}
 
 	hero.Level = level
 	hero.CurrentXP = xp
 	hero.CurrentHP = hp
 	hero.CurrentMana = mana
 	hero.CurrentGold = gold
-	hero.LevelBonuses = models.Stats{
+	hero.LevelStats = models.Stats{
 		Health:  lbH,
 		Mana:    lbMa,
 		Attack:  lbAt,
@@ -367,6 +382,7 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 		return nil, err
 	}
 	defer rows.Close()
+	hero.LearnedMoves = nil
 	for rows.Next() {
 		var lm models.LearnedMove
 		if err := rows.Scan(&lm.MoveID, &lm.Level); err != nil {
@@ -441,7 +457,7 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	for rows5.Next() {
 		var se models.StatusEffect
 		var effectType, statAffected, target string
-		if err := rows5.Scan(&effectType, &statAffected, &se.Delta, &se.Duration, &target, &se.ActivationDelay, &se.TurnsRemaining, &se.TurnsToActivate); err != nil {
+		if err := rows5.Scan(&effectType, &statAffected, &se.BaseDelta, &se.Duration, &target, &se.ActivationDelay, &se.TurnsRemaining, &se.TurnsToActivate); err != nil {
 			return nil, err
 		}
 		se.Type = models.EffectType(effectType)
@@ -536,7 +552,6 @@ func readRooms(db *sql.DB, floorDBID int, config *game.GameConfig) ([]models.Roo
 func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Monster, error) {
 	var monsterDBID int
 	var templateID string
-	var isDefeated bool
 	var level, xp, hp, mana int
 	var lbH, lbMa, lbAt, lbDe, lbMg int
 
@@ -544,7 +559,7 @@ func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Mon
 		`SELECT id, monster_template_id, is_defeated, level, current_xp, current_hp, current_mana,
 		        lb_health, lb_mana, lb_attack, lb_defense, lb_magic
 		 FROM save_monsters WHERE room_db_id = ?`, roomDBID,
-	).Scan(&monsterDBID, &templateID, &isDefeated, &level, &xp, &hp, &mana,
+	).Scan(&monsterDBID, &templateID, new(bool), &level, &xp, &hp, &mana,
 		&lbH, &lbMa, &lbAt, &lbDe, &lbMg)
 	if err != nil {
 		return nil, err
@@ -566,13 +581,15 @@ func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Mon
 			}
 		}
 	}
+	if monster.ID == "" {
+		return nil, fmt.Errorf("monster template %q not found in config", templateID)
+	}
 
-	monster.IsDefeated = isDefeated
 	monster.Level = level
 	monster.CurrentXP = xp
 	monster.CurrentHP = hp
 	monster.CurrentMana = mana
-	monster.LevelBonuses = models.Stats{
+	monster.LevelStats = models.Stats{
 		Health:  lbH,
 		Mana:    lbMa,
 		Attack:  lbAt,
@@ -592,7 +609,7 @@ func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Mon
 	for rows.Next() {
 		var se models.StatusEffect
 		var effectType, statAffected, target string
-		if err := rows.Scan(&effectType, &statAffected, &se.Delta, &se.Duration, &target, &se.ActivationDelay, &se.TurnsRemaining, &se.TurnsToActivate); err != nil {
+		if err := rows.Scan(&effectType, &statAffected, &se.BaseDelta, &se.Duration, &target, &se.ActivationDelay, &se.TurnsRemaining, &se.TurnsToActivate); err != nil {
 			return nil, err
 		}
 		se.Type = models.EffectType(effectType)
@@ -614,10 +631,11 @@ func readEvent(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Event
 		return nil, err
 	}
 
-	event, ok := config.EventTemplates[eventTemplateID]
-	if !ok {
+	idx := slices.IndexFunc(config.EventTemplates, func(e models.Event) bool { return e.ID == eventTemplateID })
+	if idx == -1 {
 		return nil, nil
 	}
+	event := config.EventTemplates[idx]
 	event.Applied = applied
 	return &event, nil
 }
