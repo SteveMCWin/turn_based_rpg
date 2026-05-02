@@ -6,18 +6,27 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 80,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "shield_up",
         "name": "Shield Up",
         "description": "Raise your shield. Increases Defense for 2 turns.",
         "move_type": "physical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
-        "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat": "defense",
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "scale_factor": 1.0,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -25,11 +34,19 @@
         "name": "Battle Cry",
         "description": "A fearsome war cry. Increases Attack for 2 turns.",
         "move_type": "physical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "attack", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": 8,
+                "scale_factor": 0.4,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -39,7 +56,19 @@
         "move_type": "magical",
         "primary": "heal",
         "base_value": 80,
-        "scaling_stat": "magic"
+        "cost_amount": 15,
+        "scaling_stat": "magic",
+        "scaling_stat_amount": 1.0
+    },
+    {
+        "id": "staff_bash",
+        "name": "Staff Bash",
+        "description": "A clumsy but solid strike with the butt of a staff. Deals low physical damage.",
+        "move_type": "physical",
+        "primary": "damage",
+        "base_value": 65,
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "rusty_blade",
@@ -48,7 +77,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 80,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "dirty_kick",
@@ -58,8 +88,16 @@
         "primary": "damage",
         "base_value": 55,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": -6, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": -6,
+                "scale_factor": -0.3,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -67,11 +105,19 @@
         "name": "Frenzy",
         "description": "Enter a frenzied state. Raises Attack for 2 turns.",
         "move_type": "physical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "attack", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": 8,
+                "scale_factor": 0.4,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -81,7 +127,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 130,
-        "scaling_stat": "attack"
+        "scaling_stat": "health",
+        "scaling_stat_amount": 0.25
     },
     {
         "id": "firebolt",
@@ -91,18 +138,28 @@
         "primary": "damage",
         "base_value": 75,
         "cost_amount": 15,
-        "scaling_stat": "magic"
+        "scaling_stat": "magic",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "arcane_surge",
         "name": "Arcane Surge",
         "description": "Channel raw magic. Raises Magic for 2 turns.",
         "move_type": "magical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
+        "cost_amount": 12,
         "scaling_stat": "magic",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "magic", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": 8,
+                "scale_factor": 0.3,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -112,9 +169,18 @@
         "move_type": "magical",
         "primary": "damage",
         "base_value": 50,
+        "cost_amount": 12,
         "scaling_stat": "magic",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "magic", "delta": -6, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": -6,
+                "scale_factor": -0.2,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -122,12 +188,20 @@
         "name": "Hex Shield",
         "description": "A ward of hex magic. Raises Defense for 2 turns.",
         "move_type": "magical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
         "cost_amount": 10,
         "scaling_stat": "magic",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "scale_factor": 0.3,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -137,7 +211,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 80,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "web_throw",
@@ -147,8 +222,16 @@
         "primary": "damage",
         "base_value": 55,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": -6, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": -6,
+                "scale_factor": -0.3,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -158,18 +241,27 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 130,
-        "scaling_stat": "attack"
+        "scaling_stat": "health",
+        "scaling_stat_amount": 0.25
     },
     {
         "id": "skitter",
         "name": "Skitter",
         "description": "Dodge and weave to raise Defense for 2 turns.",
         "move_type": "physical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "scale_factor": 0.4,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -179,7 +271,9 @@
         "move_type": "magical",
         "primary": "damage",
         "base_value": 70,
-        "scaling_stat": "magic"
+        "cost_amount": 15,
+        "scaling_stat": "magic",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "drain_life",
@@ -188,9 +282,18 @@
         "move_type": "magical",
         "primary": "damage",
         "base_value": 50,
+        "cost_amount": 12,
         "scaling_stat": "magic",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "attack", "delta": -5, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -5,
+                "scale_factor": -0.2,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -198,11 +301,20 @@
         "name": "Curse",
         "description": "Lay a curse on the target. Lowers their Attack for 2 turns.",
         "move_type": "magical",
-        "primary": "none",
+        "primary": "debuff",
         "base_value": 0,
+        "cost_amount": 10,
         "scaling_stat": "magic",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "attack", "delta": -8, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -8,
+                "scale_factor": -0.3,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -210,12 +322,20 @@
         "name": "Dark Pact",
         "description": "Trade mana for power. Costs 15 mana to raise Magic for 2 turns.",
         "move_type": "magical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
         "scaling_stat": "magic",
+        "scaling_stat_amount": 1.0,
         "cost_amount": 15,
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "magic", "delta": 10, "duration": 2, "target": "self" }
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": 10,
+                "scale_factor": 0.35,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -225,7 +345,9 @@
         "move_type": "magical",
         "primary": "damage",
         "base_value": 90,
-        "scaling_stat": "magic"
+        "cost_amount": 20,
+        "scaling_stat": "magic",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "claw_swipe",
@@ -234,18 +356,35 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 80,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "intimidate",
         "name": "Intimidate",
         "description": "A terrifying roar. Lowers the target's Attack for 2 turns.",
         "move_type": "physical",
-        "primary": "none",
+        "primary": "debuff",
         "base_value": 0,
-        "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "attack", "delta": -8, "duration": 2, "target": "opponent" }
+        "scaling_stat": "health",
+        "scaling_stat_amount": 0.5,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -8,
+                "scale_factor": -0.08,
+                "duration": 3,
+                "target": "opponent"
+            },
+            {
+                "type": "stat_mod",
+                "stat_affected": "magic",
+                "delta": -8,
+                "scale_factor": -0.08,
+                "duration": 3,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -253,11 +392,19 @@
         "name": "Dragon Scales",
         "description": "Harden the scales. Raises Defense for 2 turns.",
         "move_type": "physical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
-        "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": 10, "duration": 2, "target": "self" }
+        "scaling_stat": "defense",
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 10,
+                "scale_factor": 1.0,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -268,8 +415,15 @@
         "primary": "damage",
         "base_value": 55,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "dot", "stat_affected": "health", "delta": 5, "duration": 3, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "dot",
+                "stat_affected": "health",
+                "delta": 5,
+                "duration": 3,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -280,8 +434,15 @@
         "primary": "damage",
         "base_value": 60,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "dot", "stat_affected": "health", "delta": 7, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "dot",
+                "stat_affected": "health",
+                "delta": 7,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -292,8 +453,16 @@
         "primary": "damage",
         "base_value": 65,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": -5, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": -5,
+                "scale_factor": -0.25,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -303,7 +472,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 120,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "arrow_shot",
@@ -312,7 +482,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 75,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "piercing_shot",
@@ -322,8 +493,16 @@
         "primary": "damage",
         "base_value": 55,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": -7, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": -7,
+                "scale_factor": -0.35,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -331,12 +510,20 @@
         "name": "Phase Shift",
         "description": "Become partially ethereal. Raises Defense for 2 turns.",
         "move_type": "magical",
-        "primary": "none",
+        "primary": "buff",
         "base_value": 0,
         "cost_amount": 10,
         "scaling_stat": "magic",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "defense", "delta": 8, "duration": 2, "target": "self" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "defense",
+                "delta": 8,
+                "scale_factor": 0.3,
+                "duration": 2,
+                "target": "self"
+            }
         ]
     },
     {
@@ -347,8 +534,15 @@
         "primary": "damage",
         "base_value": 50,
         "scaling_stat": "attack",
-        "effect": [
-            { "type": "dot", "stat_affected": "health", "delta": 6, "duration": 2, "target": "opponent" }
+        "scaling_stat_amount": 1.0,
+        "effects": [
+            {
+                "type": "dot",
+                "stat_affected": "health",
+                "delta": 6,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     },
     {
@@ -359,7 +553,8 @@
         "primary": "heal",
         "base_value": 70,
         "cost_amount": 15,
-        "scaling_stat": "magic"
+        "scaling_stat": "magic",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "talon_strike",
@@ -368,7 +563,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 110,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "regenerate",
@@ -377,8 +573,9 @@
         "move_type": "magical",
         "primary": "heal",
         "base_value": 90,
-        "cost_amount": 10,
-        "scaling_stat": "magic"
+        "cost_amount": 20,
+        "scaling_stat": "health",
+        "scaling_stat_amount": 0.25
     },
     {
         "id": "multi_bite",
@@ -387,7 +584,8 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 100,
-        "scaling_stat": "attack"
+        "scaling_stat": "attack",
+        "scaling_stat_amount": 1.0
     },
     {
         "id": "constrict",
@@ -396,9 +594,17 @@
         "move_type": "physical",
         "primary": "damage",
         "base_value": 60,
-        "scaling_stat": "attack",
-        "effect": [
-            { "type": "stat_mod", "stat_affected": "attack", "delta": -7, "duration": 2, "target": "opponent" }
+        "scaling_stat": "health",
+        "scaling_stat_amount": 0.25,
+        "effects": [
+            {
+                "type": "stat_mod",
+                "stat_affected": "attack",
+                "delta": -7,
+                "scale_factor": -0.07,
+                "duration": 2,
+                "target": "opponent"
+            }
         ]
     }
 ]

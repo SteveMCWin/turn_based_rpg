@@ -1,10 +1,13 @@
 let state = null;
+let battleLog = JSON.parse(sessionStorage.getItem('battleInitialLog') || '[]');
+sessionStorage.removeItem('battleInitialLog');
 
 (async () => {
   state = await loadState();
   if (!state) return;
   renderAll();
   initTooltips();
+  if (state.waiting_for_monster) setTimeout(resolveMonsterTurn, 500);
 })();
 
 function renderAll() {
@@ -77,10 +80,12 @@ function renderCombatant(side, entity) {
 function renderMonsterInfo(monster) {
   if (!monster) return;
   document.getElementById('monster-stats').innerHTML =
-    `<span>${statIcon('attack')}ATK ${effAtk(monster)}</span>`
+    `<span>Lv.${monster.level}</span>`
+    + `<span>${statIcon('attack')}ATK ${effAtk(monster)}</span>`
     + `<span>${statIcon('defense')}DEF ${effDef(monster)}</span>`
     + `<span>${statIcon('magic')}MAG ${effMag(monster)}</span>`
-    + `<span>Lv.${monster.level}</span>`;
+    + `<span>${statIcon('health')}HP ${monster.current_hp}/${maxHP(monster)}</span>`
+    + (maxMana(monster) > 0 ? `<span>${statIcon('mana')}MP ${monster.current_mana}/${maxMana(monster)}</span>` : '');
 
   // monster.learned_moves is []LearnedMove with {move_id, level}
   document.getElementById('monster-skills').innerHTML = (monster.learned_moves || []).map(lm => {
@@ -91,7 +96,7 @@ function renderMonsterInfo(monster) {
 
 function renderMoveButtons() {
   const grid = document.getElementById('move-buttons');
-  if (!state.in_battle) { grid.innerHTML = ''; return; }
+  if (!state.in_battle || state.waiting_for_monster) { grid.innerHTML = ''; return; }
 
   const bonusPct = state.settings?.move_level_bonus_percent || 0;
   grid.innerHTML = (state.player.equipped_moves || []).map(id => {
@@ -114,8 +119,7 @@ function renderMoveButtons() {
 function renderBattleLog() {
   const el = document.getElementById('battle-log');
   el.innerHTML = '';
-  // battle_log is []string in the new model — plain strings, no class
-  for (const line of (state.battle_log || [])) {
+  for (const line of battleLog) {
     const p = document.createElement('p');
     p.textContent = line;
     el.appendChild(p);
@@ -123,37 +127,78 @@ function renderBattleLog() {
   el.scrollTop = el.scrollHeight;
 }
 
+function spriteAnim(side, cls) {
+  const el = document.getElementById(`${side}-sprite`);
+  if (!el) return;
+  el.classList.remove('anim-shake', 'anim-jump', 'anim-sink');
+  // force reflow so removing+re-adding the same class restarts the animation
+  void el.offsetWidth;
+  el.classList.add(cls);
+  el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+}
+
+function snapshotCombatant(entity) {
+  if (!entity) return null;
+  return {
+    hp:      entity.current_hp,
+    effects: (entity.status_effects || []).length,
+    posEffs: (entity.status_effects || []).filter(se => se.delta > 0).length,
+  };
+}
+
+function animateFromDiff(side, before, after) {
+  if (!before || !after) return;
+  if (after.hp < before.hp) {
+    spriteAnim(side, 'anim-shake');
+  } else if (after.effects > before.effects) {
+    const newPositive = after.posEffs > before.posEffs;
+    spriteAnim(side, newPositive ? 'anim-jump' : 'anim-sink');
+  }
+}
+
 async function submitMove(moveId) {
-  const grid = document.getElementById('move-buttons');
-  grid.querySelectorAll('button').forEach(b => b.disabled = true);
   try {
+    const prevMonster     = snapshotCombatant(currentMonster());
+    const prevHero        = snapshotCombatant(state.player);
+    const prevMonsterFull = currentMonster();
     const result = await postAction('/game/battle/move', { move_id: moveId });
-
-    // Phase 1: show player's action (update monster side only).
-    // Use the old state.current_room_id — the server clears it when battle ends,
-    // so gs.current_room_id would be empty on a killing blow.
-    const gs      = result.game_state;
-    const roomId  = state.current_room_id;
-    const newMonster = (() => {
-      if (!roomId || !gs?.floors) return null;
-      for (const floor of gs.floors)
-        for (const room of floor.Rooms)
-          if (room.Id === roomId) return room.Encounter?.monster || null;
-      return null;
-    })();
-    if (newMonster) renderCombatant('monster', newMonster);
-
-    // Phase 2: after 1s show monster's response + full update
-    setTimeout(() => {
-      state = gs;
-      renderAll();
-      if (result.battle_over) {
-        grid.innerHTML =
-          `<button class="btn btn-primary" onclick="window.location.href='/post-battle'">Continue</button>`;
-      }
-    }, 1000);
+    if (result.new_log_lines?.length) battleLog.push(...result.new_log_lines);
+    state = result.game_state;
+    renderAll();
+    if (result.battle_over && result.player_won && prevMonsterFull) {
+      prevMonsterFull.current_hp = 0;
+      renderCombatant('monster', prevMonsterFull);
+    }
+    animateFromDiff('monster', prevMonster, { hp: result.player_won ? 0 : snapshotCombatant(currentMonster())?.hp });
+    animateFromDiff('hero',    prevHero,    snapshotCombatant(state.player));
+    if (result.battle_over) {
+      showContinueButton();
+      return;
+    }
+    setTimeout(resolveMonsterTurn, 1000);
   } catch (e) {
     alert(e.message);
     renderMoveButtons();
   }
+}
+
+async function resolveMonsterTurn() {
+  try {
+    const prevHero    = snapshotCombatant(state.player);
+    const prevMonster = snapshotCombatant(currentMonster());
+    const result = await postAction('/game/battle/monster-move');
+    if (result.new_log_lines?.length) battleLog.push(...result.new_log_lines);
+    state = result.game_state;
+    renderAll();
+    animateFromDiff('hero',    prevHero,    snapshotCombatant(state.player));
+    animateFromDiff('monster', prevMonster, snapshotCombatant(currentMonster()));
+    if (result.battle_over) showContinueButton();
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+function showContinueButton() {
+  document.getElementById('move-buttons').innerHTML =
+    `<button class="btn btn-primary" onclick="window.location.href='/post-battle'">Continue</button>`;
 }

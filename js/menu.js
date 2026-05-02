@@ -33,11 +33,19 @@ function renderHeroCards(heroes) {
       `<span class="hero-card-item" title="${escHtml(item.name)}">${itemTypeIcon(item.item_type, true)} ${escHtml(item.name)}</span>`
     ).join('');
 
+    const movesHTML = (h.learned_moves || []).map(lm =>
+      `<span class="skill-tag">${escHtml(lm.move_id.replace(/_/g, ' '))}</span>`
+    ).join('');
+
     return `
     <div class="hero-card" data-id="${escHtml(h.id)}" onclick="selectHero(this)">
-      <img class="hero-card-portrait" src="${heroSprite(h.id)}" alt="${escHtml(h.name)}">
-      <div class="hero-card-name">${escHtml(h.name)}</div>
-      <div class="hero-card-desc">${escHtml(h.description || '')}</div>
+      <div class="hero-card-top">
+        <img class="hero-card-portrait" src="${heroSprite(h.id)}" alt="${escHtml(h.name)}">
+        <div class="hero-card-top-right">
+          <div class="hero-card-name">${escHtml(h.name)}</div>
+          <div class="hero-card-desc">${escHtml(h.description || '')}</div>
+        </div>
+      </div>
       <div class="hero-card-stats">
         <span>${statIcon('health')}${h.health}</span>
         <span>${statIcon('attack')}${h.attack}</span>
@@ -45,6 +53,7 @@ function renderHeroCards(heroes) {
         <span>${statIcon('magic')}${h.magic}</span>
         <span>${statIcon('mana')}${h.mana}</span>
       </div>
+      ${movesHTML ? `<div class="hero-card-items">${movesHTML}</div>` : ''}
       ${startingItems ? `<div class="hero-card-items">${startingItems}</div>` : ''}
       ${envPrefsHTML(h.env_effects)}
     </div>`;

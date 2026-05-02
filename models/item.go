@@ -9,6 +9,8 @@ const (
 	Consumable ItemType = "consumable"
 )
 
+// pretty self explanatory
+// Since items should affects stats, there is a map of stat affected and how much they are affected
 type Item struct {
 	Id          string   `json:"id"`
 	Name        string   `json:"name"`

@@ -1,6 +1,6 @@
 package models
 
-// Used for scaling with stats
+// Used for calculating damage (magical bypasses defense)
 type MoveType string
 
 const (
@@ -9,27 +9,39 @@ const (
 )
 
 // Used for the enemy AI
-type PrimaryType string
+type MoveIntent string
 
 const (
-	PrimaryDamage PrimaryType = "damage"
-	PrimaryHeal   PrimaryType = "heal"
-	PrimaryNone   PrimaryType = "none"
+	IntentDamage MoveIntent = "damage"
+	IntentHeal   MoveIntent = "heal"
+	IntentBuff   MoveIntent = "buff"
+	IntentDebuff MoveIntent = "debuff"
 )
 
+// The base move
+// Id, name and description are self explanatory
+// Move type, move intent are explained above
+// Effects are the effects that the move will apply to an entity
+// Base value is one part of the equation of how much impact a move will have
+// The other part is scaling stat and the entities stats * ScalingStatFactor.
+// If the move scales with magic, more magic -> stronger move
+// Cost amount is how much mana the move uses up
 type MoveDefinition struct {
-	ID          string      `json:"id"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	MoveType    MoveType    `json:"move_type"`
-	Primary     PrimaryType `json:"primary"`
-	Effects     []*Effect   `json:"effect,omitempty"`
-	BaseValue   int         `json:"base_value"`
-	ScalingStat StatType    `json:"scaling_stat"`
-	CostAmount  int         `json:"cost_amount,omitempty"`
+	Id                string     `json:"id"`
+	Name              string     `json:"name"`
+	Description       string     `json:"description"`
+	BaseValue         int        `json:"base_value"`
+	MoveType          MoveType   `json:"move_type"`
+	Intent            MoveIntent `json:"primary"`
+	Effects           []*Effect  `json:"effects,omitempty"`
+	ScalingStat       StatType   `json:"scaling_stat"`
+	ScalingStatFactor float32    `json:"scaling_stat_amount"`
+	CostAmount        int        `json:"cost_amount,omitempty"`
 }
 
+// Learned move is a combination of a base move and a level of the move
+// Since many entities share moves, levels differ, but the base is the same
 type LearnedMove struct {
-	MoveID string `json:"move_id"`
+	MoveId string `json:"move_id"`
 	Level  int    `json:"level"`
 }

@@ -8,6 +8,8 @@ import (
 	"tbrpg/models"
 )
 
+// Response for the client after it requests to update the game state in battle
+// e.g. when a player makes a move, this is the response from the server
 type BattleResult struct {
 	GameState    *Game               `json:"game_state,omitempty"`
 	BattleOver   bool                `json:"battle_over"`
@@ -17,94 +19,143 @@ type BattleResult struct {
 	FloorReached int                 `json:"floor_reached,omitempty"`
 	LearnedMove  *models.LearnedMove `json:"learned_move,omitempty"`
 	ItemAcquired *models.Item        `json:"item_acquired,omitempty"`
+	NewLogLines  []string            `json:"new_log_lines,omitempty"`
 }
 
-func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
+func (g *Game) SubmitPlayerMove(moveId string) (*BattleResult, error) {
 	if !g.IsInBattle {
 		return nil, fmt.Errorf("not in battle")
 	}
+	if g.WaitingForMonster {
+		return nil, fmt.Errorf("waiting for monster turn")
+	}
 
-	move_def, ok := g.AllMoves[moveID]
+	move_def, ok := g.AllMoves[moveId]
 	if !ok {
-		return nil, fmt.Errorf("move with id %s doesn't exist?", moveID)
+		return nil, fmt.Errorf("move with id %s doesn't exist?", moveId)
 	}
 
 	room := g.CurrentRoom()
-
 	monster := room.Encounter.Monster
 	hero := &g.Player
 
-	if !slices.Contains(hero.EquippedMoves, moveID) {
-		return nil, fmt.Errorf("move %s is not equipped", moveID)
+	if !slices.Contains(hero.EquippedMoves, moveId) {
+		return nil, fmt.Errorf("move %s is not equipped", moveId)
 	}
-
 	if move_def.CostAmount > hero.CurrentMana {
 		return nil, fmt.Errorf("not enough mana")
 	}
 
-	moveLevel := hero.GetMoveLevel(moveID)
+	moveLevel := hero.GetMoveLevel(moveId)
 
-	hero.CurrentMana -= move_def.CostAmount
-
+	// scale the move strenght by it's level and scaling amount
 	scaled_value := int(float64(move_def.BaseValue) * (1.0 + float64(moveLevel-1)*float64(g.Settings.MoveLevelBonusPct)/100.0))
 	effMove := move_def
 	effMove.BaseValue = scaled_value
 
-	// =========================
-	// ======= Hero turn =======
-	// =========================
+	var logLines []string
 
-	hero.TickStatusEffects()
+	preHeroHP := hero.CurrentHP
+
+	// apply move and log
+	hero.CurrentMana -= move_def.CostAmount
 	applyMove(effMove, &hero.Entity, &monster.Entity)
-	new_log_line := fmt.Sprintf("You use %s. %s", move_def.Name, describeMoveResult(effMove, &hero.Entity, &monster.Entity))
-	g.BattleLog = append(g.BattleLog, new_log_line)
+	logLines = append(logLines, fmt.Sprintf("You use %s. %s", move_def.Name, describeMoveResult(effMove, &hero.Entity, &monster.Entity, preHeroHP)))
 
-	hero.CurrentMana = min(hero.CurrentMana+g.Settings.ManaRegenPerTurn, hero.MaxMana())
-
+	// check if fight is over
 	if !monster.IsAlive() {
 		monster.CurrentHP = 0
-		return g.endBattle(true), nil
+		result := g.endBattle(true)
+		result.NewLogLines = append(logLines, result.NewLogLines...)
+		return result, nil
 	}
 
-	// ============================
-	// ======= Monster turn =======
-	// ============================
+	hero.TickStatusEffects()
+
+	// switch to monsters turn
+	g.WaitingForMonster = true
+	return &BattleResult{GameState: g, NewLogLines: logLines}, nil
+}
+
+// handle the monsters turn in battle
+// called by the client automatically after the player makes a move
+func (g *Game) SubmitMonsterMove() (*BattleResult, error) {
+	if !g.IsInBattle {
+		return nil, fmt.Errorf("not in battle")
+	}
+
+	if !g.WaitingForMonster {
+		return nil, fmt.Errorf("not waiting for monster turn")
+	}
+
+	room := g.CurrentRoom()
+	monster := room.Encounter.Monster
+	hero := &g.Player
+
+	var logLines []string
 
 	monster.TickStatusEffects()
 
 	if !monster.IsAlive() {
 		monster.CurrentHP = 0
-		return g.endBattle(true), nil
+		g.WaitingForMonster = false
+		result := g.endBattle(true)
+		result.NewLogLines = logLines
+		return result, nil
 	}
 
 	monster.CurrentMana = min(monster.CurrentMana+g.Settings.ManaRegenPerTurn, monster.MaxMana())
 
-	monsterMoveID := g.pickMonsterMove()
-	monsterMoveDef, ok := g.AllMoves[monsterMoveID]
-	if !ok && len(monster.Moves) > 0 {
-		monsterMoveDef = g.AllMoves[monster.Moves[0].MoveID]
+	monsterMoveId, err := g.pickMonsterMove()
+	if err != nil {
+		return nil, err
 	}
+
+	monsterMoveDef := g.AllMoves[monsterMoveId]
+	monster.CurrentMana -= monsterMoveDef.CostAmount
+	preMonsterHP := monster.CurrentHP
 	applyMove(monsterMoveDef, &monster.Entity, &hero.Entity)
-	g.BattleLog = append(g.BattleLog, fmt.Sprintf("%s uses %s. %s", monster.Name, monsterMoveDef.Name, describeMoveResult(monsterMoveDef, &monster.Entity, &hero.Entity)))
+	logLines = append(logLines, fmt.Sprintf("%s uses %s. %s", monster.Name, monsterMoveDef.Name, describeMoveResult(monsterMoveDef, &monster.Entity, &hero.Entity, preMonsterHP)))
+
+	g.WaitingForMonster = false
 
 	if !hero.IsAlive() {
 		hero.CurrentHP = 0
-		return g.endBattle(false), nil
+		result := g.endBattle(false)
+		result.NewLogLines = append(logLines, result.NewLogLines...)
+		return result, nil
 	}
 
-	return &BattleResult{GameState: g}, nil
+	hero.CurrentMana = min(hero.CurrentMana+g.Settings.ManaRegenPerTurn, hero.MaxMana())
+
+	return &BattleResult{GameState: g, NewLogLines: logLines}, nil
 }
 
-func (g *Game) pickMonsterMove() string {
+// Takes into account monsters stats and heroes stats
+// makes decision based on that and what the move does
+func (g *Game) pickMonsterMove() (string, error) {
 	monster := g.CurrentRoom().Encounter.Monster
-	monsterHP := float64(monster.CurrentHP) / float64(max(1, monster.MaxHP()))
 
-	// Environmental buffs have TurnsRemaining 99; move-applied buffs are short (duration 2).
-	// A monster should only use its buff move if it hasn't already buffed recently
+	if len(monster.Moves) == 0 {
+		return "", fmt.Errorf("monster %q has no moves", monster.Name)
+	}
+
+	// how much hp does the monster have on a scale from 0.0 to 1.0 (1.0 is max hp)
+	monsterHpPct := float64(monster.CurrentHP) / float64(max(1, monster.MaxHP()))
+	hero := &g.Player
+
 	hasActiveBuff := false
 	for _, se := range monster.StatusEffects {
-		if se.Type == models.StatModifier && se.Delta > 0 && se.TurnsRemaining < 99 && se.TurnsToActivate <= 0 {
+		if se.Type == models.StatModifier && se.BaseDelta > 0 && !se.IsEnvironmental && se.TurnsToActivate <= 0 {
 			hasActiveBuff = true
+			break
+		}
+	}
+
+	heroHasDebuff := false
+	for _, se := range hero.StatusEffects {
+		if se.Type == models.StatModifier && se.BaseDelta < 0 && !se.IsEnvironmental && se.TurnsToActivate <= 0 {
+			heroHasDebuff = true
 			break
 		}
 	}
@@ -116,116 +167,177 @@ func (g *Game) pickMonsterMove() string {
 	var candidates []candidate
 
 	for _, m := range monster.Moves {
-		def, ok := g.AllMoves[m.MoveID]
+		def, ok := g.AllMoves[m.MoveId]
 		if !ok {
 			continue
 		}
+
 		if def.CostAmount > monster.CurrentMana {
 			continue
 		}
 
 		weight := 1
-		switch def.Primary {
-		case models.PrimaryDamage:
+		switch def.Intent {
+		case models.IntentDamage:
+			// dealing damage is always decent
 			weight = 4
-		case models.PrimaryHeal:
-			if monsterHP < 0.35 {
+
+		case models.IntentHeal:
+			// strong chance of healing if low on hp
+			if monsterHpPct < 0.35 {
 				weight = 8
-			} else if monsterHP < 0.5 {
+			} else if monsterHpPct < 0.5 {
 				weight = 5
 			} else {
 				weight = 0
 			}
-		case models.PrimaryNone:
-			if isSelfBuff(def) && !hasActiveBuff {
-				weight = 6
+
+		case models.IntentBuff:
+			// buff is good if not applied alreaady
+			if !hasActiveBuff {
+				weight = 4
+			} else {
+				weight = 0
+			}
+		case models.IntentDebuff:
+			// prioritize damage or heal if low on hp or if player is already debuffed
+			if monsterHpPct < 0.35 || heroHasDebuff {
+				weight = 0
+			} else {
+				weight = 3
 			}
 		}
 
 		if weight > 0 {
-			candidates = append(candidates, candidate{m.MoveID, weight})
+			candidates = append(candidates, candidate{m.MoveId, weight})
 		}
 	}
 
+	// fallback
 	if len(candidates) == 0 {
-		return monster.Moves[rand.Intn(len(monster.Moves))].MoveID
+		return monster.Moves[rand.Intn(len(monster.Moves))].MoveId, nil
+	}
+
+	// if a damage move will kill the hero, ignore previous weights
+	for _, c := range candidates {
+		def := g.AllMoves[c.id]
+		if def.Intent == models.IntentDamage && calcDamage(def, &monster.Entity, &hero.Entity) >= hero.CurrentHP {
+			return c.id, nil
+		}
 	}
 
 	total := 0
 	for _, c := range candidates {
 		total += c.weight
 	}
+
+	// candidates with higher weight have a better chance of bringing the rand num below 0
 	r := rand.Intn(total)
 	for _, c := range candidates {
 		r -= c.weight
 		if r < 0 {
-			return c.id
+			return c.id, nil
 		}
 	}
-	return candidates[len(candidates)-1].id
+
+	// another fallback
+	return candidates[len(candidates)-1].id, nil
 }
 
-func isSelfBuff(def models.MoveDefinition) bool {
-	for _, e := range def.Effects {
-		if e.Type == models.StatModifier && e.Target == models.TargetSelf && e.Delta > 0 {
-			return true
-		}
+// return stat value based on stat type
+func scalingStatValue(stats models.Stats, stat models.StatType) int {
+	switch stat {
+	case models.AttackStat:
+		return stats.Attack
+	case models.MagicStat:
+		return stats.Magic
+	case models.DefenseStat:
+		return stats.Defense
+	case models.HealthStat:
+		return stats.Health
+	case models.ManaStat:
+		return stats.Mana
 	}
-	return false
+	return 0
 }
 
-func applyMove(move models.MoveDefinition, attacker, defender *models.Entity) {
+// returns amount of hp the defender will lose based on the move selected and attackers and defenders stats
+func calcDamage(move models.MoveDefinition, attacker, defender *models.Entity) int {
 	eff := attacker.EffectiveStats()
 	defEff := defender.EffectiveStats()
+	power := int(float32(scalingStatValue(eff, move.ScalingStat)) * move.ScalingStatFactor * float32(move.BaseValue) / 100)
+	if move.MoveType == models.Physical {
+		return max(1, power-defEff.Defense)
+	}
+	return max(1, power)
+}
 
-	switch move.Primary {
-	case models.PrimaryDamage:
-		var dmg int
-		if move.MoveType == models.Physical {
-			dmg = max(1, eff.Attack*move.BaseValue/100-defEff.Defense)
-		} else {
-			dmg = max(1, eff.Magic*move.BaseValue/100)
-		}
+// returns amount of hp the caster will gain from a healing move
+func calcHeal(move models.MoveDefinition, caster *models.Entity) int {
+	eff := caster.EffectiveStats()
+	return int(float32(scalingStatValue(eff, move.ScalingStat)) * move.ScalingStatFactor * float32(move.BaseValue) / 100)
+}
+
+// calc damage/heal and effect of a move based on move selected, attacker and defender
+func applyMove(move models.MoveDefinition, attacker, defender *models.Entity) {
+	switch move.Intent {
+	case models.IntentDamage:
+		dmg := calcDamage(move, attacker, defender)
 		defender.CurrentHP = max(0, defender.CurrentHP-dmg)
-	case models.PrimaryHeal:
-		heal := eff.Magic * move.BaseValue / 100
+
+	case models.IntentHeal:
+		heal := calcHeal(move, attacker)
 		attacker.CurrentHP = min(attacker.CurrentHP+heal, attacker.MaxHP())
 	}
 
-	if len(move.Effects) > 0 {
-		for i := range move.Effects {
-			target := defender
-			if move.Effects[i].Target == models.TargetSelf {
-				target = attacker
-			}
-			addEffect(move.Effects[i], target)
+	for i := range move.Effects {
+		target := defender
+		if move.Effects[i].Target == models.TargetSelf {
+			target = attacker
 		}
+		delta := computeEffectDelta(move.Effects[i], attacker, move.ScalingStat)
+		addEffect(move.Effects[i], target, delta)
 	}
 }
 
-func addEffect(effect *models.Effect, target *models.Entity) {
+// compute how strong the effect of a move is based on attacker stats and stat scaling
+// if no scaling factor, use base delta
+func computeEffectDelta(effect *models.Effect, attacker *models.Entity, stat models.StatType) int {
+	if effect.ScaleFactor != 0 {
+		eff := attacker.EffectiveStats()
+		return int(float32(scalingStatValue(eff, stat)) * effect.ScaleFactor)
+	}
+
+	return effect.BaseDelta
+}
+
+func addEffect(effect *models.Effect, target *models.Entity, delta int) {
+	se := models.StatusEffect{
+		Effect:          *effect,
+		TurnsRemaining:  effect.Duration,
+		TurnsToActivate: effect.ActivationDelay,
+	}
+	se.BaseDelta = delta
+
+	target.StatusEffects = append(target.StatusEffects, se)
+}
+
+func addEnvironmentEffect(effect *models.Effect, target *models.Entity) {
 	target.StatusEffects = append(target.StatusEffects, models.StatusEffect{
 		Effect:          *effect,
 		TurnsRemaining:  effect.Duration,
 		TurnsToActivate: effect.ActivationDelay,
+		IsEnvironmental: true,
 	})
 }
 
-func describeMoveResult(move models.MoveDefinition, attacker, defender *models.Entity) string {
-	eff := attacker.EffectiveStats()
-	defEff := defender.EffectiveStats()
-
-	switch move.Primary {
-	case models.PrimaryDamage:
-		var dmg int
-		if move.MoveType == models.Physical {
-			dmg = max(1, eff.Attack*move.BaseValue/100-defEff.Defense)
-		} else {
-			dmg = max(1, eff.Magic*move.BaseValue/100)
-		}
-		return fmt.Sprintf("Deals %d damage.", dmg)
-	case models.PrimaryHeal:
-		return fmt.Sprintf("Restores %d HP.", eff.Magic*move.BaseValue/100)
+// logging
+func describeMoveResult(move models.MoveDefinition, attacker, defender *models.Entity, preAttackerHP int) string {
+	switch move.Intent {
+	case models.IntentDamage:
+		return fmt.Sprintf("Deals %d damage.", calcDamage(move, attacker, defender))
+	case models.IntentHeal:
+		return fmt.Sprintf("Restores %d HP.", attacker.CurrentHP-preAttackerHP)
 	}
 
 	for i := range move.Effects {
@@ -233,67 +345,73 @@ func describeMoveResult(move models.MoveDefinition, attacker, defender *models.E
 		switch e.Type {
 		case models.StatModifier:
 			sign := ""
-			if e.Delta > 0 {
+			if e.BaseDelta > 0 {
 				sign = "+"
 			}
-			return fmt.Sprintf("%s %s%d for %d turns.", e.StatAffected, sign, e.Delta, e.Duration)
+			return fmt.Sprintf("%s %s%d for %d turns.", e.StatAffected, sign, e.BaseDelta, e.Duration)
 		case models.DamageOverTime:
-			if e.Delta > 0 {
-				return fmt.Sprintf("Deals %d damage.", e.Delta)
+			if e.BaseDelta > 0 {
+				return fmt.Sprintf("Deals %d damage.", e.BaseDelta)
 			}
-			return fmt.Sprintf("Restores %d HP.", -e.Delta)
+			return fmt.Sprintf("Restores %d HP.", -e.BaseDelta)
 		}
 	}
 	return ""
 }
 
+// handles end of battle and returns updated game state
 func (g *Game) endBattle(playerWon bool) *BattleResult {
 	result := &BattleResult{BattleOver: true, PlayerWon: playerWon}
 	room := g.CurrentRoom()
 	g.IsInBattle = false
 
+	var logLines []string
+
 	if playerWon {
 		monster := room.Encounter.Monster
-		monster.IsDefeated = true
-		g.BattleLog = append(g.BattleLog, fmt.Sprintf("You defeated %s!", monster.Name))
+		logLines = append(logLines, fmt.Sprintf("You defeated %s!", monster.Name))
 
 		xpGain := g.Settings.XPPerMonsterLevel * monster.Level
 		levelsGained := g.Player.AddXP(xpGain, g.Settings.XPToLevelUp)
-		g.BattleLog = append(g.BattleLog, fmt.Sprintf("Gained %d XP.", xpGain))
+		logLines = append(logLines, fmt.Sprintf("Gained %d XP.", xpGain))
 
 		if levelsGained > 0 {
-			g.BattleLog = append(g.BattleLog, fmt.Sprintf("Level up! Now Lv.%d", g.Player.Level))
+			logLines = append(logLines, fmt.Sprintf("Level up! Now Lv.%d", g.Player.Level))
 			g.PendingLevelUp = &PendingAllocation{
 				ManualPoints: g.Settings.ManualPointsOnLevelUp * levelsGained,
 				RandomPoints: g.Settings.RandomPointsOnLevelUp * levelsGained,
 			}
 		}
 
-		learned := g.learnRandomMove()
+		// handle learning a move after defating the monster
+		learned := g.learnFromMonster()
 		if learned != nil {
-			moveName := g.AllMoves[learned.MoveID].Name
-			g.BattleLog = append(g.BattleLog, fmt.Sprintf("Learned: %s (Lv.%d)", moveName, learned.Level))
+			moveName := g.AllMoves[learned.MoveId].Name
+			logLines = append(logLines, fmt.Sprintf("Learned: %s (Lv.%d)", moveName, learned.Level))
 			result.LearnedMove = learned
 		}
 
-		item_acquired := g.getRandomItem()
+		// handle getting item from monster
+		item_acquired := g.lootMonster()
 		if item_acquired != nil {
-			item_name := item_acquired.Name
-			g.BattleLog = append(g.BattleLog, fmt.Sprintf("Got an item: %s", item_name))
+			logLines = append(logLines, fmt.Sprintf("Got an item: %s", item_acquired.Name))
 			result.ItemAcquired = item_acquired
 		}
 
-		// Restore a portion of hero mana between fights
+		// restore part of max mana after completing battle
 		if g.Player.MaxMana() > 0 {
 			restore := int(float32(g.Player.MaxMana()) * g.Settings.ManaRestoreBetweenFightsPct)
 			g.Player.CurrentMana = min(g.Player.CurrentMana+restore, g.Player.MaxMana())
 		}
+
 		g.Player.ClearStatusEffects()
 
+		// 🤑🤑🤑
+		// (get gold in the range from min to max defined in settings)
 		max_g := g.Settings.MaxGoldAfterBattle
 		min_g := g.Settings.MinGoldAfterBattle
-
 		gold_looted := rand.Intn(max_g-min_g) + min_g
+		// get double the gold if monster was a boss
 		isBoss := room.Encounter.Kind == models.EncounterKindBoss
 		if isBoss {
 			gold_looted *= 2
@@ -308,19 +426,16 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 			LearnedMove: learned,
 		}
 
-		g.CompleteRoom(g.CurrentRoomID)
-		g.CurrentRoomID = ""
+		g.CompleteRoom(g.CurrentRoomId)
+		g.CurrentRoomId = ""
 
 	} else {
-		g.BattleLog = append(g.BattleLog, "You were defeated...")
-		if room != nil && room.Encounter.Monster != nil {
-			room.Encounter.Monster.ResetForBattle()
-		}
+		logLines = append(logLines, "You were defeated...")
 		g.Player.ClearStatusEffects()
 
 		floorReached := 0
 		if g.IsEndless {
-			if fi, _, err := models.GetFloorIdx(room.Id); err == nil {
+			if fi, _, err := models.GetFloorRoomIdx(room.Id); err == nil {
 				floorReached = fi + 1
 			}
 		}
@@ -330,9 +445,10 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 			FloorReached: floorReached,
 		}
 
-		g.CurrentRoomID = ""
+		g.CurrentRoomId = ""
 	}
 
+	result.NewLogLines = logLines
 	result.GameState = g
 	return result
 }

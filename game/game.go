@@ -9,75 +9,100 @@ import (
 	"tbrpg/models"
 )
 
+// represents the whole game and it's state
 type Game struct {
-	ID               int                `json:"id"`
-	Settings         GameSettings       `json:"settings"`
-	Player           models.Hero        `json:"player"`
-	Floors           []models.Floor     `json:"floors"`
-	BattleLog        []string           `json:"battle_log,omitempty"`
-	IsInBattle       bool               `json:"in_battle"`
-	IsEndless        bool               `json:"is_endless"`
-	CurrentRoomID    string             `json:"current_room_id,omitempty"`
-	LastBattleResult *BattleResult      `json:"last_battle_result"`
-	PendingLevelUp   *PendingAllocation `json:"pending_level_up"`
+	Id                int                `json:"id"`
+	Settings          GameSettings       `json:"settings"`
+	Player            models.Hero        `json:"player"`
+	Floors            []models.Floor     `json:"floors"`
+	IsInBattle        bool               `json:"in_battle"`
+	WaitingForMonster bool               `json:"waiting_for_monster"`
+	NeedsTick         bool               `json:"needs_tick"`
+	IsEndless         bool               `json:"is_endless"`
+	CurrentRoomId     string             `json:"current_room_id,omitempty"`
+	LastBattleResult  *BattleResult      `json:"last_battle_result"`
+	PendingLevelUp    *PendingAllocation `json:"pending_level_up"`
 
-	AllMoves        map[string]models.MoveDefinition `json:"moves,omitempty"`
-	AllItems        map[string]models.Item           `json:"items,omitempty"`
-	Shop            *models.Shop                     `json:"shop,omitempty"`
+	// cached moves and items
+	AllMoves map[string]models.MoveDefinition `json:"moves,omitempty"`
+	AllItems map[string]models.Item           `json:"items,omitempty"`
+
+	Shop *models.Shop `json:"shop,omitempty"`
+
+	// dont' serialize to json
+	Config *GameConfig `json:"-"`
 }
 
+// represents the amount of points that can be allocated to stats upon level up either manually or randomly
+// note that the user can allocate more points randomly according ot the current config
 type PendingAllocation struct {
 	ManualPoints int `json:"manual_points"`
 	RandomPoints int `json:"random_points"`
 }
 
-func eventSlice(m map[string]models.Event) []models.Event {
-	s := make([]models.Event, 0, len(m))
-	for _, e := range m {
-		s = append(s, e)
-	}
-	return s
-}
-
-func NewGame(config *GameConfig, hero models.Hero) *Game {
-	events := eventSlice(config.EventTemplates)
+func NewGame(config *GameConfig, heroId string) *Game {
+	events := slices.Clone(config.EventTemplates)
 
 	monsters := slices.Clone(config.MonsterTemplates)
 	for i := range monsters {
-		monsters[i].Init()
+		monsters[i].Reset()
 	}
 
 	bosses := slices.Clone(config.BossTemplates)
 	for i := range bosses {
-		bosses[i].Init()
+		bosses[i].Reset()
 	}
 
 	environments := slices.Clone(config.EnvironmentTemplates)
 
 	g := Game{
 		Settings: config.Settings,
-		Player:   hero,
 		Floors:   models.MakeFirstRealm(config.Settings.FloorsPerRealms, config.Settings.MaxRoomsPerLevel, config.Settings.MonsterSpawnChance),
 		AllMoves: config.Moves,
 		AllItems: config.Items,
 		Shop:     models.NewShop(config.Items),
+		Config:   config,
 	}
 
-	g.Player.Init()
-	models.FillFloorEncounters(g.Floors, monsters, bosses, events, environments)
+	g.Player = g.NewHero(heroId)
+	models.FillFloorEncountersAndConnect(g.Floors, monsters, bosses, events, environments)
 
 	return &g
 }
 
+// returns a fresh hero from the config template with the given Id.
+// All slices are deep-copied so mutations during a run don't affect the template.
+// Falls back to the first template if the Id is not found.
+func (g *Game) NewHero(heroId string) models.Hero {
+	template := g.Config.HeroTemplates[0]
+	for _, h := range g.Config.HeroTemplates {
+		if h.Id == heroId {
+			template = h
+			break
+		}
+	}
+
+	hero := template
+	hero.EquippedItems = slices.Clone(template.EquippedItems)
+	hero.ItemPool = slices.Clone(template.ItemPool)
+	hero.LearnedMoves = slices.Clone(template.LearnedMoves)
+	hero.Reset()
+	return hero
+}
+
+// Utility
+// pretty much just calls the floors AddRealmToExistingOne
 func (g *Game) AddRealm(config *GameConfig) {
 	monsters := slices.Clone(config.MonsterTemplates)
 	for i := range monsters {
-		monsters[i].Init()
+		monsters[i].Reset()
 	}
+
 	bosses := slices.Clone(config.BossTemplates)
 	for i := range bosses {
-		bosses[i].Init()
+		bosses[i].Reset()
 	}
+
 	g.Floors = models.AddRealmToExistingOne(
 		g.Floors,
 		config.Settings.FloorsPerRealms,
@@ -85,98 +110,86 @@ func (g *Game) AddRealm(config *GameConfig) {
 		config.Settings.MonsterSpawnChance,
 		monsters,
 		bosses,
-		eventSlice(config.EventTemplates),
+		slices.Clone(config.EventTemplates),
 		config.EnvironmentTemplates,
 	)
 }
 
-func (g *Game) RoomByID(id string) *models.Room {
-	for fi := range g.Floors {
-		for ri := range g.Floors[fi].Rooms {
-			if g.Floors[fi].Rooms[ri].Id == id {
-				return &g.Floors[fi].Rooms[ri]
-			}
-		}
-	}
-	return nil
-}
-
+// Utility
 func (g *Game) CurrentRoom() *models.Room {
-	if g.CurrentRoomID == "" {
+	if g.CurrentRoomId == "" {
 		return nil
 	}
-
-	return g.RoomByID(g.CurrentRoomID)
+	return models.RoomById(g.Floors, g.CurrentRoomId)
 }
 
-func (g *Game) EnterRoom(roomID string) error {
-	room := g.RoomByID(roomID)
+// The game handles applying environments of rooms to entities
+func applyEnvironmentEffects(env models.Environment, monster *models.Monster, hero *models.Hero) {
+	for env_id, effect := range monster.EnvironmentEffects {
+		if env_id == env.Id {
+			effect := effect
+			addEnvironmentEffect(&effect, &monster.Entity)
+		}
+	}
+	for env_id, effect := range hero.EnvironmentEffects {
+		if env_id == env.Id {
+			effect := effect
+			addEnvironmentEffect(&effect, &hero.Entity)
+		}
+	}
+}
+
+// EnterRoom transitions the game into a room and returns any intro log lines.
+// Note that upon entering a room of an already defeated enemy,
+// The enemy may permanently level up so they are tougher to beat
+func (g *Game) EnterRoom(roomId string) ([]string, error) {
+	room := models.RoomById(g.Floors, roomId)
 	if room == nil {
-		return fmt.Errorf("room not found: %s", roomID)
+		return nil, fmt.Errorf("room not found: %s", roomId)
 	}
 	if !room.CanEnter {
-		return fmt.Errorf("room %s is not accessible", roomID)
+		return nil, fmt.Errorf("room %s is not accessible", roomId)
 	}
+
+	var initialLog []string
 
 	switch room.Encounter.Kind {
 	case models.EncounterKindBoss:
-		g.BattleLog = nil
-		room.Encounter.Monster.ResetForBattle()
-		g.CurrentRoomID = roomID
-		g.IsInBattle = true
+		if room.IsCompleted {
+			return nil, fmt.Errorf("boss already defeated")
+		}
 
-		for env_id, effect := range room.Encounter.Monster.EnvironmentEffects {
-			if env_id == room.Environment.Id {
-				addEffect(&effect, &room.Encounter.Monster.Entity)
-			}
-		}
-		for env_id, effect := range g.Player.EnvironmentEffects {
-			if env_id == room.Environment.Id {
-				addEffect(&effect, &g.Player.Entity)
-			}
-		}
+		room.Encounter.Monster.Reset()
+		g.CurrentRoomId = roomId
+		g.IsInBattle = true
+		applyEnvironmentEffects(room.Environment, room.Encounter.Monster, &g.Player)
 
 	case models.EncounterKindMonster:
-		g.BattleLog = nil
 		if room.IsCompleted {
-
-			g.BattleLog = append(g.BattleLog, "You applied black magic to revive an already defeated foe. They are as hostile as you remember them to be.")
-
+			initialLog = append(initialLog, "You applied black magic to revive an already defeated foe. They are as hostile as you remember them to be.")
 			if mrand.Int()%100 <= g.Settings.PercentChanceMonsterLevelsUp {
 				room.Encounter.Monster.SetToLevel(room.Encounter.Monster.Level + 1)
-				g.BattleLog = append(g.BattleLog, "However, upon reviving the monster for another duel, something went wrong in the ritual, and the monster is now permanently stronger!")
+				initialLog = append(initialLog, "However, upon reviving the monster for another duel, something went wrong in the ritual, and the monster is now permanently stronger!")
 			}
 		}
 
-		room.Encounter.Monster.ResetForBattle()
-		g.CurrentRoomID = roomID
+		room.Encounter.Monster.Reset()
+		g.CurrentRoomId = roomId
 		g.IsInBattle = true
-
-		for env_id, effect := range room.Encounter.Monster.EnvironmentEffects {
-			if env_id == room.Environment.Id {
-				addEffect(&effect, &room.Encounter.Monster.Entity)
-			}
-		}
-
-		for env_id, effect := range g.Player.EnvironmentEffects {
-			if env_id == room.Environment.Id {
-				addEffect(&effect, &g.Player.Entity)
-			}
-		}
-
+		applyEnvironmentEffects(room.Environment, room.Encounter.Monster, &g.Player)
 
 	case models.EncounterKindEvent:
 		if room.Encounter.Event != nil && !room.Encounter.Event.Applied {
 			g.applyEvent(room.Encounter.Event)
-			g.CompleteRoom(roomID)
+			g.CompleteRoom(roomId)
 		}
-		// g.CompleteRoom(roomID)
 	}
-	return nil
+	return initialLog, nil
 }
 
-func (g *Game) CompleteRoom(roomID string) {
-	room := g.RoomByID(roomID)
+// Updates game state
+func (g *Game) CompleteRoom(roomId string) {
+	room := models.RoomById(g.Floors, roomId)
 	if room == nil {
 		return
 	}
@@ -187,19 +200,19 @@ func (g *Game) CompleteRoom(roomID string) {
 
 	room.IsCompleted = true
 
-	fi, _, err := models.GetFloorIdx(roomID)
+	fi, _, err := models.GetFloorRoomIdx(roomId)
 	if err != nil {
 		log.Println(err)
 	}
 
 	for ri := range g.Floors[fi].Rooms {
-		if g.Floors[fi].Rooms[ri].Id != roomID {
+		if g.Floors[fi].Rooms[ri].Id != roomId {
 			g.Floors[fi].Rooms[ri].CanEnter = false
 		}
 	}
 
-	for _, nextID := range room.NextRoomIDs {
-		if next := g.RoomByID(nextID); next != nil {
+	for _, nextId := range room.NextRoomIds {
+		if next := models.RoomById(g.Floors, nextId); next != nil {
 			next.CanEnter = true
 		}
 	}
@@ -207,47 +220,48 @@ func (g *Game) CompleteRoom(roomID string) {
 	g.Floors[fi].IsCompleted = true
 }
 
+// Have an event affect player
 func (g *Game) applyEvent(e *models.Event) {
 	h := &g.Player
 	for stat, delta := range e.StatsAffected {
 		switch stat {
 		case models.HealthStat:
 			prevMax := h.MaxHP()
-			h.LevelBonuses.Health += delta
+			h.LevelStats.Health += delta
 			newMax := h.MaxHP()
 			if delta > 0 {
 				h.CurrentHP += newMax - prevMax
 			}
 			h.CurrentHP = min(max(h.CurrentHP, 1), newMax)
-		case models.AttackStat:
-			h.LevelBonuses.Attack = max(0, h.LevelBonuses.Attack+delta)
-		case models.DefenseStat:
-			h.LevelBonuses.Defense = max(0, h.LevelBonuses.Defense+delta)
-		case models.MagicStat:
-			h.LevelBonuses.Magic = max(0, h.LevelBonuses.Magic+delta)
 		case models.ManaStat:
 			prevMax := h.MaxMana()
-			h.LevelBonuses.Mana += delta
+			h.LevelStats.Mana += delta
 			newMax := h.MaxMana()
 			if delta > 0 {
 				h.CurrentMana += newMax - prevMax
 			}
 			h.CurrentMana = min(max(h.CurrentMana, 0), newMax)
+		case models.AttackStat:
+			h.LevelStats.Attack = max(0, h.LevelStats.Attack+delta)
+		case models.DefenseStat:
+			h.LevelStats.Defense = max(0, h.LevelStats.Defense+delta)
+		case models.MagicStat:
+			h.LevelStats.Magic = max(0, h.LevelStats.Magic+delta)
 		}
 	}
+
 	e.Applied = true
 }
 
-func (g *Game) learnRandomMove() *models.LearnedMove {
+// gets a pool of last defeated monster's moves and has the player learn one of them at random
+func (g *Game) learnFromMonster() *models.LearnedMove {
 	var pool []string
 	monster := g.CurrentRoom().Encounter.Monster
 	for _, m := range monster.Moves {
-		if _, ok := g.AllMoves[m.MoveID]; !ok {
+		if _, ok := g.AllMoves[m.MoveId]; !ok {
 			continue
 		}
-		if g.Player.GetMoveLevel(m.MoveID) < g.Settings.MaxMoveLevel {
-			pool = append(pool, m.MoveID)
-		}
+		pool = append(pool, m.MoveId)
 	}
 
 	if len(pool) == 0 {
@@ -259,11 +273,12 @@ func (g *Game) learnRandomMove() *models.LearnedMove {
 	return &learned
 }
 
-func (g *Game) getRandomItem() *models.Item {
+// adds random item to the players random pool
+func (g *Game) lootMonster() *models.Item {
 	monster := g.CurrentRoom().Encounter.Monster
 	var pool []models.Item
 	for _, item_id := range monster.ItemPool {
-		if item, ok := g.AllItems[item_id]; ok {
+		if item, ok := g.Config.Items[item_id]; ok {
 			pool = append(pool, item)
 		}
 	}
@@ -271,6 +286,8 @@ func (g *Game) getRandomItem() *models.Item {
 		return nil
 	}
 
+	// shuffle possible items so the chances are random
+	// if it weren't suffled, the chance of getting the last item in the list would be smaller than it should be
 	mrand.Shuffle(len(pool), func(i, j int) { pool[i], pool[j] = pool[j], pool[i] })
 	for i := range pool {
 		if mrand.Intn(100) < pool[i].DropRate {
@@ -278,5 +295,112 @@ func (g *Game) getRandomItem() *models.Item {
 			return &pool[i]
 		}
 	}
+
+	return nil
+}
+
+// countFreeMoves returns the number of equipped moves that cost no mana.
+func (g *Game) countFreeMoves() int {
+	count := 0
+	for _, id := range g.Player.EquippedMoves {
+		if def, ok := g.AllMoves[id]; ok && def.CostAmount == 0 {
+			count++
+		}
+	}
+	return count
+}
+
+// EquipMove validates and equips a move for the hero.
+func (g *Game) EquipMove(moveId string, maxSlots int) error {
+	hero := &g.Player
+
+	if len(hero.EquippedMoves) >= maxSlots {
+		return fmt.Errorf("equipped moves at maximum")
+	}
+
+	if slices.Contains(hero.EquippedMoves, moveId) {
+		return fmt.Errorf("move already equipped")
+	}
+
+	if hero.GetMoveLevel(moveId) == 0 {
+		return fmt.Errorf("move not learned")
+	}
+
+	def := g.AllMoves[moveId]
+	if def.CostAmount > 0 && g.countFreeMoves() == 0 {
+		return fmt.Errorf("must keep at least one move with no mana cost")
+	}
+
+	hero.EquippedMoves = append(hero.EquippedMoves, moveId)
+	return nil
+}
+
+// UnequipMove removes a move from the hero's equipped list.
+func (g *Game) UnequipMove(moveId string) error {
+	hero := &g.Player
+	if len(hero.EquippedMoves) <= 1 {
+		return fmt.Errorf("must keep at least one move equipped")
+	}
+
+	def := g.AllMoves[moveId]
+	if def.CostAmount == 0 && g.countFreeMoves() <= 1 {
+		return fmt.Errorf("must keep at least one move with no mana cost")
+	}
+
+	updated := make([]string, 0, len(hero.EquippedMoves)-1)
+	for _, id := range hero.EquippedMoves {
+		if id != moveId {
+			updated = append(updated, id)
+		}
+	}
+	hero.EquippedMoves = updated
+	return nil
+}
+
+// Utility
+// FindInItemPool returns the item with itemId from the player's pool, if present.
+func (g *Game) GetItemFromPlayerPool(itemId string) (models.Item, bool) {
+	if slices.Contains(g.Player.ItemPool, itemId) {
+		item, ok := g.Config.Items[itemId]
+		return item, ok
+	}
+
+	return models.Item{}, false
+}
+
+// Utility
+// RemoveFromItemPool removes one occurrence of itemId from the player's pool.
+func (g *Game) RemoveFromItemPool(itemId string) {
+	for i, id := range g.Player.ItemPool {
+		if id == itemId {
+			g.Player.ItemPool = slices.Delete(g.Player.ItemPool, i, i+1)
+			return
+		}
+	}
+}
+
+// EquipItemFromPool equips an item from the player's inventory.
+func (g *Game) EquipItemFromPool(itemId string) error {
+	item, ok := g.GetItemFromPlayerPool(itemId)
+	if !ok {
+		return fmt.Errorf("item not in inventory")
+	}
+	if err := g.Player.EquipItem(item); err != nil {
+		return err
+	}
+	g.RemoveFromItemPool(itemId)
+	return nil
+}
+
+// UseItemFromPool applies a consumable from the player's inventory.
+func (g *Game) UseItemFromPool(itemId string) error {
+	item, ok := g.GetItemFromPlayerPool(itemId)
+	if !ok {
+		return fmt.Errorf("item not in inventory")
+	}
+	if err := g.Player.ApplyConsumableItem(item); err != nil {
+		return err
+	}
+	g.RemoveFromItemPool(itemId)
 	return nil
 }

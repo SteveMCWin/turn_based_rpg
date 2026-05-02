@@ -15,7 +15,9 @@ func main() {
 	}
 
 	db := &database.DataBase{}
-    db.InitDatabase()
+	if err := db.InitDatabase(); err != nil {
+		log.Fatalf("failed to initialize database: %v", err)
+	}
 
 	log.Println("Starting server on :5000")
 	if err := http.ListenAndServe(":5000", handlers.NewServer(config, db)); err != nil {

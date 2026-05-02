@@ -9,7 +9,7 @@ type Stats struct {
 	Attack  int `json:"attack"`
 	Defense int `json:"defense"`
 	Magic   int `json:"magic"`
-	// resilience against effects? dodge?
+	// resilience against effects? dodge? out of scope...
 }
 
 // Percentage of increase for each stat after level gain
@@ -62,19 +62,19 @@ func (s Stats) ScaleStats(scaleFactor StatScaleFactors) Stats {
 func (s Stats) ApplyEffect(e Effect) Stats {
 	switch e.StatAffected {
 	case HealthStat:
-		s.Health += e.Delta
+		s.Health += e.BaseDelta
 		s.Health = max(s.Health, 0)
 	case ManaStat:
-		s.Mana += e.Delta
+		s.Mana += e.BaseDelta
 		s.Mana = max(s.Mana, 0)
 	case AttackStat:
-		s.Attack += e.Delta
+		s.Attack += e.BaseDelta
 		s.Attack = max(s.Attack, 0)
 	case DefenseStat:
-		s.Defense += e.Delta
+		s.Defense += e.BaseDelta
 		s.Defense = max(s.Defense, 0)
 	case MagicStat:
-		s.Magic += e.Delta
+		s.Magic += e.BaseDelta
 		s.Magic = max(s.Magic, 0)
 	default:
 		log.Println("Urmmm")
@@ -83,6 +83,7 @@ func (s Stats) ApplyEffect(e Effect) Stats {
 	return s
 }
 
+// Apply delta to a stat based on stat type, used for item buffs
 func (s Stats) AddToStat(stat StatType, delta int) Stats {
 	res := s
 

@@ -8,30 +8,37 @@ import (
 	"strings"
 )
 
+// id of room is floor_num,room_num
 const ROOM_ID_SEPARATOR string = ","
 
-// id of room is floor_num,room_num
+// Each room conatins an encounter (event or monster)
+// Each room has to connect to at least one room on the next floor
+// Since monsters can be fought again, IsCompleted is not always the same as CanEnter
 type Room struct {
 	Id          string
 	Encounter   Encounter
-	NextRoomIDs []string
+	NextRoomIds []string
 	IsCompleted bool
 	CanEnter    bool
 	Environment Environment
 }
 
+// Each room has an environment which applies status effects on entities
 type Environment struct {
 	Id          string
 	Name        string
 	Description string
 }
 
+// The game is made up of multiple floors
 type Floor struct {
 	Rooms       []Room
 	IsCompleted bool
 	Idx         int
 }
 
+// A realm is just a set of floors, couldn't think up of a better name
+// the first can have only 1 room on its first floor which has a monster encounter
 func MakeFirstRealm(numFloors, maxRoomsPerFloor, monster_spawn_chance int) []Floor {
 
 	floors := make([]Floor, 1)
@@ -53,11 +60,12 @@ func MakeFirstRealm(numFloors, maxRoomsPerFloor, monster_spawn_chance int) []Flo
 	return floors
 }
 
+// yeah this is a lot of parameters, but I wanted it to be a single funciton for making and populating a new realm
 func AddRealmToExistingOne(existing []Floor, numFloors, maxRoomsPerFloor, monster_spawn_chance int, monsterTemplates, bossTemplates []Monster, eventTemplates []Event, environmentTemplates []Environment) []Floor {
 
 	new_realm := GenerateFloors(numFloors, maxRoomsPerFloor, len(existing), monster_spawn_chance)
 
-	FillFloorEncounters(new_realm, monsterTemplates, bossTemplates, eventTemplates, environmentTemplates)
+	FillFloorEncountersAndConnect(new_realm, monsterTemplates, bossTemplates, eventTemplates, environmentTemplates)
 	ConnectFloorRooms(&existing[len(existing)-1], &new_realm[0])
 
 	// CompleteRoom already ran for the boss before AddRealm was called, so
@@ -71,6 +79,8 @@ func AddRealmToExistingOne(existing []Floor, numFloors, maxRoomsPerFloor, monste
 	return existing
 }
 
+// makes floors and rooms, sets their ids, encounter kind
+// since floors are made realm by realm, the first floor in realm 2 should have an idx num_floors_in_prev_realm + 1
 func GenerateFloors(numFloors, maxRoomsPerFloor, start_floor_idx, monster_spawn_chance int) []Floor {
 	floors := make([]Floor, numFloors)
 
@@ -102,7 +112,17 @@ func GenerateFloors(numFloors, maxRoomsPerFloor, start_floor_idx, monster_spawn_
 	return floors
 }
 
-func GetFloorIdx(room_id string) (int, int, error) {
+// Get a room based on it's id from all floors
+func RoomById(floors []Floor, id string) *Room {
+	fi, ri, err := GetFloorRoomIdx(id)
+	if err != nil || fi >= len(floors) || ri >= len(floors[fi].Rooms) {
+		return nil
+	}
+	return &floors[fi].Rooms[ri]
+}
+
+// Get floor and room idx based on the id of the room
+func GetFloorRoomIdx(room_id string) (int, int, error) {
 	idxs := strings.Split(room_id, ROOM_ID_SEPARATOR)
 	if len(idxs) != 2 {
 		return -1, -1, fmt.Errorf("Error getting floor and room idx from room id %s\n", room_id)
@@ -121,6 +141,12 @@ func GetFloorIdx(room_id string) (int, int, error) {
 	return f_idx, r_idx, nil
 }
 
+// the rule for connecting rooms is that each room on each floor must be reachable by at least one path
+// also paths cannot go over eachother, as in if room 0,0 connects to 1,1 then 0,1 cannot connect to 1,0
+// Visualisation:
+// 0,0  0,1
+// 
+// 1,0  1,1
 func ConnectFloorRooms(f1, f2 *Floor) {
 	last_conn_idx := 0
 	f1_len := len(f1.Rooms)
@@ -139,7 +165,7 @@ func ConnectFloorRooms(f1, f2 *Floor) {
 		}
 
 		for room_idx := last_conn_idx; room_idx <= room_indexes_to_connect; room_idx++ {
-			f1.Rooms[i].NextRoomIDs = append(f1.Rooms[i].NextRoomIDs, strconv.Itoa(f2.Idx)+","+strconv.Itoa(room_idx))
+			f1.Rooms[i].NextRoomIds = append(f1.Rooms[i].NextRoomIds, strconv.Itoa(f2.Idx)+","+strconv.Itoa(room_idx))
 		}
 
 		last_conn_idx = room_indexes_to_connect
@@ -151,7 +177,10 @@ func ConnectFloorRooms(f1, f2 *Floor) {
 
 }
 
-func FillFloorEncounters(floors []Floor, monsterTemplates, bossTemplates []Monster, eventTemplates []Event, environmentTemplates []Environment) {
+// fills room encounters with environments monsters (including bosses) and events based on room kind
+// then connects floors
+
+func FillFloorEncountersAndConnect(floors []Floor, monsterTemplates, bossTemplates []Monster, eventTemplates []Event, environmentTemplates []Environment) {
 	events := slices.Clone(eventTemplates)
 	monsters := slices.Clone(monsterTemplates)
 	bosses := slices.Clone(bossTemplates)

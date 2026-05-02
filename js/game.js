@@ -7,12 +7,13 @@ async function loadState() {
   return res.json();
 }
 
-async function postAction(url, body = {}) {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+async function postAction(url, body) {
+  const options = { method: 'POST' };
+  if (body !== undefined) {
+    options.headers = { 'Content-Type': 'application/json' };
+    options.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, options);
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error || `Request failed: ${res.status}`);
@@ -29,11 +30,11 @@ function itemStatBonus(e, stat) {
   }, 0);
 }
 
-function maxHP(e)   { return (e.health  || 0) + (e.level_bonuses?.health  || 0) + itemStatBonus(e, 'health'); }
-function maxMana(e) { return (e.mana    || 0) + (e.level_bonuses?.mana    || 0) + itemStatBonus(e, 'mana'); }
-function effAtk(e)  { return (e.attack  || 0) + (e.level_bonuses?.attack  || 0) + itemStatBonus(e, 'attack'); }
-function effDef(e)  { return (e.defense || 0) + (e.level_bonuses?.defense || 0) + itemStatBonus(e, 'defense'); }
-function effMag(e)  { return (e.magic   || 0) + (e.level_bonuses?.magic   || 0) + itemStatBonus(e, 'magic'); }
+function maxHP(e)   { return (e.health  || 0) + (e.level_stats?.health  || 0) + itemStatBonus(e, 'health'); }
+function maxMana(e) { return (e.mana    || 0) + (e.level_stats?.mana    || 0) + itemStatBonus(e, 'mana'); }
+function effAtk(e)  { return (e.attack  || 0) + (e.level_stats?.attack  || 0) + itemStatBonus(e, 'attack'); }
+function effDef(e)  { return (e.defense || 0) + (e.level_stats?.defense || 0) + itemStatBonus(e, 'defense'); }
+function effMag(e)  { return (e.magic   || 0) + (e.level_stats?.magic   || 0) + itemStatBonus(e, 'magic'); }
 
 function itemTooltipHTML(item) {
   if (!item) return '';
@@ -75,7 +76,7 @@ function initTooltips() {
   document.addEventListener('mousemove', e => {
     if (tip.style.display === 'none') return;
     tip.style.left = (e.clientX + 14) + 'px';
-    tip.style.top  = (e.clientY + 14) + 'px';
+    tip.style.top  = (e.clientY - tip.offsetHeight - 14) + 'px';
   });
   document.addEventListener('mouseout', e => {
     if (e.target.closest('[data-tooltip]')) tip.style.display = 'none';

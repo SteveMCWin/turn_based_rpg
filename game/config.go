@@ -16,7 +16,6 @@ type GameSettings struct {
 	MaxRoomsPerLevel             int     `json:"max_rooms_per_level"`
 	FloorsPerRealms              int     `json:"floors_per_realm"`
 	MaxEquippedMoves             int     `json:"max_equipped_moves"`
-	MaxMoveLevel                 int     `json:"max_move_level"`
 	ManaRegenPerTurn             int     `json:"mana_regen_per_turn"`
 	ManaRestoreBetweenFightsPct  float32 `json:"mana_restore_between_fights_pct"`
 	PercentChanceMonsterLevelsUp int     `json:"pct_chance_monster_lvl_up"`
@@ -35,7 +34,7 @@ type GameConfig struct {
 	MonsterTemplates     []models.Monster
 	BossTemplates        []models.Monster
 	Settings             GameSettings
-	EventTemplates       map[string]models.Event
+	EventTemplates       []models.Event
 	EnvironmentTemplates []models.Environment
 }
 
@@ -48,7 +47,7 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 	}
 	config.Moves = make(map[string]models.MoveDefinition, len(moveList))
 	for _, m := range moveList {
-		config.Moves[m.ID] = m
+		config.Moves[m.Id] = m
 	}
 
 	var itemList []models.Item
@@ -65,8 +64,11 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 	}
 	for hero_idx := range config.HeroTemplates {
 		for _, item_id := range config.HeroTemplates[hero_idx].ItemPool {
-			config.HeroTemplates[hero_idx].EquipItem(config.Items[item_id])
+			if err := config.HeroTemplates[hero_idx].EquipItem(config.Items[item_id]); err != nil {
+				return nil, fmt.Errorf("hero %q starting item %q: %w", config.HeroTemplates[hero_idx].Id, item_id, err)
+			}
 		}
+
 		// Clear item_pool so starting gear doesn't also appear in the player's inventory
 		config.HeroTemplates[hero_idx].ItemPool = nil
 	}
@@ -101,18 +103,12 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 		return nil, fmt.Errorf("game settings: %w", err)
 	}
 
-	// events.json is optional
-	var eventList []models.Event
-	if err := loadJSON(configDir+"/events.json", &eventList); err != nil {
-		return nil, fmt.Errorf("events not loaded: %w", err)
-	}
-	config.EventTemplates = make(map[string]models.Event, len(eventList))
-	for _, e := range eventList {
-		config.EventTemplates[e.ID] = e
+	if err := loadJSON(configDir+"/events.json", &config.EventTemplates); err != nil {
+		return nil, fmt.Errorf("events config: %w", err)
 	}
 
 	if err := loadJSON(configDir+"/environments.json", &config.EnvironmentTemplates); err != nil {
-		return nil, fmt.Errorf("environments not loaded: %w", err)
+		return nil, fmt.Errorf("environments config: %w", err)
 	}
 
 	return config, nil
