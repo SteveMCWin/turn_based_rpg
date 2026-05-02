@@ -4,13 +4,13 @@ import (
 	"fmt"
 )
 
-func (g *Game) BuyItem(itemID string) error {
+func (g *Game) BuyItem(itemId string) error {
 	if g.IsInBattle {
 		return fmt.Errorf("cannot shop during battle")
 	}
 	idx := -1
 	for i, item := range g.Shop.Items {
-		if item.Id == itemID {
+		if item.Id == itemId {
 			idx = i
 			break
 		}
@@ -28,13 +28,13 @@ func (g *Game) BuyItem(itemID string) error {
 	return nil
 }
 
-func (g *Game) SellItem(itemID string) error {
+func (g *Game) SellItem(itemId string) error {
 	if g.IsInBattle {
 		return fmt.Errorf("cannot shop during battle")
 	}
 	found := false
 	for i, id := range g.Player.ItemPool {
-		if id == itemID {
+		if id == itemId {
 			g.Player.ItemPool = append(g.Player.ItemPool[:i], g.Player.ItemPool[i+1:]...)
 			found = true
 			break
@@ -43,7 +43,7 @@ func (g *Game) SellItem(itemID string) error {
 	if !found {
 		return fmt.Errorf("item not in inventory")
 	}
-	item, ok := g.Config.Items[itemID]
+	item, ok := g.Config.Items[itemId]
 	if !ok {
 		return fmt.Errorf("unknown item")
 	}

@@ -44,13 +44,21 @@ function render() {
     }).join('');
 }
 
+let movesErrorTimer = null;
+function showMovesError(msg) {
+  const el = document.getElementById('moves-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(movesErrorTimer);
+  movesErrorTimer = setTimeout(() => el.classList.add('hidden'), 3000);
+}
+
 async function equip(id) {
   try {
     state = await postAction('/game/moves/equip', { move_id: id });
     render();
   } catch (e) {
-    document.getElementById('moves-error').textContent = e.message;
-    document.getElementById('moves-error').classList.remove('hidden');
+    showMovesError(e.message);
   }
 }
 
@@ -59,7 +67,6 @@ async function unequip(id) {
     state = await postAction('/game/moves/unequip', { move_id: id });
     render();
   } catch (e) {
-    document.getElementById('moves-error').textContent = e.message;
-    document.getElementById('moves-error').classList.remove('hidden');
+    showMovesError(e.message);
   }
 }

@@ -29,7 +29,7 @@ func (db *DataBase) ListSaves() ([]Save, error) {
 	saves := []Save{}
 	for rows.Next() {
 		var s Save
-		if err := rows.Scan(&s.ID, &s.Label, &s.SavedAt); err != nil {
+		if err := rows.Scan(&s.Id, &s.Label, &s.SavedAt); err != nil {
 			return nil, err
 		}
 		saves = append(saves, s)
@@ -51,7 +51,7 @@ func (db *DataBase) CreateGame(g *game.Game) (int, error) {
 
 	res, err := tx.Exec(
 		`INSERT INTO saves (is_endless, is_in_battle, current_room_id) VALUES (?, ?, ?)`,
-		g.IsEndless, g.IsInBattle, g.CurrentRoomID,
+		g.IsEndless, g.IsInBattle, g.CurrentRoomId,
 	)
 	if err != nil {
 		return 0, err
@@ -78,7 +78,7 @@ func (db *DataBase) SaveGame(g *game.Game) error {
 
 	_, err = tx.Exec(
 		`UPDATE saves SET is_endless = ?, is_in_battle = ?, current_room_id = ?, saved_at = CURRENT_TIMESTAMP WHERE id = ?`,
-		g.IsEndless, g.IsInBattle, g.CurrentRoomID, g.ID,
+		g.IsEndless, g.IsInBattle, g.CurrentRoomId, g.Id,
 	)
 	if err != nil {
 		return err
@@ -96,15 +96,15 @@ func (db *DataBase) SaveGame(g *game.Game) error {
 		"save_shop_items",
 	}
 	for _, t := range childTables {
-		if _, err := tx.Exec(`DELETE FROM `+t+` WHERE save_id = ?`, g.ID); err != nil {
+		if _, err := tx.Exec(`DELETE FROM `+t+` WHERE save_id = ?`, g.Id); err != nil {
 			return err
 		}
 	}
-	if _, err := tx.Exec(`DELETE FROM save_floors WHERE save_id = ?`, g.ID); err != nil {
+	if _, err := tx.Exec(`DELETE FROM save_floors WHERE save_id = ?`, g.Id); err != nil {
 		return err
 	}
 
-	if err := writeSaveChildren(tx, g.ID, g); err != nil {
+	if err := writeSaveChildren(tx, g.Id, g); err != nil {
 		return err
 	}
 
@@ -117,7 +117,7 @@ func (db *DataBase) LoadSave(id int, config *game.GameConfig) (*game.Game, error
 	var isEndless, isInBattle bool
 	err := db.Data.QueryRow(
 		`SELECT id, is_endless, is_in_battle, current_room_id FROM saves WHERE id = ?`, id,
-	).Scan(&g.ID, &isEndless, &isInBattle, &g.CurrentRoomID)
+	).Scan(&g.Id, &isEndless, &isInBattle, &g.CurrentRoomId)
 	if err != nil {
 		return nil, err
 	}
@@ -159,17 +159,17 @@ func (db *DataBase) LoadSave(id int, config *game.GameConfig) (*game.Game, error
 }
 
 // writeSaveChildren inserts all child records for a save inside a transaction.
-func writeSaveChildren(tx *sql.Tx, saveID int, g *game.Game) error {
-	if err := writeHero(tx, saveID, &g.Player); err != nil {
+func writeSaveChildren(tx *sql.Tx, saveId int, g *game.Game) error {
+	if err := writeHero(tx, saveId, &g.Player); err != nil {
 		return err
 	}
-	if err := writeFloors(tx, saveID, g.Floors); err != nil {
+	if err := writeFloors(tx, saveId, g.Floors); err != nil {
 		return err
 	}
-	if err := writeShop(tx, saveID, g.Shop); err != nil {
+	if err := writeShop(tx, saveId, g.Shop); err != nil {
 		return err
 	}
-	if err := writePendingLevelUp(tx, saveID, g.PendingLevelUp); err != nil {
+	if err := writePendingLevelUp(tx, saveId, g.PendingLevelUp); err != nil {
 		return err
 	}
 	return nil
@@ -177,11 +177,11 @@ func writeSaveChildren(tx *sql.Tx, saveID int, g *game.Game) error {
 
 // --- write helpers ---
 
-func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
+func writeHero(tx *sql.Tx, saveId int, h *models.Hero) error {
 	if _, err := tx.Exec(
 		`INSERT INTO save_heroes (save_id, hero_template_id, level, current_xp, current_hp, current_mana, current_gold, lb_health, lb_mana, lb_attack, lb_defense, lb_magic)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		saveID, h.ID, h.Level, h.CurrentXP, h.CurrentHP, h.CurrentMana, h.CurrentGold,
+		saveId, h.Id, h.Level, h.CurrentXP, h.CurrentHP, h.CurrentMana, h.CurrentGold,
 		h.LevelStats.Health, h.LevelStats.Mana, h.LevelStats.Attack, h.LevelStats.Defense, h.LevelStats.Magic,
 	); err != nil {
 		return err
@@ -190,16 +190,16 @@ func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
 	for _, lm := range h.LearnedMoves {
 		if _, err := tx.Exec(
 			`INSERT INTO save_hero_learned_moves (save_id, move_id, level) VALUES (?, ?, ?)`,
-			saveID, lm.MoveID, lm.Level,
+			saveId, lm.MoveId, lm.Level,
 		); err != nil {
 			return err
 		}
 	}
 
-	for slot, moveID := range h.EquippedMoves {
+	for slot, moveId := range h.EquippedMoves {
 		if _, err := tx.Exec(
 			`INSERT INTO save_hero_equipped_moves (save_id, move_id, slot_order) VALUES (?, ?, ?)`,
-			saveID, moveID, slot,
+			saveId, moveId, slot,
 		); err != nil {
 			return err
 		}
@@ -208,16 +208,16 @@ func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
 	for _, item := range h.EquippedItems {
 		if _, err := tx.Exec(
 			`INSERT INTO save_hero_equipped_items (save_id, item_id) VALUES (?, ?)`,
-			saveID, item.Id,
+			saveId, item.Id,
 		); err != nil {
 			return err
 		}
 	}
 
-	for _, itemID := range h.ItemPool {
+	for _, itemId := range h.ItemPool {
 		if _, err := tx.Exec(
 			`INSERT INTO save_hero_item_pool (save_id, item_id) VALUES (?, ?)`,
-			saveID, itemID,
+			saveId, itemId,
 		); err != nil {
 			return err
 		}
@@ -227,7 +227,7 @@ func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
 		if _, err := tx.Exec(
 			`INSERT INTO save_hero_status_effects (save_id, effect_type, stat_affected, delta, duration, target, activation_delay, turns_remaining, turns_to_activate)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			saveID, string(se.Type), string(se.StatAffected), se.BaseDelta, se.Duration, string(se.Target),
+			saveId, string(se.Type), string(se.StatAffected), se.BaseDelta, se.Duration, string(se.Target),
 			se.ActivationDelay, se.TurnsRemaining, se.TurnsToActivate,
 		); err != nil {
 			return err
@@ -237,33 +237,33 @@ func writeHero(tx *sql.Tx, saveID int, h *models.Hero) error {
 	return nil
 }
 
-func writeFloors(tx *sql.Tx, saveID int, floors []models.Floor) error {
+func writeFloors(tx *sql.Tx, saveId int, floors []models.Floor) error {
 	for _, floor := range floors {
 		res, err := tx.Exec(
 			`INSERT INTO save_floors (save_id, floor_idx, is_completed) VALUES (?, ?, ?)`,
-			saveID, floor.Idx, floor.IsCompleted,
+			saveId, floor.Idx, floor.IsCompleted,
 		)
 		if err != nil {
 			return err
 		}
-		floorDBID, _ := res.LastInsertId()
+		floorDBId, _ := res.LastInsertId()
 
 		for _, room := range floor.Rooms {
-			nextIDs := strings.Join(room.NextRoomIDs, ";")
+			nextIds := strings.Join(room.NextRoomIds, ";")
 			res2, err := tx.Exec(
 				`INSERT INTO save_rooms (floor_db_id, room_string_id, encounter_kind, is_completed, can_enter, next_room_ids, environment_id)
 				 VALUES (?, ?, ?, ?, ?, ?, ?)`,
-				floorDBID, room.Id, string(room.Encounter.Kind), room.IsCompleted, room.CanEnter, nextIDs, room.Environment.Id,
+				floorDBId, room.Id, string(room.Encounter.Kind), room.IsCompleted, room.CanEnter, nextIds, room.Environment.Id,
 			)
 			if err != nil {
 				return err
 			}
-			roomDBID, _ := res2.LastInsertId()
+			roomDBId, _ := res2.LastInsertId()
 
 			switch room.Encounter.Kind {
 			case models.EncounterKindMonster, models.EncounterKindBoss:
 				if room.Encounter.Monster != nil {
-					if err := writeMonster(tx, roomDBID, room.Encounter.Monster); err != nil {
+					if err := writeMonster(tx, roomDBId, room.Encounter.Monster); err != nil {
 						return err
 					}
 				}
@@ -271,7 +271,7 @@ func writeFloors(tx *sql.Tx, saveID int, floors []models.Floor) error {
 				if room.Encounter.Event != nil {
 					if _, err := tx.Exec(
 						`INSERT INTO save_room_events (room_db_id, event_template_id, applied) VALUES (?, ?, ?)`,
-						roomDBID, room.Encounter.Event.ID, room.Encounter.Event.Applied,
+						roomDBId, room.Encounter.Event.Id, room.Encounter.Event.Applied,
 					); err != nil {
 						return err
 					}
@@ -282,23 +282,23 @@ func writeFloors(tx *sql.Tx, saveID int, floors []models.Floor) error {
 	return nil
 }
 
-func writeMonster(tx *sql.Tx, roomDBID int64, m *models.Monster) error {
+func writeMonster(tx *sql.Tx, roomDBId int64, m *models.Monster) error {
 	res, err := tx.Exec(
 		`INSERT INTO save_monsters (room_db_id, monster_template_id, is_defeated, level, current_xp, current_hp, current_mana, lb_health, lb_mana, lb_attack, lb_defense, lb_magic)
 		 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		roomDBID, m.ID, false, m.Level, m.CurrentXP, m.CurrentHP, m.CurrentMana,
+		roomDBId, m.Id, false, m.Level, m.CurrentXP, m.CurrentHP, m.CurrentMana,
 		m.LevelStats.Health, m.LevelStats.Mana, m.LevelStats.Attack, m.LevelStats.Defense, m.LevelStats.Magic,
 	)
 	if err != nil {
 		return err
 	}
-	monsterDBID, _ := res.LastInsertId()
+	monsterDBId, _ := res.LastInsertId()
 
 	for _, se := range m.StatusEffects {
 		if _, err := tx.Exec(
 			`INSERT INTO save_monster_status_effects (monster_db_id, effect_type, stat_affected, delta, duration, target, activation_delay, turns_remaining, turns_to_activate)
 			 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-			monsterDBID, string(se.Type), string(se.StatAffected), se.BaseDelta, se.Duration, string(se.Target),
+			monsterDBId, string(se.Type), string(se.StatAffected), se.BaseDelta, se.Duration, string(se.Target),
 			se.ActivationDelay, se.TurnsRemaining, se.TurnsToActivate,
 		); err != nil {
 			return err
@@ -307,14 +307,14 @@ func writeMonster(tx *sql.Tx, roomDBID int64, m *models.Monster) error {
 	return nil
 }
 
-func writeShop(tx *sql.Tx, saveID int, shop *models.Shop) error {
+func writeShop(tx *sql.Tx, saveId int, shop *models.Shop) error {
 	if shop == nil {
 		return nil
 	}
 	for _, item := range shop.Items {
 		if _, err := tx.Exec(
 			`INSERT INTO save_shop_items (save_id, item_id) VALUES (?, ?)`,
-			saveID, item.Id,
+			saveId, item.Id,
 		); err != nil {
 			return err
 		}
@@ -322,29 +322,29 @@ func writeShop(tx *sql.Tx, saveID int, shop *models.Shop) error {
 	return nil
 }
 
-func writePendingLevelUp(tx *sql.Tx, saveID int, p *game.PendingAllocation) error {
+func writePendingLevelUp(tx *sql.Tx, saveId int, p *game.PendingAllocation) error {
 	if p == nil {
 		return nil
 	}
 	_, err := tx.Exec(
 		`INSERT INTO save_pending_level_ups (save_id, manual_points, random_points) VALUES (?, ?, ?)`,
-		saveID, p.ManualPoints, p.RandomPoints,
+		saveId, p.ManualPoints, p.RandomPoints,
 	)
 	return err
 }
 
 // --- read helpers ---
 
-func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, error) {
-	var templateID string
+func readHero(db *sql.DB, saveId int, config *game.GameConfig) (*models.Hero, error) {
+	var templateId string
 	var level, xp, hp, mana, gold int
 	var lbH, lbMa, lbAt, lbDe, lbMg int
 
 	err := db.QueryRow(
 		`SELECT hero_template_id, level, current_xp, current_hp, current_mana, current_gold,
 		        lb_health, lb_mana, lb_attack, lb_defense, lb_magic
-		 FROM save_heroes WHERE save_id = ?`, saveID,
-	).Scan(&templateID, &level, &xp, &hp, &mana, &gold, &lbH, &lbMa, &lbAt, &lbDe, &lbMg)
+		 FROM save_heroes WHERE save_id = ?`, saveId,
+	).Scan(&templateId, &level, &xp, &hp, &mana, &gold, &lbH, &lbMa, &lbAt, &lbDe, &lbMg)
 	if err != nil {
 		return nil, err
 	}
@@ -352,13 +352,13 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	// Start from the config template to get base stats, scaling, env effects, etc.
 	var hero models.Hero
 	for _, t := range config.HeroTemplates {
-		if t.ID == templateID {
+		if t.Id == templateId {
 			hero = t
 			break
 		}
 	}
-	if hero.ID == "" {
-		return nil, fmt.Errorf("hero template %q not found in config", templateID)
+	if hero.Id == "" {
+		return nil, fmt.Errorf("hero template %q not found in config", templateId)
 	}
 
 	hero.Level = level
@@ -376,7 +376,7 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 
 	// Learned moves
 	rows, err := db.Query(
-		`SELECT move_id, level FROM save_hero_learned_moves WHERE save_id = ?`, saveID,
+		`SELECT move_id, level FROM save_hero_learned_moves WHERE save_id = ?`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -385,7 +385,7 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	hero.LearnedMoves = nil
 	for rows.Next() {
 		var lm models.LearnedMove
-		if err := rows.Scan(&lm.MoveID, &lm.Level); err != nil {
+		if err := rows.Scan(&lm.MoveId, &lm.Level); err != nil {
 			return nil, err
 		}
 		hero.LearnedMoves = append(hero.LearnedMoves, lm)
@@ -393,7 +393,7 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 
 	// Equipped moves (ordered by slot)
 	rows2, err := db.Query(
-		`SELECT move_id FROM save_hero_equipped_moves WHERE save_id = ? ORDER BY slot_order`, saveID,
+		`SELECT move_id FROM save_hero_equipped_moves WHERE save_id = ? ORDER BY slot_order`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -401,16 +401,16 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	defer rows2.Close()
 	hero.EquippedMoves = nil
 	for rows2.Next() {
-		var moveID string
-		if err := rows2.Scan(&moveID); err != nil {
+		var moveId string
+		if err := rows2.Scan(&moveId); err != nil {
 			return nil, err
 		}
-		hero.EquippedMoves = append(hero.EquippedMoves, moveID)
+		hero.EquippedMoves = append(hero.EquippedMoves, moveId)
 	}
 
 	// Equipped items
 	rows3, err := db.Query(
-		`SELECT item_id FROM save_hero_equipped_items WHERE save_id = ?`, saveID,
+		`SELECT item_id FROM save_hero_equipped_items WHERE save_id = ?`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -418,18 +418,18 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	defer rows3.Close()
 	hero.EquippedItems = nil
 	for rows3.Next() {
-		var itemID string
-		if err := rows3.Scan(&itemID); err != nil {
+		var itemId string
+		if err := rows3.Scan(&itemId); err != nil {
 			return nil, err
 		}
-		if item, ok := config.Items[itemID]; ok {
+		if item, ok := config.Items[itemId]; ok {
 			hero.EquippedItems = append(hero.EquippedItems, item)
 		}
 	}
 
 	// Item pool
 	rows4, err := db.Query(
-		`SELECT item_id FROM save_hero_item_pool WHERE save_id = ?`, saveID,
+		`SELECT item_id FROM save_hero_item_pool WHERE save_id = ?`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -437,17 +437,17 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	defer rows4.Close()
 	hero.ItemPool = nil
 	for rows4.Next() {
-		var itemID string
-		if err := rows4.Scan(&itemID); err != nil {
+		var itemId string
+		if err := rows4.Scan(&itemId); err != nil {
 			return nil, err
 		}
-		hero.ItemPool = append(hero.ItemPool, itemID)
+		hero.ItemPool = append(hero.ItemPool, itemId)
 	}
 
 	// Status effects
 	rows5, err := db.Query(
 		`SELECT effect_type, stat_affected, delta, duration, target, activation_delay, turns_remaining, turns_to_activate
-		 FROM save_hero_status_effects WHERE save_id = ?`, saveID,
+		 FROM save_hero_status_effects WHERE save_id = ?`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -469,9 +469,9 @@ func readHero(db *sql.DB, saveID int, config *game.GameConfig) (*models.Hero, er
 	return &hero, nil
 }
 
-func readFloors(db *sql.DB, saveID int, config *game.GameConfig) ([]models.Floor, error) {
+func readFloors(db *sql.DB, saveId int, config *game.GameConfig) ([]models.Floor, error) {
 	floorRows, err := db.Query(
-		`SELECT id, floor_idx, is_completed FROM save_floors WHERE save_id = ? ORDER BY floor_idx`, saveID,
+		`SELECT id, floor_idx, is_completed FROM save_floors WHERE save_id = ? ORDER BY floor_idx`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -480,13 +480,13 @@ func readFloors(db *sql.DB, saveID int, config *game.GameConfig) ([]models.Floor
 
 	var floors []models.Floor
 	for floorRows.Next() {
-		var floorDBID int
+		var floorDBId int
 		var floor models.Floor
-		if err := floorRows.Scan(&floorDBID, &floor.Idx, &floor.IsCompleted); err != nil {
+		if err := floorRows.Scan(&floorDBId, &floor.Idx, &floor.IsCompleted); err != nil {
 			return nil, err
 		}
 
-		rooms, err := readRooms(db, floorDBID, config)
+		rooms, err := readRooms(db, floorDBId, config)
 		if err != nil {
 			return nil, err
 		}
@@ -496,10 +496,10 @@ func readFloors(db *sql.DB, saveID int, config *game.GameConfig) ([]models.Floor
 	return floors, nil
 }
 
-func readRooms(db *sql.DB, floorDBID int, config *game.GameConfig) ([]models.Room, error) {
+func readRooms(db *sql.DB, floorDBId int, config *game.GameConfig) ([]models.Room, error) {
 	roomRows, err := db.Query(
 		`SELECT id, room_string_id, encounter_kind, is_completed, can_enter, next_room_ids, environment_id
-		 FROM save_rooms WHERE floor_db_id = ?`, floorDBID,
+		 FROM save_rooms WHERE floor_db_id = ?`, floorDBId,
 	)
 	if err != nil {
 		return nil, err
@@ -508,22 +508,22 @@ func readRooms(db *sql.DB, floorDBID int, config *game.GameConfig) ([]models.Roo
 
 	var rooms []models.Room
 	for roomRows.Next() {
-		var roomDBID int
+		var roomDBId int
 		var room models.Room
-		var encounterKind, nextRoomIDsRaw, environmentID string
-		if err := roomRows.Scan(&roomDBID, &room.Id, &encounterKind, &room.IsCompleted, &room.CanEnter, &nextRoomIDsRaw, &environmentID); err != nil {
+		var encounterKind, nextRoomIdsRaw, environmentId string
+		if err := roomRows.Scan(&roomDBId, &room.Id, &encounterKind, &room.IsCompleted, &room.CanEnter, &nextRoomIdsRaw, &environmentId); err != nil {
 			return nil, err
 		}
 
 		room.Encounter.Kind = models.EncounterKind(encounterKind)
 
-		if nextRoomIDsRaw != "" {
-			room.NextRoomIDs = strings.Split(nextRoomIDsRaw, ";")
+		if nextRoomIdsRaw != "" {
+			room.NextRoomIds = strings.Split(nextRoomIdsRaw, ";")
 		}
 
 		// Resolve environment from config
 		for _, env := range config.EnvironmentTemplates {
-			if env.Id == environmentID {
+			if env.Id == environmentId {
 				room.Environment = env
 				break
 			}
@@ -531,13 +531,13 @@ func readRooms(db *sql.DB, floorDBID int, config *game.GameConfig) ([]models.Roo
 
 		switch room.Encounter.Kind {
 		case models.EncounterKindMonster, models.EncounterKindBoss:
-			monster, err := readMonster(db, roomDBID, config)
+			monster, err := readMonster(db, roomDBId, config)
 			if err != nil {
 				return nil, err
 			}
 			room.Encounter.Monster = monster
 		case models.EncounterKindEvent:
-			event, err := readEvent(db, roomDBID, config)
+			event, err := readEvent(db, roomDBId, config)
 			if err != nil {
 				return nil, err
 			}
@@ -549,17 +549,17 @@ func readRooms(db *sql.DB, floorDBID int, config *game.GameConfig) ([]models.Roo
 	return rooms, nil
 }
 
-func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Monster, error) {
-	var monsterDBID int
-	var templateID string
+func readMonster(db *sql.DB, roomDBId int, config *game.GameConfig) (*models.Monster, error) {
+	var monsterDBId int
+	var templateId string
 	var level, xp, hp, mana int
 	var lbH, lbMa, lbAt, lbDe, lbMg int
 
 	err := db.QueryRow(
 		`SELECT id, monster_template_id, is_defeated, level, current_xp, current_hp, current_mana,
 		        lb_health, lb_mana, lb_attack, lb_defense, lb_magic
-		 FROM save_monsters WHERE room_db_id = ?`, roomDBID,
-	).Scan(&monsterDBID, &templateID, new(bool), &level, &xp, &hp, &mana,
+		 FROM save_monsters WHERE room_db_id = ?`, roomDBId,
+	).Scan(&monsterDBId, &templateId, new(bool), &level, &xp, &hp, &mana,
 		&lbH, &lbMa, &lbAt, &lbDe, &lbMg)
 	if err != nil {
 		return nil, err
@@ -568,21 +568,21 @@ func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Mon
 	// Start from the matching template (checks both monsters and bosses)
 	var monster models.Monster
 	for _, t := range config.MonsterTemplates {
-		if t.ID == templateID {
+		if t.Id == templateId {
 			monster = t
 			break
 		}
 	}
-	if monster.ID == "" {
+	if monster.Id == "" {
 		for _, t := range config.BossTemplates {
-			if t.ID == templateID {
+			if t.Id == templateId {
 				monster = t
 				break
 			}
 		}
 	}
-	if monster.ID == "" {
-		return nil, fmt.Errorf("monster template %q not found in config", templateID)
+	if monster.Id == "" {
+		return nil, fmt.Errorf("monster template %q not found in config", templateId)
 	}
 
 	monster.Level = level
@@ -600,7 +600,7 @@ func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Mon
 	// Status effects
 	rows, err := db.Query(
 		`SELECT effect_type, stat_affected, delta, duration, target, activation_delay, turns_remaining, turns_to_activate
-		 FROM save_monster_status_effects WHERE monster_db_id = ?`, monsterDBID,
+		 FROM save_monster_status_effects WHERE monster_db_id = ?`, monsterDBId,
 	)
 	if err != nil {
 		return nil, err
@@ -621,17 +621,17 @@ func readMonster(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Mon
 	return &monster, nil
 }
 
-func readEvent(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Event, error) {
-	var eventTemplateID string
+func readEvent(db *sql.DB, roomDBId int, config *game.GameConfig) (*models.Event, error) {
+	var eventTemplateId string
 	var applied bool
 	err := db.QueryRow(
-		`SELECT event_template_id, applied FROM save_room_events WHERE room_db_id = ?`, roomDBID,
-	).Scan(&eventTemplateID, &applied)
+		`SELECT event_template_id, applied FROM save_room_events WHERE room_db_id = ?`, roomDBId,
+	).Scan(&eventTemplateId, &applied)
 	if err != nil {
 		return nil, err
 	}
 
-	idx := slices.IndexFunc(config.EventTemplates, func(e models.Event) bool { return e.ID == eventTemplateID })
+	idx := slices.IndexFunc(config.EventTemplates, func(e models.Event) bool { return e.Id == eventTemplateId })
 	if idx == -1 {
 		return nil, nil
 	}
@@ -640,9 +640,9 @@ func readEvent(db *sql.DB, roomDBID int, config *game.GameConfig) (*models.Event
 	return &event, nil
 }
 
-func readShop(db *sql.DB, saveID int, config *game.GameConfig) (*models.Shop, error) {
+func readShop(db *sql.DB, saveId int, config *game.GameConfig) (*models.Shop, error) {
 	rows, err := db.Query(
-		`SELECT item_id FROM save_shop_items WHERE save_id = ?`, saveID,
+		`SELECT item_id FROM save_shop_items WHERE save_id = ?`, saveId,
 	)
 	if err != nil {
 		return nil, err
@@ -651,11 +651,11 @@ func readShop(db *sql.DB, saveID int, config *game.GameConfig) (*models.Shop, er
 
 	var items []models.Item
 	for rows.Next() {
-		var itemID string
-		if err := rows.Scan(&itemID); err != nil {
+		var itemId string
+		if err := rows.Scan(&itemId); err != nil {
 			return nil, err
 		}
-		if item, ok := config.Items[itemID]; ok {
+		if item, ok := config.Items[itemId]; ok {
 			items = append(items, item)
 		}
 	}

@@ -15,7 +15,7 @@ type DataBase struct {
 }
 
 type Save struct {
-	ID      int    `json:"id"`
+	Id      int    `json:"id"`
 	Label   string `json:"label"`
 	SavedAt string `json:"saved_at"`
 }

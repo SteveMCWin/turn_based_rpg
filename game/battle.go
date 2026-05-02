@@ -22,7 +22,7 @@ type BattleResult struct {
 	NewLogLines  []string            `json:"new_log_lines,omitempty"`
 }
 
-func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
+func (g *Game) SubmitPlayerMove(moveId string) (*BattleResult, error) {
 	if !g.IsInBattle {
 		return nil, fmt.Errorf("not in battle")
 	}
@@ -30,23 +30,23 @@ func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
 		return nil, fmt.Errorf("waiting for monster turn")
 	}
 
-	move_def, ok := g.AllMoves[moveID]
+	move_def, ok := g.AllMoves[moveId]
 	if !ok {
-		return nil, fmt.Errorf("move with id %s doesn't exist?", moveID)
+		return nil, fmt.Errorf("move with id %s doesn't exist?", moveId)
 	}
 
 	room := g.CurrentRoom()
 	monster := room.Encounter.Monster
 	hero := &g.Player
 
-	if !slices.Contains(hero.EquippedMoves, moveID) {
-		return nil, fmt.Errorf("move %s is not equipped", moveID)
+	if !slices.Contains(hero.EquippedMoves, moveId) {
+		return nil, fmt.Errorf("move %s is not equipped", moveId)
 	}
 	if move_def.CostAmount > hero.CurrentMana {
 		return nil, fmt.Errorf("not enough mana")
 	}
 
-	moveLevel := hero.GetMoveLevel(moveID)
+	moveLevel := hero.GetMoveLevel(moveId)
 
 	// scale the move strenght by it's level and scaling amount
 	scaled_value := int(float64(move_def.BaseValue) * (1.0 + float64(moveLevel-1)*float64(g.Settings.MoveLevelBonusPct)/100.0))
@@ -107,12 +107,12 @@ func (g *Game) SubmitMonsterMove() (*BattleResult, error) {
 
 	monster.CurrentMana = min(monster.CurrentMana+g.Settings.ManaRegenPerTurn, monster.MaxMana())
 
-	monsterMoveID, err := g.pickMonsterMove()
+	monsterMoveId, err := g.pickMonsterMove()
 	if err != nil {
 		return nil, err
 	}
 
-	monsterMoveDef := g.AllMoves[monsterMoveID]
+	monsterMoveDef := g.AllMoves[monsterMoveId]
 	monster.CurrentMana -= monsterMoveDef.CostAmount
 	preMonsterHP := monster.CurrentHP
 	applyMove(monsterMoveDef, &monster.Entity, &hero.Entity)
@@ -166,7 +166,7 @@ func (g *Game) pickMonsterMove() (string, error) {
 	var candidates []candidate
 
 	for _, m := range monster.Moves {
-		def, ok := g.AllMoves[m.MoveID]
+		def, ok := g.AllMoves[m.MoveId]
 		if !ok {
 			continue
 		}
@@ -208,13 +208,13 @@ func (g *Game) pickMonsterMove() (string, error) {
 		}
 
 		if weight > 0 {
-			candidates = append(candidates, candidate{m.MoveID, weight})
+			candidates = append(candidates, candidate{m.MoveId, weight})
 		}
 	}
 
 	// fallback
 	if len(candidates) == 0 {
-		return monster.Moves[rand.Intn(len(monster.Moves))].MoveID, nil
+		return monster.Moves[rand.Intn(len(monster.Moves))].MoveId, nil
 	}
 
 	// if a damage move will kill the hero, ignore previous weights
@@ -385,7 +385,7 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 		// handle learning a move after defating the monster
 		learned := g.learnFromMonster()
 		if learned != nil {
-			moveName := g.AllMoves[learned.MoveID].Name
+			moveName := g.AllMoves[learned.MoveId].Name
 			logLines = append(logLines, fmt.Sprintf("Learned: %s (Lv.%d)", moveName, learned.Level))
 			result.LearnedMove = learned
 		}
@@ -425,8 +425,8 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 			LearnedMove: learned,
 		}
 
-		g.CompleteRoom(g.CurrentRoomID)
-		g.CurrentRoomID = ""
+		g.CompleteRoom(g.CurrentRoomId)
+		g.CurrentRoomId = ""
 
 	} else {
 		logLines = append(logLines, "You were defeated...")
@@ -446,7 +446,7 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 			FloorReached: floorReached,
 		}
 
-		g.CurrentRoomID = ""
+		g.CurrentRoomId = ""
 	}
 
 	result.NewLogLines = logLines

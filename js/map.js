@@ -152,14 +152,14 @@ function drawConnections() {
 
   (state.floors || []).forEach(floor => {
     (floor.Rooms || []).forEach(room => {
-      if (!room.NextRoomIDs?.length) return;
+      if (!room.NextRoomIds?.length) return;
       const fromEl = document.getElementById('room-' + room.Id.replace(',', '_'));
       if (!fromEl) return;
       const fo = getOffsetFrom(fromEl, container);
       const fx = fo.x + fromEl.offsetWidth  / 2;
       const fy = fo.y + fromEl.offsetHeight / 2;
 
-      room.NextRoomIDs.forEach(nextId => {
+      room.NextRoomIds.forEach(nextId => {
         const toEl = document.getElementById('room-' + nextId.replace(',', '_'));
         if (!toEl) return;
         const to = getOffsetFrom(toEl, container);

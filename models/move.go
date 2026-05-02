@@ -27,7 +27,7 @@ const (
 // If the move scales with magic, more magic -> stronger move
 // Cost amount is how much mana the move uses up
 type MoveDefinition struct {
-	ID                string     `json:"id"`
+	Id                string     `json:"id"`
 	Name              string     `json:"name"`
 	Description       string     `json:"description"`
 	BaseValue         int        `json:"base_value"`
@@ -42,6 +42,6 @@ type MoveDefinition struct {
 // Learned move is a combination of a base move and a level of the move
 // Since many entities share moves, levels differ, but the base is the same
 type LearnedMove struct {
-	MoveID string `json:"move_id"`
+	MoveId string `json:"move_id"`
 	Level  int    `json:"level"`
 }

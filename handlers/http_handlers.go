@@ -129,10 +129,10 @@ func NewServer(config *game.GameConfig, db *database.DataBase) http.Handler {
 
 func (s *Server) setSession(c *gin.Context, g *game.Game) {
 	s.mu.Lock()
-	s.games[g.ID] = g
+	s.games[g.Id] = g
 	s.mu.Unlock()
 
-	c.SetCookie(gameSessionCookieName, strconv.Itoa(g.ID), oneWeekSecs, "/", "", false, true)
+	c.SetCookie(gameSessionCookieName, strconv.Itoa(g.Id), oneWeekSecs, "/", "", false, true)
 }
 
 func (s *Server) gameFromRequest(c *gin.Context) (*game.Game, bool) {
@@ -213,21 +213,12 @@ func (s *Server) handlePostCreateNewGame(c *gin.Context) {
 	}
 
 	var req struct {
-		HeroID    string `json:"hero_id"`
+		HeroId    string `json:"hero_id"`
 		IsEndless bool   `json:"is_endless"`
 	}
 	c.ShouldBindJSON(&req)
 
-	// pick first hero by default as fallback
-	hero := s.config.HeroTemplates[0]
-	for _, h := range s.config.HeroTemplates {
-		if h.ID == req.HeroID {
-			hero = h
-			break
-		}
-	}
-
-	g := game.NewGame(s.config, hero)
+	g := game.NewGame(s.config, req.HeroId)
 	g.IsEndless = req.IsEndless
 	id, err := s.db.CreateGame(g)
 	if err != nil {
@@ -235,7 +226,7 @@ func (s *Server) handlePostCreateNewGame(c *gin.Context) {
 		return
 	}
 
-	g.ID = id
+	g.Id = id
 	s.setSession(c, g)
 	c.JSON(http.StatusOK, g)
 }
@@ -248,7 +239,7 @@ func (s *Server) handlePostEnterRoom(c *gin.Context) {
 	}
 
 	var req struct {
-		RoomID string `json:"room_id" binding:"required"`
+		RoomId string `json:"room_id" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -256,7 +247,7 @@ func (s *Server) handlePostEnterRoom(c *gin.Context) {
 		return
 	}
 
-	initialLog, err := g.EnterRoom(req.RoomID)
+	initialLog, err := g.EnterRoom(req.RoomId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -272,13 +263,13 @@ func (s *Server) handlePostBattleMove(c *gin.Context) {
 		return
 	}
 	var req struct {
-		MoveID string `json:"move_id" binding:"required"`
+		MoveId string `json:"move_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
 	}
-	result, err := g.SubmitPlayerMove(req.MoveID)
+	result, err := g.SubmitPlayerMove(req.MoveId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -314,14 +305,14 @@ func (s *Server) handlePostEquipMove(c *gin.Context) {
 	}
 
 	var req struct {
-		MoveID string `json:"move_id" binding:"required"`
+		MoveId string `json:"move_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
 	}
 
-	if err := g.EquipMove(req.MoveID, s.config.Settings.MaxEquippedMoves); err != nil {
+	if err := g.EquipMove(req.MoveId, s.config.Settings.MaxEquippedMoves); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -336,14 +327,14 @@ func (s *Server) handlePostUnequipMove(c *gin.Context) {
 		return
 	}
 	var req struct {
-		MoveID string `json:"move_id" binding:"required"`
+		MoveId string `json:"move_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "move_id is required"})
 		return
 	}
 
-	if err := g.UnequipMove(req.MoveID); err != nil {
+	if err := g.UnequipMove(req.MoveId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -366,13 +357,13 @@ func (s *Server) handlePostEquipItem(c *gin.Context) {
 		return
 	}
 	var req struct {
-		ItemID string `json:"item_id" binding:"required"`
+		ItemId string `json:"item_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	if err := g.EquipItemFromPool(req.ItemID); err != nil {
+	if err := g.EquipItemFromPool(req.ItemId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -390,14 +381,14 @@ func (s *Server) handlePostUnequipItem(c *gin.Context) {
 		return
 	}
 	var req struct {
-		ItemID string `json:"item_id" binding:"required"`
+		ItemId string `json:"item_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	g.Player.UnequipItem(req.ItemID)
-	g.Player.ItemPool = append(g.Player.ItemPool, req.ItemID)
+	g.Player.UnequipItem(req.ItemId)
+	g.Player.ItemPool = append(g.Player.ItemPool, req.ItemId)
 	c.JSON(http.StatusOK, g)
 }
 
@@ -412,13 +403,13 @@ func (s *Server) handlePostUseItem(c *gin.Context) {
 		return
 	}
 	var req struct {
-		ItemID string `json:"item_id" binding:"required"`
+		ItemId string `json:"item_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	if err := g.UseItemFromPool(req.ItemID); err != nil {
+	if err := g.UseItemFromPool(req.ItemId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -487,13 +478,13 @@ func (s *Server) handlePostBuyItem(c *gin.Context) {
 		return
 	}
 	var req struct {
-		ItemID string `json:"item_id" binding:"required"`
+		ItemId string `json:"item_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	if err := g.BuyItem(req.ItemID); err != nil {
+	if err := g.BuyItem(req.ItemId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -507,13 +498,13 @@ func (s *Server) handlePostSellItem(c *gin.Context) {
 		return
 	}
 	var req struct {
-		ItemID string `json:"item_id" binding:"required"`
+		ItemId string `json:"item_id" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "item_id is required"})
 		return
 	}
-	if err := g.SellItem(req.ItemID); err != nil {
+	if err := g.SellItem(req.ItemId); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

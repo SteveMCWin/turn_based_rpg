@@ -106,6 +106,8 @@ func (e *Entity) UnequipItem(item_id string) {
 			e.EquippedItems = slices.Delete(e.EquippedItems, i, i+1)
 		}
 	}
+	e.CurrentHP = min(e.CurrentHP, e.MaxHP())
+	e.CurrentMana = min(e.CurrentMana, e.MaxMana())
 }
 
 // Note that consubales at the moment only apply to current hp and mana

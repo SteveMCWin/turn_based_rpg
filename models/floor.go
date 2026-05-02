@@ -17,7 +17,7 @@ const ROOM_ID_SEPARATOR string = ","
 type Room struct {
 	Id          string
 	Encounter   Encounter
-	NextRoomIDs []string
+	NextRoomIds []string
 	IsCompleted bool
 	CanEnter    bool
 	Environment Environment
@@ -113,7 +113,7 @@ func GenerateFloors(numFloors, maxRoomsPerFloor, start_floor_idx, monster_spawn_
 }
 
 // Get a room based on it's id from all floors
-func RoomByID(floors []Floor, id string) *Room {
+func RoomById(floors []Floor, id string) *Room {
 	fi, ri, err := GetFloorRoomIdx(id)
 	if err != nil || fi >= len(floors) || ri >= len(floors[fi].Rooms) {
 		return nil
@@ -165,7 +165,7 @@ func ConnectFloorRooms(f1, f2 *Floor) {
 		}
 
 		for room_idx := last_conn_idx; room_idx <= room_indexes_to_connect; room_idx++ {
-			f1.Rooms[i].NextRoomIDs = append(f1.Rooms[i].NextRoomIDs, strconv.Itoa(f2.Idx)+","+strconv.Itoa(room_idx))
+			f1.Rooms[i].NextRoomIds = append(f1.Rooms[i].NextRoomIds, strconv.Itoa(f2.Idx)+","+strconv.Itoa(room_idx))
 		}
 
 		last_conn_idx = room_indexes_to_connect

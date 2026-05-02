@@ -47,7 +47,7 @@
     "attack": 8,
     "defense": 4,
     "magic": 28,
-    "mana": 120,
+    "mana": 10,
     "stat_scaling": {
       "health_scaling": 0.07,
       "attack_scaling": 0.03,

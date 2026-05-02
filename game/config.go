@@ -47,7 +47,7 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 	}
 	config.Moves = make(map[string]models.MoveDefinition, len(moveList))
 	for _, m := range moveList {
-		config.Moves[m.ID] = m
+		config.Moves[m.Id] = m
 	}
 
 	var itemList []models.Item
@@ -65,7 +65,7 @@ func LoadConfig(configDir string) (*GameConfig, error) {
 	for hero_idx := range config.HeroTemplates {
 		for _, item_id := range config.HeroTemplates[hero_idx].ItemPool {
 			if err := config.HeroTemplates[hero_idx].EquipItem(config.Items[item_id]); err != nil {
-				return nil, fmt.Errorf("hero %q starting item %q: %w", config.HeroTemplates[hero_idx].ID, item_id, err)
+				return nil, fmt.Errorf("hero %q starting item %q: %w", config.HeroTemplates[hero_idx].Id, item_id, err)
 			}
 		}
 

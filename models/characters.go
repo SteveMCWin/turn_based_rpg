@@ -5,7 +5,7 @@ package models
 // equipped moves and current gold are self explanatory :^)
 type Hero struct {
 	Entity
-	ID            string        `json:"id"`
+	Id            string        `json:"id"`
 	Name          string        `json:"name"`
 	Description   string        `json:"description"`
 	LearnedMoves  []LearnedMove `json:"learned_moves"`
@@ -21,27 +21,27 @@ func (h *Hero) Reset() {
 	if len(h.LearnedMoves) > 0 {
 		h.EquippedMoves = make([]string, len(h.LearnedMoves))
 		for i, m := range h.LearnedMoves {
-			h.EquippedMoves[i] = m.MoveID
+			h.EquippedMoves[i] = m.MoveId
 		}
 	}
 }
 
 // Adds to the pool of learned moves. If already learned, level it up
-func (h *Hero) LearnMove(moveID string, level int) LearnedMove {
+func (h *Hero) LearnMove(moveId string, level int) LearnedMove {
 	for i := range h.LearnedMoves {
-		if h.LearnedMoves[i].MoveID == moveID {
+		if h.LearnedMoves[i].MoveId == moveId {
 			h.LearnedMoves[i].Level++
 			return h.LearnedMoves[i]
 		}
 	}
-	lm := LearnedMove{MoveID: moveID, Level: level}
+	lm := LearnedMove{MoveId: moveId, Level: level}
 	h.LearnedMoves = append(h.LearnedMoves, lm)
 	return lm
 }
 
-func (h *Hero) GetMoveLevel(moveID string) int {
+func (h *Hero) GetMoveLevel(moveId string) int {
 	for _, lm := range h.LearnedMoves {
-		if lm.MoveID == moveID {
+		if lm.MoveId == moveId {
 			return lm.Level
 		}
 	}
@@ -50,7 +50,7 @@ func (h *Hero) GetMoveLevel(moveID string) int {
 
 type Monster struct {
 	Entity
-	ID   string        `json:"id"`
+	Id   string        `json:"id"`
 	Name string        `json:"name"`
 	Moves []LearnedMove `json:"learned_moves"`
 }

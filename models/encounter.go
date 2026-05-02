@@ -18,7 +18,7 @@ type Encounter struct {
 
 // Event is basically just something happened that affected your stats, could be good or bad
 type Event struct {
-	ID            string           `json:"id"`
+	Id            string           `json:"id"`
 	Description   string           `json:"description"`
 	Applied       bool             `json:"applied,omitempty"`
 	StatsAffected map[StatType]int `json:"stat_affected"`
