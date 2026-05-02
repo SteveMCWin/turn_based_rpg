@@ -33,6 +33,10 @@ function renderHeroCards(heroes) {
       `<span class="hero-card-item" title="${escHtml(item.name)}">${itemTypeIcon(item.item_type, true)} ${escHtml(item.name)}</span>`
     ).join('');
 
+    const movesHTML = (h.learned_moves || []).map(lm =>
+      `<span class="skill-tag">${escHtml(lm.move_id.replace(/_/g, ' '))}</span>`
+    ).join('');
+
     return `
     <div class="hero-card" data-id="${escHtml(h.id)}" onclick="selectHero(this)">
       <div class="hero-card-top">
@@ -49,6 +53,7 @@ function renderHeroCards(heroes) {
         <span>${statIcon('magic')}${h.magic}</span>
         <span>${statIcon('mana')}${h.mana}</span>
       </div>
+      ${movesHTML ? `<div class="hero-card-items">${movesHTML}</div>` : ''}
       ${startingItems ? `<div class="hero-card-items">${startingItems}</div>` : ''}
       ${envPrefsHTML(h.env_effects)}
     </div>`;

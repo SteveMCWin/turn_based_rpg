@@ -80,10 +80,12 @@ function renderCombatant(side, entity) {
 function renderMonsterInfo(monster) {
   if (!monster) return;
   document.getElementById('monster-stats').innerHTML =
-    `<span>${statIcon('attack')}ATK ${effAtk(monster)}</span>`
+    `<span>Lv.${monster.level}</span>`
+    + `<span>${statIcon('attack')}ATK ${effAtk(monster)}</span>`
     + `<span>${statIcon('defense')}DEF ${effDef(monster)}</span>`
     + `<span>${statIcon('magic')}MAG ${effMag(monster)}</span>`
-    + `<span>Lv.${monster.level}</span>`;
+    + `<span>${statIcon('health')}HP ${monster.current_hp}/${maxHP(monster)}</span>`
+    + (maxMana(monster) > 0 ? `<span>${statIcon('mana')}MP ${monster.current_mana}/${maxMana(monster)}</span>` : '');
 
   // monster.learned_moves is []LearnedMove with {move_id, level}
   document.getElementById('monster-skills').innerHTML = (monster.learned_moves || []).map(lm => {

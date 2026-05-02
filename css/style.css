@@ -74,7 +74,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 /* Menu */
 .menu-page { display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding-top: 60px; }
 .menu-container { text-align: center; width: 100%; max-width: 420px; padding: 0 24px 40px; }
-.menu-wide { max-width: 1440px; }
+.menu-wide { max-width: 1512px; }
 .game-title { font-size: 30px; color: var(--accent2); margin-bottom: 10px; }
 .menu-subtitle { color: var(--text-secondary); font-size: 13px; margin-bottom: 28px; }
 .menu-buttons { display: flex; flex-direction: column; gap: 12px; }

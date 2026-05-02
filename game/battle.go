@@ -55,12 +55,6 @@ func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
 
 	var logLines []string
 
-	// mana regen
-	hero.CurrentMana = min(hero.CurrentMana+g.Settings.ManaRegenPerTurn, hero.MaxMana())
-
-	// status effects update
-	hero.TickStatusEffects()
-
 	preHeroHP := hero.CurrentHP
 
 	// apply move and log
@@ -75,6 +69,9 @@ func (g *Game) SubmitPlayerMove(moveID string) (*BattleResult, error) {
 		result.NewLogLines = logLines
 		return result, nil
 	}
+
+	hero.CurrentMana = min(hero.CurrentMana+g.Settings.ManaRegenPerTurn, hero.MaxMana())
+	hero.TickStatusEffects()
 
 	// switch to monsters turn
 	g.WaitingForMonster = true
@@ -434,6 +431,8 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 	} else {
 		logLines = append(logLines, "You were defeated...")
 		g.Player.ClearStatusEffects()
+		g.Player.CurrentHP = g.Player.MaxHP()
+		g.Player.CurrentMana = g.Player.MaxMana()
 
 		floorReached := 0
 		if g.IsEndless {

@@ -17,6 +17,7 @@ type Game struct {
 	Floors            []models.Floor     `json:"floors"`
 	IsInBattle        bool               `json:"in_battle"`
 	WaitingForMonster bool               `json:"waiting_for_monster"`
+	NeedsTick         bool               `json:"needs_tick"`
 	IsEndless         bool               `json:"is_endless"`
 	CurrentRoomID     string             `json:"current_room_id,omitempty"`
 	LastBattleResult  *BattleResult      `json:"last_battle_result"`
