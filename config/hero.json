@@ -44,7 +44,7 @@
     "description": "A scholarly spellcaster who commands the arcane arts. Frail and vulnerable up close, but capable of devastating magical burst damage and powerful debuffs.",
     "level": 1,
     "health": 65,
-    "attack": 8,
+    "attack": 14,
     "defense": 4,
     "magic": 28,
     "mana": 10,

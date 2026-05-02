@@ -76,7 +76,7 @@ function initTooltips() {
   document.addEventListener('mousemove', e => {
     if (tip.style.display === 'none') return;
     tip.style.left = (e.clientX + 14) + 'px';
-    tip.style.top  = (e.clientY + 14) + 'px';
+    tip.style.top  = (e.clientY - tip.offsetHeight - 14) + 'px';
   });
   document.addEventListener('mouseout', e => {
     if (e.target.closest('[data-tooltip]')) tip.style.display = 'none';

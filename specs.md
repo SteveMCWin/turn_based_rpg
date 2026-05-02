@@ -91,8 +91,6 @@ moves until you feel like the experience is fun.
 **Note** : you can tweak the moveset of the characters a bit in your implementation. So if
 you find another character other than the knight interesting and would like your hero
 to be that character you can think of a couple of moves and make it happen. If you're
-
-
 going to do this though, pay attention that you still end up with moves that are using
 the systems you have built. For example, don't disregard the Magic stat in your
 moves just by making every move physical.

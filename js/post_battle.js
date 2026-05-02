@@ -46,8 +46,7 @@ let state = null;
     } else {
       content.innerHTML = `<h1 class="lose-title">Defeated</h1>
         <p><strong>${escHtml(result.monster_name)}</strong> was too powerful.</p>`;
-      document.getElementById('btn-continue').textContent = 'Back to Map';
-      document.getElementById('btn-continue').onclick = () => { window.location.href = '/map'; };
+      document.getElementById('btn-continue').classList.add('hidden');
     }
     document.getElementById('btn-restart').classList.remove('hidden');
     document.getElementById('btn-restart').onclick = () => { window.location.href = '/'; };

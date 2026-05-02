@@ -127,12 +127,50 @@ function renderBattleLog() {
   el.scrollTop = el.scrollHeight;
 }
 
+function spriteAnim(side, cls) {
+  const el = document.getElementById(`${side}-sprite`);
+  if (!el) return;
+  el.classList.remove('anim-shake', 'anim-jump', 'anim-sink');
+  // force reflow so removing+re-adding the same class restarts the animation
+  void el.offsetWidth;
+  el.classList.add(cls);
+  el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+}
+
+function snapshotCombatant(entity) {
+  if (!entity) return null;
+  return {
+    hp:      entity.current_hp,
+    effects: (entity.status_effects || []).length,
+    posEffs: (entity.status_effects || []).filter(se => se.delta > 0).length,
+  };
+}
+
+function animateFromDiff(side, before, after) {
+  if (!before || !after) return;
+  if (after.hp < before.hp) {
+    spriteAnim(side, 'anim-shake');
+  } else if (after.effects > before.effects) {
+    const newPositive = after.posEffs > before.posEffs;
+    spriteAnim(side, newPositive ? 'anim-jump' : 'anim-sink');
+  }
+}
+
 async function submitMove(moveId) {
   try {
+    const prevMonster     = snapshotCombatant(currentMonster());
+    const prevHero        = snapshotCombatant(state.player);
+    const prevMonsterFull = currentMonster();
     const result = await postAction('/game/battle/move', { move_id: moveId });
     if (result.new_log_lines?.length) battleLog.push(...result.new_log_lines);
     state = result.game_state;
     renderAll();
+    if (result.battle_over && result.player_won && prevMonsterFull) {
+      prevMonsterFull.current_hp = 0;
+      renderCombatant('monster', prevMonsterFull);
+    }
+    animateFromDiff('monster', prevMonster, { hp: result.player_won ? 0 : snapshotCombatant(currentMonster())?.hp });
+    animateFromDiff('hero',    prevHero,    snapshotCombatant(state.player));
     if (result.battle_over) {
       showContinueButton();
       return;
@@ -146,10 +184,14 @@ async function submitMove(moveId) {
 
 async function resolveMonsterTurn() {
   try {
+    const prevHero    = snapshotCombatant(state.player);
+    const prevMonster = snapshotCombatant(currentMonster());
     const result = await postAction('/game/battle/monster-move');
     if (result.new_log_lines?.length) battleLog.push(...result.new_log_lines);
     state = result.game_state;
     renderAll();
+    animateFromDiff('hero',    prevHero,    snapshotCombatant(state.player));
+    animateFromDiff('monster', prevMonster, snapshotCombatant(currentMonster()));
     if (result.battle_over) showContinueButton();
   } catch (e) {
     alert(e.message);

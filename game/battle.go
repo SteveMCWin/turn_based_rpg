@@ -66,11 +66,10 @@ func (g *Game) SubmitPlayerMove(moveId string) (*BattleResult, error) {
 	if !monster.IsAlive() {
 		monster.CurrentHP = 0
 		result := g.endBattle(true)
-		result.NewLogLines = logLines
+		result.NewLogLines = append(logLines, result.NewLogLines...)
 		return result, nil
 	}
 
-	hero.CurrentMana = min(hero.CurrentMana+g.Settings.ManaRegenPerTurn, hero.MaxMana())
 	hero.TickStatusEffects()
 
 	// switch to monsters turn
@@ -123,9 +122,11 @@ func (g *Game) SubmitMonsterMove() (*BattleResult, error) {
 	if !hero.IsAlive() {
 		hero.CurrentHP = 0
 		result := g.endBattle(false)
-		result.NewLogLines = logLines
+		result.NewLogLines = append(logLines, result.NewLogLines...)
 		return result, nil
 	}
+
+	hero.CurrentMana = min(hero.CurrentMana+g.Settings.ManaRegenPerTurn, hero.MaxMana())
 
 	return &BattleResult{GameState: g, NewLogLines: logLines}, nil
 }
@@ -431,8 +432,6 @@ func (g *Game) endBattle(playerWon bool) *BattleResult {
 	} else {
 		logLines = append(logLines, "You were defeated...")
 		g.Player.ClearStatusEffects()
-		g.Player.CurrentHP = g.Player.MaxHP()
-		g.Player.CurrentMana = g.Player.MaxMana()
 
 		floorReached := 0
 		if g.IsEndless {
