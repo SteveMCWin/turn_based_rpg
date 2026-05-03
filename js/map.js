@@ -143,7 +143,7 @@ function drawConnections() {
   svg.setAttribute('aria-hidden', 'true');
   container.prepend(svg);
 
-  // Find the completed room on the highest floor — that's the one whose exits to highlight
+  // Find the completed room on the highest floor, that's the one whose exits to highlight
   let lastCompleted = null;
   for (let fi = (state.floors || []).length - 1; fi >= 0; fi--) {
     const r = (state.floors[fi].Rooms || []).find(r => r.IsCompleted);

@@ -64,7 +64,7 @@ function renderCombatant(side, entity) {
     manaText.textContent   = '';
   }
 
-  // TurnsRemaining has no json tag — capital T
+  // TurnsRemaining has no json tag, capital T
   document.getElementById(`${side}-effects`).innerHTML = (entity.status_effects || []).map(se => {
     const label = se.type === 'stat_mod'
       ? `${se.stat_affected} ${se.delta > 0 ? '+' : ''}${se.delta}`

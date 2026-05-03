@@ -195,7 +195,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
 .gauntlet-header h2 { color: var(--accent2); font-size: 18px; }
 .hero-gold { color: var(--accent2); font-size: 14px; display: flex; align-items: center; gap: 5px; }
 
-/* Map — room node graph */
+/* Map; room node graph */
 #floors { position: relative; }
 #connections-svg {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -381,7 +381,7 @@ h1, h2, h3 { font-family: 'Silkscreen', monospace; }
   display: flex; align-items: center; gap: 4px;
 }
 
-/* Hero card — environment preferences */
+/* Hero card; environment preferences */
 .hero-card-env { border-top: 2px solid var(--muted); padding-top: 10px; display: flex; flex-direction: row; gap: 16px; text-align: left; }
 .hero-card-env .env-buff, .hero-card-env .env-debuff { flex: 1; }
 .env-pref { font-size: 11px; line-height: 1.5; }

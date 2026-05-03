@@ -50,15 +50,15 @@ Short comments are left throughout the backend explaining the intent and quirks 
 
 ### Recommended Reading Order
 
-**`models`** — `stats` → `effect` → `move` → `item` → `entity` → `character` → `encounter` → `shop` → `floor`
+**`models`** : `stats` → `effect` → `move` → `item` → `entity` → `character` → `encounter` → `shop` → `floor`
 
 The foundation of the game. Defines the core structures (`Stats`, `Entity`, etc.) and the functions that operate on them.
 
-**`game`** — `config` → `game` → `battle` → `shop`
+**`game`** : `config` → `game` → `battle` → `shop`
 
 Where the actual game logic lives.
 
-**`database`** — `database` → `save`
+**`database`** : `database` → `save`
 
 Handles database connections and all interactions with SQLite.
 
@@ -66,9 +66,9 @@ Handles database connections and all interactions with SQLite.
 
 Initializes the database and config, then starts the server.
 
-**`handlers`** — `handlers`
+**`handlers`** : `handlers`
 
-Connects the frontend to the backend. The frontend is statically served — changes to HTML/CSS take effect on server restart; JS changes require a browser refresh due to caching. All game data (heroes, monsters, fight results, etc.) is exchanged as JSON.
+Connects the frontend to the backend. The frontend is statically served; changes to HTML/CSS take effect on server restart; JS changes require a browser refresh due to caching. All game data (heroes, monsters, fight results, etc.) is exchanged as JSON.
 
 ---
 
@@ -147,7 +147,7 @@ All 15 bonus features from the spec's backlog were implemented:
 | Attribute choices on level up | Player allocates points manually or randomly (amount or manual and rand points configurable, rand gives more) |
 | Status effects (Bleed, Poison, Damage Reduction, Damage Increase) | DoT applied at the end of turn so player has a chance to avoid taking damage from it |
 | Resource costs (HP/Mana) | Mana cost validation, per-turn regen, restore percentage of manx mana between fights, configurable |
-| Save & Exit (mid-run save) | Full SQLite serialisation of game state — `database/save.go` |
+| Save & Exit (mid-run save) | Full SQLite serialisation of game state in `database/save.go` |
 | Battle log | Damage, heals, buffs, debuffs, level-ups, and loot all logged |
 | Battle animations | Animations handled client-side |
 | Smarter AI | HP-aware move weighting, kill-on-sight logic, buff/debuff tracking |

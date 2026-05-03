@@ -22,7 +22,7 @@ async function postAction(url, body) {
 }
 
 // Stats fields are flat (Stats is an anonymous embed in Entity).
-// Entity-level fields have json tags (lowercase). Floor/Room do NOT — use capitals there.
+// Entity-level fields have json tags (lowercase). Floor/Room do NOT, use capitals there.
 function itemStatBonus(e, stat) {
   return (e.equipment || []).reduce((sum, item) => {
     if (item.item_type === 'consumable') return sum;

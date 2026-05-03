@@ -36,7 +36,7 @@ function render() {
       </div>`).join('');
   }
 
-  // Inventory — group by id to show counts
+  // Inventory, group by id to show counts
   const counts = {};
   for (const id of inventory) counts[id] = (counts[id] || 0) + 1;
 
