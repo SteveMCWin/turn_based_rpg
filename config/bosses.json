@@ -36,9 +36,8 @@
     "learned_moves": [
       { "move_id": "headbutt",   "level": 1 },
       { "move_id": "bone_smash", "level": 1 },
-      { "move_id": "frenzy",     "level": 1 },
-      { "move_id": "intimidate", "level": 1 },
-      { "move_id": "claw_swipe", "level": 1 }
+      { "move_id": "battle_cry",     "level": 1 },
+      { "move_id": "intimidate", "level": 1 }
     ],
     "item_pool": ["minotaur_horn"],
     "env_effects": {
@@ -59,11 +58,10 @@
       "defense_scaling": 0.22, "magic_scaling": 0.05, "mana_scaling": 0.0
     },
     "learned_moves": [
-      { "move_id": "headbutt",      "level": 1 },
-      { "move_id": "bone_smash",    "level": 1 },
+      { "move_id": "slash",      "level": 1 },
+      { "move_id": "pounce",    "level": 1 },
       { "move_id": "intimidate",    "level": 1 },
-      { "move_id": "frenzy",        "level": 1 },
-      { "move_id": "dragon_scales", "level": 1 }
+      { "move_id": "frenzy",        "level": 1 }
     ],
     "item_pool": ["giants_sigil"],
     "env_effects": {
