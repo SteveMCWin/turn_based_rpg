@@ -34,6 +34,12 @@ Then open `http://localhost:5000` in your browser.
 
 ---
 
+## Note for Reviewers
+
+The game is a roguelike; losing a run means starting over from the beginning. If you'd like an easier time getting through the game to see all the content, open `config/hero.json` and increase the base stats for whichever class you pick. The server needs to be restarted for config changes to take effect (no recompile needed, unless you are using docker, which bakes the config into the image you are running on every build).
+
+---
+
 ## Specification and Implementation
 
 Some things worth noting:
@@ -45,18 +51,23 @@ Short comments are left throughout the backend explaining the intent and quirks 
 ### Recommended Reading Order
 
 **`models`** — `stats` → `effect` → `move` → `item` → `entity` → `character` → `encounter` → `shop` → `floor`
+
 The foundation of the game. Defines the core structures (`Stats`, `Entity`, etc.) and the functions that operate on them.
 
 **`game`** — `config` → `game` → `battle` → `shop`
+
 Where the actual game logic lives.
 
 **`database`** — `database` → `save`
+
 Handles database connections and all interactions with SQLite.
 
 **`main.go`**
+
 Initializes the database and config, then starts the server.
 
 **`handlers`** — `handlers`
+
 Connects the frontend to the backend. The frontend is statically served — changes to HTML/CSS take effect on server restart; JS changes require a browser refresh due to caching. All game data (heroes, monsters, fight results, etc.) is exchanged as JSON.
 
 ---
