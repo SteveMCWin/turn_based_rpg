@@ -36,7 +36,7 @@ Then open `http://localhost:5000` in your browser.
 
 ## Note for Reviewers
 
-The game is a roguelike; losing a run means starting over from the beginning. If you'd like an easier time getting through the game to see all the content, open `config/hero.json` and increase the base stats for whichever class you pick. The server needs to be restarted for config changes to take effect (no recompile needed, unless you are using docker, which bakes the config into the image you are running on every build).
+The game is a roguelike; losing a run means starting over from the beginning. If you'd like an easier time getting through the game to see all the content, open `config/hero.json` and increase the base stats for whichever class you pick. The server needs to be restarted for config changes to take effect (no recompile needed, but if you are running it with docker, you need to build a new image, as docker bakes all the files into the image).
 
 ---
 
@@ -44,9 +44,9 @@ The game is a roguelike; losing a run means starting over from the beginning. If
 
 Some things worth noting:
 - Since the spec mentions working with game designers, I focused on making the game easily configurable: item drop rates, hero stat scaling, number of floors per realm, etc. are all in JSON files, while game saves are stored in an SQLite database.
-- Moves, monster templates, and similar data are loaded once on startup and kept in memory, as they are read very frequently.
+- Moves, monster templates, and similar data are cached (loaded once on startup and kept in memory), as they are read very frequently.
 
-Short comments are left throughout the backend explaining the intent and quirks of each function.
+Short comments are left throughout the backend source code explaining the intent and quirks of each function.
 
 ### Recommended Reading Order
 
@@ -68,7 +68,7 @@ Initializes the database and config, then starts the server.
 
 **`handlers`** : `handlers`
 
-Connects the frontend to the backend. The frontend is statically served; changes to HTML/CSS take effect on server restart; JS changes require a browser refresh due to caching. All game data (heroes, monsters, fight results, etc.) is exchanged as JSON.
+Connects the frontend to the backend. The frontend is statically served; changes to HTML/CSS take effect on server restart; JS changes require a browser refresh (Ctrl+Shift+R in Firefox) due to caching. All game data (heroes, monsters, fight results, etc.) is exchanged as JSON.
 
 ---
 
@@ -149,11 +149,11 @@ All 15 bonus features from the spec's backlog were implemented:
 | Resource costs (HP/Mana) | Mana cost validation, per-turn regen, restore percentage of manx mana between fights, configurable |
 | Save & Exit (mid-run save) | Full SQLite serialisation of game state in `database/save.go` |
 | Battle log | Damage, heals, buffs, debuffs, level-ups, and loot all logged |
-| Battle animations | Animations handled client-side |
+| Battle animations | Animations handled client-side: smooth bars, sprite animations indicating taking damage, receiving buffs/debuffs |
 | Smarter AI | HP-aware move weighting, kill-on-sight logic, buff/debuff tracking |
 | Items system | Equip/use/drop system with Armor, Weapon, Trinket, Consumable types, enemies have a chance of having an item equipped |
 | Shop system | 4 random equippables + all consumables; buy/sell with gold (bigger cost when buying than selling, configurable) |
-| More enemies & moves | 15 monsters + 3 bosses; bosses are normal monsters but spawn only on last room and have 100% chance of having an item |
+| More enemies & moves | 15 monsters + 3 bosses |
 | Non-linear map (branching paths) | Non-crossing path algorithm, chance of branching and chance of monster appearance in each room, configurable |
 | Environmental effects | 12 environments with per-character effect maps applied on room entry |
 | Endless mode | New realm generated on boss defeat; infinite procedural progression, each realm ends with a bossfight |
@@ -161,20 +161,19 @@ All 15 bonus features from the spec's backlog were implemented:
 
 ---
 
-### Extra Features Beyond the Spec
+### Extra Features
 
-These were not in the specification but were built as part of the project:
+These were not in the specification but I throught they would be fun to have:
 
 | Feature | Notes |
 |---|---|
-| Mana system | Per-turn regen, cost validation prevents being locked out of all moves |
-| Monster level-up on re-grind | 20% chance the monster permanently gains a level, discouraging passive farming |
+| Monster level-up on re-grind | 20% chance the monster permanently gains a level (configurable), intended as a way to stop the player from excessive farming |
 | Move level stacking | Learning the same move multiple times increases its level |
-| Gold economy | Gold drops from all battles (doubled for bosses), spent in the shop |
 | Item drop system | Per-item configurable drop rates, items drawn from each monster's loot pool |
-| Event system | Non-combat room encounters that apply permanent stat changes to the hero |
+| Event system | Non-combat, mistery room encounters that apply permanent stat changes to the hero, cannot be revisited |
 | Effect stat scaling | Effects can scale off the caster's stats rather than using a fixed delta |
 | Configurable balance knobs | XP thresholds, move level bonus %, gold drops, and more all live in `config/game.json` |
+| Boss monsters | Spawn at last floor of each realm, drop twice the gold, have a guaranteed item equipped and drop and cannot be re-fought in endless mode |
 
 ---
 
