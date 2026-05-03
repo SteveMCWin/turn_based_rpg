@@ -50,10 +50,9 @@ function renderShop() {
 
 function shopItemCardHTML(item, playerGold) {
   const canAfford = playerGold >= item.price;
-  const typeIcon  = item.item_type === 'weapon' ? '⚔' : item.item_type === 'armor' ? '🛡' : item.item_type === 'trinket' ? '💎' : '🧪';
   return `<div class="shop-item-card ${canAfford ? '' : 'shop-item-unaffordable'}">
     <div class="shop-item-info">
-      <span class="shop-item-name">${typeIcon} ${escHtml(item.name)}</span>
+      <span class="shop-item-name">${itemTypeIcon(item.item_type, true)} ${escHtml(item.name)}</span>
       <span class="shop-item-desc">${escHtml(item.description)}</span>
     </div>
     <button class="btn btn-small btn-primary" onclick="buyItem('${escHtml(item.id)}')" ${canAfford ? '' : 'disabled'}>
